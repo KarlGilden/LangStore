@@ -31,6 +31,7 @@ try {
 	await app.listen({ port, host });
 } catch (error) {
 	app.log.error(error, "Server startup failed");
+
 	process.exitCode = 1;
 	await shutdown();
 }

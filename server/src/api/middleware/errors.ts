@@ -17,7 +17,7 @@ export const errorHandler = (
 			},
 			error,
 		},
-		"Unhandled error occurred.",
+		error.message ? error.message : "Unhandled error occurred.",
 	);
 	return reply.code(500).send(error.message);
 };

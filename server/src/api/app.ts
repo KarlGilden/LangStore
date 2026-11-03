@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import type { FastifyInstance, FastifyServerOptions } from "fastify";
 import { healthRoutes } from "./routes/health.route.js";
 import { errorHandler } from "./middleware/errors.js";
-import { clerkPlugin } from "@clerk/fastify";
+import { clerkPlugin, createClerkClient } from "@clerk/fastify";
 import { createProtectedRoutes } from "./routes/protected/protected.js";
 import { createUserService } from "../core/services/user.service.js";
 import { registerEnv } from "./config.js";
@@ -30,6 +30,11 @@ export async function buildApp(
 		secretKey: app.config.CLERK_SECRET_KEY,
 	});
 
+	const clerkClient = createClerkClient({
+		publishableKey: app.config.CLERK_PUBLISHABLE_KEY,
+		secretKey: app.config.CLERK_SECRET_KEY,
+	});
+
 	app.decorateRequest("authenticatedUserId", null);
 
 	// error handling
@@ -43,7 +48,9 @@ export async function buildApp(
 
 	// routes
 	app.register(healthRoutes);
-	app.register(createProtectedRoutes(userService), { prefix: "/api" });
+	app.register(createProtectedRoutes(userService, clerkClient), {
+		prefix: "/api",
+	});
 
 	return app;
 }

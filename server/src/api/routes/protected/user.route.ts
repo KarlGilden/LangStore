@@ -5,10 +5,13 @@ import type {
 	FastifyRequest,
 } from "fastify";
 import type { UserService } from "../../../core/services/user.service.js";
-import { clerkClient } from "@clerk/fastify";
+import { type ClerkClient } from "@clerk/fastify";
 import { getUserSchema } from "../../schema/user.schema.js";
 
-export function createUserRoutes(userService: UserService): FastifyPluginAsync {
+export function createUserRoutes(
+	userService: UserService,
+	clerkClient: ClerkClient,
+): FastifyPluginAsync {
 	return async (app: FastifyInstance) => {
 		app.get(
 			"/user",

@@ -9,14 +9,8 @@
 		"verbatimModuleSyntax": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-		"rootDir": ".",
-		"outDir": "dist",
-		"types": ["node"]
+		"rootDir": "./src",
+		"outDir": "./dist"
 	},
-	"include": [
-		"src/api/**/*.ts",
-		"src/api/**/*.tsts",
-		"src/infrastructure/**/*.ts",
-		"tests/**/*.ts"
-	]
+	"include": ["src/**/*.ts"]
 }

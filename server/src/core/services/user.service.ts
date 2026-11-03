@@ -1,4 +1,4 @@
-import type { UserRepository } from "../../core/repositories/user.repository.js";
+import type { UserRepository } from "../repositories/user.repository.js";
 
 export const createUserService = (userRepository: UserRepository) => {
 	const findByProviderId = async (providerId: string) => {

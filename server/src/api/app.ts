@@ -8,7 +8,7 @@ import { createUserService } from "../core/services/user.service.js";
 import { registerEnv } from "./config.js";
 import { createDatabase } from "../infrastructure/data/db.js";
 import { createDrizzleUserRepository } from "../infrastructure/repositories/user.repository.drizzle.js";
-import { clerkAdapter } from "../infrastructure/auth/clerk.adapter.js";
+import { createClerkAdapter } from "../infrastructure/auth/clerk.adapter.js";
 
 export async function buildApp(
 	options: FastifyServerOptions = {},
@@ -36,7 +36,7 @@ export async function buildApp(
 		secretKey: app.config.CLERK_SECRET_KEY,
 	});
 
-	const authClient = clerkAdapter(clerkClient);
+	const identityProfileReader = createClerkAdapter(clerkClient);
 
 	app.decorateRequest("authenticatedUserId", null);
 
@@ -47,11 +47,11 @@ export async function buildApp(
 	const userRepository = createDrizzleUserRepository(db);
 
 	// services
-	const userService = createUserService(userRepository);
+	const userService = createUserService(userRepository, identityProfileReader);
 
 	// routes
 	app.register(healthRoutes);
-	app.register(createProtectedRoutes(userService, authClient), {
+	app.register(createProtectedRoutes(userService), {
 		prefix: "/api",
 	});
 

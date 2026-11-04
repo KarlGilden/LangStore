@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import { buildApp } from "../../src/api/app.js";
 
 it("serves public process health without external services", async () => {
-	const app = buildApp();
+	const app = await buildApp();
 	try {
 		const response = await app.inject({ method: "GET", url: "/health" });
 		expect(response.statusCode).toBe(200);

@@ -1,7 +1,9 @@
 import type { ClerkClient } from "@clerk/fastify";
-import type { AuthClient } from "../../api/auth/authClient.js";
+import type { IdentityProfileReader } from "../../core/port/identityProfileReader.js";
 
-export const clerkAdapter = (clerkClient: ClerkClient): AuthClient => {
+export const createClerkAdapter = (
+	clerkClient: ClerkClient,
+): IdentityProfileReader => {
 	return {
 		getUserEmail: async (userId: string) => {
 			const clerkUser = await clerkClient.users.getUser(userId);
@@ -11,7 +13,7 @@ export const clerkAdapter = (clerkClient: ClerkClient): AuthClient => {
 			)?.emailAddress;
 
 			if (!email) {
-				throw new Error("User has no email address");
+				return null;
 			}
 
 			return email;

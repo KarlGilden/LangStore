@@ -6,12 +6,8 @@ import type {
 } from "fastify";
 import type { UserService } from "../../../core/services/user.service.js";
 import { getUserSchema } from "../../schema/user.schema.js";
-import type { AuthClient } from "../../auth/authClient.js";
 
-export function createUserRoutes(
-	userService: UserService,
-	authClient: AuthClient,
-): FastifyPluginAsync {
+export function createUserRoutes(userService: UserService): FastifyPluginAsync {
 	return async (app: FastifyInstance) => {
 		app.get(
 			"/user",
@@ -31,28 +27,7 @@ export function createUserRoutes(
 					});
 				}
 
-				let user = await userService.findByProviderId(userId);
-
-				if (!user) {
-					const email = await authClient.getUserEmail(userId);
-
-					if (!email) {
-						return reply.code(400).send({
-							error: "User has no email address",
-						});
-					}
-
-					user = await userService.createUser({
-						providerId: userId,
-						email,
-					});
-
-					if (!user) {
-						return reply.code(500).send({
-							error: "Failed to create existing user",
-						});
-					}
-				}
+				let user = await userService.getOrCreateUser(userId);
 
 				return reply.code(200).send({
 					email: user.email,

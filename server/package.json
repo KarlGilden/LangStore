@@ -13,6 +13,7 @@
 		"start": "node dist/api/server.js",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
+		"test:repository": "vitest run --config vitest.repository.config.ts",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate"
 	},

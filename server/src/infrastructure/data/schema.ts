@@ -5,10 +5,13 @@ export const users = pgTable("users", {
 
 	providerId: text("provider_id").notNull().unique(),
 
-	email: text("email").notNull(),
+	username: text("username"),
+
+	email: text("email").notNull().unique(),
 
 	createdAt: timestamp("created_at", {
 		withTimezone: true,
+		precision: 3,
 	})
 		.notNull()
 		.defaultNow(),

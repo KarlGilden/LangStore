@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { MissingIdentityEmailError } from "../../core/errors/identity-profile.error.js";
+import { UserEmailConflictError } from "../../core/errors/user.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -18,6 +19,10 @@ export const errorHandler = (
 	if (error instanceof MissingIdentityEmailError) {
 		statusCode = 409;
 		code = "IDENTITY_EMAIL_MISSING";
+		message = error.message;
+	} else if (error instanceof UserEmailConflictError) {
+		statusCode = 409;
+		code = "USER_EMAIL_CONFLICT";
 		message = error.message;
 	} else if (
 		typeof error.statusCode === "number" &&

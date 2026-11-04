@@ -10,19 +10,24 @@ export const createUserService = (
 		let user = await userRepository.findByProviderId(providerId);
 
 		if (!user) {
-			const email = await identityProfileReader.getUserEmail(providerId);
+			const profile = await identityProfileReader.getUserProfile(providerId);
 
-			if (!email) {
+			if (!profile) {
 				throw new MissingIdentityEmailError();
 			}
 
 			user = await userRepository.create({
-				providerId: providerId,
-				email,
+				providerId,
+				username: profile.username,
+				email: profile.email.trim().toLowerCase(),
 			});
 
 			if (!user) {
-				throw new Error("Failed to create existing user");
+				user = await userRepository.findByProviderId(providerId);
+			}
+
+			if (!user) {
+				throw new Error("Failed to create user");
 			}
 		}
 

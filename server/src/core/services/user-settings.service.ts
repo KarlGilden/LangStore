@@ -1,4 +1,7 @@
-import { InvalidLanguageCodeError, SettingsNotFoundError } from "../errors/user-settings.error.js";
+import {
+	InvalidLanguageCodeError,
+	SettingsNotFoundError,
+} from "../errors/user-settings.error.js";
 import { isAssignedIso6391Code } from "../language/iso-639-1.js";
 import type { UserSettingsRepository } from "../repositories/user-settings.repository.js";
 import type { UserService } from "./user.service.js";

@@ -1,3 +1,8 @@
+export interface IdentityProfile {
+	username: string | null;
+	email: string;
+}
+
 export interface IdentityProfileReader {
-	getUserEmail(userId: string): Promise<string | null>;
+	getUserProfile(userId: string): Promise<IdentityProfile | null>;
 }

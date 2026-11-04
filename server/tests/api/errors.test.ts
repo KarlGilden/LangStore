@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import { afterEach, describe, expect, it } from "vitest";
 import { errorHandler } from "../../src/api/middleware/errors.js";
 import { MissingIdentityEmailError } from "../../src/core/errors/identity-profile.error.js";
+import { UserEmailConflictError } from "../../src/core/errors/user.error.js";
 
 describe("errorHandler", () => {
 	const apps: ReturnType<typeof Fastify>[] = [];
@@ -49,6 +50,23 @@ describe("errorHandler", () => {
 		expect(response.json().error).toEqual({
 			code: "INVALID_REQUEST",
 			message: "Invalid request",
+		});
+	});
+
+	it("returns a conflict when an email belongs to another identity", async () => {
+		const app = Fastify();
+		apps.push(app);
+		app.setErrorHandler(errorHandler);
+		app.get("/user", async () => {
+			throw new UserEmailConflictError();
+		});
+
+		const response = await app.inject({ method: "GET", url: "/user" });
+
+		expect(response.statusCode).toBe(409);
+		expect(response.json().error).toEqual({
+			code: "USER_EMAIL_CONFLICT",
+			message: "Email belongs to another user identity",
 		});
 	});
 

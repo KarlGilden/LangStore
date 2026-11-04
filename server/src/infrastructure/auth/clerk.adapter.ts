@@ -5,7 +5,7 @@ export const createClerkAdapter = (
 	clerkClient: ClerkClient,
 ): IdentityProfileReader => {
 	return {
-		getUserEmail: async (userId: string) => {
+		getUserProfile: async (userId: string) => {
 			const clerkUser = await clerkClient.users.getUser(userId);
 
 			const email = clerkUser.emailAddresses.find(
@@ -16,7 +16,10 @@ export const createClerkAdapter = (
 				return null;
 			}
 
-			return email;
+			return {
+				username: clerkUser.username,
+				email,
+			};
 		},
 	};
 };

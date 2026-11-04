@@ -6,17 +6,14 @@ import type {
 } from "fastify";
 import type { UserService } from "../../../core/services/user.service.js";
 import { getUserSchema } from "../../schema/user.schema.js";
+import type { UserViewModel } from "../../viewmodels/user.viewmodel.js";
 
 export function createUserRoutes(userService: UserService): FastifyPluginAsync {
 	return async (app: FastifyInstance) => {
 		app.get(
 			"/user",
 			{
-				schema: {
-					response: {
-						200: getUserSchema,
-					},
-				},
+				schema: getUserSchema,
 			},
 			async (request: FastifyRequest, reply: FastifyReply) => {
 				const userId = request.authenticatedUserId;
@@ -27,11 +24,16 @@ export function createUserRoutes(userService: UserService): FastifyPluginAsync {
 					});
 				}
 
-				let user = await userService.getOrCreateUser(userId);
+				const user = await userService.getOrCreateUser(userId);
 
-				return reply.code(200).send({
+				const response: UserViewModel = {
+					id: user.id,
+					username: user.username,
 					email: user.email,
-				});
+					createdAt: user.createdAt.toISOString(),
+				};
+
+				return reply.code(200).send(response);
 			},
 		);
 	};

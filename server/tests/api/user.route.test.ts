@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createUserRoutes } from "../../src/api/routes/protected/user.route.js";
 import type { UserService } from "../../src/core/services/user.service.js";
+import type { UserSettingsService } from "../../src/core/services/user-settings.service.js";
 
 describe("GET /api/user", () => {
 	const apps: ReturnType<typeof Fastify>[] = [];
@@ -25,7 +26,10 @@ describe("GET /api/user", () => {
 		app.addHook("preHandler", async (request) => {
 			request.authenticatedUserId = "provider_authenticated";
 		});
-		app.register(createUserRoutes(userService), { prefix: "/api" });
+		app.register(
+			createUserRoutes(userService, {} as UserSettingsService),
+			{ prefix: "/api" },
+		);
 
 		const response = await app.inject({
 			method: "GET",

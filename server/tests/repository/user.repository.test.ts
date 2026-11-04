@@ -6,7 +6,7 @@ import {
 	type RepositoryTestDatabase,
 } from "../support/repository-test-database.js";
 
-describe.sequential("User repository", () => {
+describe("User repository", () => {
 	let database: RepositoryTestDatabase;
 
 	beforeAll(async () => {

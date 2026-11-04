@@ -9,6 +9,8 @@ import { registerEnv } from "./config.js";
 import { createDatabase } from "../infrastructure/data/db.js";
 import { createDrizzleUserRepository } from "../infrastructure/repositories/user.repository.drizzle.js";
 import { createClerkAdapter } from "../infrastructure/auth/clerk.adapter.js";
+import { createDrizzleUserSettingsRepository } from "../infrastructure/repositories/user-settings.repository.drizzle.js";
+import { createUserSettingsService } from "../core/services/user-settings.service.js";
 
 export async function buildApp(
 	options: FastifyServerOptions = {},
@@ -45,13 +47,18 @@ export async function buildApp(
 
 	// repositories
 	const userRepository = createDrizzleUserRepository(db);
+	const userSettingsRepository = createDrizzleUserSettingsRepository(db);
 
 	// services
 	const userService = createUserService(userRepository, identityProfileReader);
+	const userSettingsService = createUserSettingsService(
+		userSettingsRepository,
+		userService,
+	);
 
 	// routes
 	app.register(healthRoutes);
-	app.register(createProtectedRoutes(userService), {
+	app.register(createProtectedRoutes(userService, userSettingsService), {
 		prefix: "/api",
 	});
 

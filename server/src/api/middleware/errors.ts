@@ -1,6 +1,10 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { MissingIdentityEmailError } from "../../core/errors/identity-profile.error.js";
 import { UserEmailConflictError } from "../../core/errors/user.error.js";
+import {
+	InvalidLanguageCodeError,
+	SettingsNotFoundError,
+} from "../../core/errors/user-settings.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -23,6 +27,14 @@ export const errorHandler = (
 	} else if (error instanceof UserEmailConflictError) {
 		statusCode = 409;
 		code = "USER_EMAIL_CONFLICT";
+		message = error.message;
+	} else if (error instanceof SettingsNotFoundError) {
+		statusCode = 404;
+		code = "SETTINGS_NOT_FOUND";
+		message = error.message;
+	} else if (error instanceof InvalidLanguageCodeError) {
+		statusCode = 400;
+		code = "INVALID_LANGUAGE_CODE";
 		message = error.message;
 	} else if (
 		typeof error.statusCode === "number" &&

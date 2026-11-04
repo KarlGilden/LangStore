@@ -5,7 +5,7 @@ import {
 	type RepositoryTestDatabase,
 } from "../support/repository-test-database.js";
 
-describe.sequential("repository database harness", () => {
+describe("repository database harness", () => {
 	let database: RepositoryTestDatabase;
 
 	beforeAll(async () => {

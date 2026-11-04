@@ -10,6 +10,12 @@ import {
 	InvalidCollectionLanguageCodeError,
 	InvalidCollectionTextError,
 } from "../../core/errors/collection.error.js";
+import {
+	InvalidPageLanguageCodeError,
+	InvalidPageTextError,
+	PageCreateConflictError,
+	PageNotFoundError,
+} from "../../core/errors/page.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -52,6 +58,22 @@ export const errorHandler = (
 	} else if (error instanceof InvalidCollectionTextError) {
 		statusCode = 400;
 		code = "INVALID_COLLECTION_TEXT";
+		message = error.message;
+	} else if (error instanceof PageNotFoundError) {
+		statusCode = 404;
+		code = "PAGE_NOT_FOUND";
+		message = error.message;
+	} else if (error instanceof PageCreateConflictError) {
+		statusCode = 409;
+		code = "PAGE_CREATE_CONFLICT";
+		message = error.message;
+	} else if (error instanceof InvalidPageLanguageCodeError) {
+		statusCode = 400;
+		code = "INVALID_LANGUAGE_CODE";
+		message = error.message;
+	} else if (error instanceof InvalidPageTextError) {
+		statusCode = 400;
+		code = "INVALID_PAGE_TEXT";
 		message = error.message;
 	} else if (
 		typeof error.statusCode === "number" &&

@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
 	char,
 	check,
+	foreignKey,
 	index,
 	pgTable,
 	text,
@@ -81,3 +82,44 @@ export const collections = pgTable(
 
 export type CollectionRow = typeof collections.$inferSelect;
 export type NewCollectionRow = typeof collections.$inferInsert;
+
+export const pages = pgTable(
+	"pages",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: uuid("user_id")
+			.notNull()
+			.references(() => users.id, {
+				onDelete: "cascade",
+				onUpdate: "no action",
+			}),
+		collectionId: uuid("collection_id").notNull(),
+		name: text("name").notNull(),
+		description: text("description"),
+		summary: text("summary"),
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+			precision: 3,
+		})
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		foreignKey({
+			name: "pages_collection_id_user_id_collections_id_user_id_fk",
+			columns: [table.collectionId, table.userId],
+			foreignColumns: [collections.id, collections.userId],
+		})
+			.onDelete("cascade")
+			.onUpdate("no action"),
+		index("pages_user_id_created_at_id_idx").on(
+			table.userId,
+			table.createdAt,
+			table.id,
+		),
+		index("pages_collection_id_idx").on(table.collectionId),
+	],
+);
+
+export type PageRow = typeof pages.$inferSelect;
+export type NewPageRow = typeof pages.$inferInsert;

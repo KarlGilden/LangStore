@@ -10,15 +10,19 @@ export const createUserSettingsService = (
 	userSettingsRepository: UserSettingsRepository,
 	userService: UserService,
 ) => {
-	const getSettings = async (providerId: string) => {
-		const user = await userService.getOrCreateUser(providerId);
-		const settings = await userSettingsRepository.findByUserId(user.id);
+	const getSettingsForUser = async (userId: string) => {
+		const settings = await userSettingsRepository.findByUserId(userId);
 
 		if (!settings) {
 			throw new SettingsNotFoundError();
 		}
 
 		return settings;
+	};
+
+	const getSettings = async (providerId: string) => {
+		const user = await userService.getOrCreateUser(providerId);
+		return getSettingsForUser(user.id);
 	};
 
 	const replaceSettings = async (

@@ -22,6 +22,13 @@
       "when": 1793800294479,
       "tag": "0002_glossy_mauler",
       "breakpoints": false
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793804374836,
+      "tag": "0003_organic_multiple_man",
+      "breakpoints": false
     }
   ]
 }

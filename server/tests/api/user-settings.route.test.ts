@@ -21,7 +21,9 @@ describe("current-user settings routes", () => {
 			request.authenticatedUserId = "provider_authenticated";
 		});
 		app.setErrorHandler(errorHandler);
-		app.register(createUserRoutes({} as UserService, service), { prefix: "/api" });
+		app.register(createUserRoutes({} as UserService, service), {
+			prefix: "/api/user",
+		});
 		return app;
 	}
 

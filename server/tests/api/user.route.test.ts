@@ -28,7 +28,7 @@ describe("GET /api/user", () => {
 		});
 		app.register(
 			createUserRoutes(userService, {} as UserSettingsService),
-			{ prefix: "/api" },
+			{ prefix: "/api/user" },
 		);
 
 		const response = await app.inject({

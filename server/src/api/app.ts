@@ -11,6 +11,8 @@ import { createDrizzleUserRepository } from "../infrastructure/repositories/user
 import { createClerkAdapter } from "../infrastructure/auth/clerk.adapter.js";
 import { createDrizzleUserSettingsRepository } from "../infrastructure/repositories/user-settings.repository.drizzle.js";
 import { createUserSettingsService } from "../core/services/user-settings.service.js";
+import { createDrizzleCollectionRepository } from "../infrastructure/repositories/collection.repository.drizzle.js";
+import { createCollectionService } from "../core/services/collection.service.js";
 
 export async function buildApp(
 	options: FastifyServerOptions = {},
@@ -48,6 +50,7 @@ export async function buildApp(
 	// repositories
 	const userRepository = createDrizzleUserRepository(db);
 	const userSettingsRepository = createDrizzleUserSettingsRepository(db);
+	const collectionRepository = createDrizzleCollectionRepository(db);
 
 	// services
 	const userService = createUserService(userRepository, identityProfileReader);
@@ -55,12 +58,20 @@ export async function buildApp(
 		userSettingsRepository,
 		userService,
 	);
+	const collectionService = createCollectionService(
+		collectionRepository,
+		userService,
+		userSettingsService,
+	);
 
 	// routes
 	app.register(healthRoutes);
-	app.register(createProtectedRoutes(userService, userSettingsService), {
-		prefix: "/api",
-	});
+	app.register(
+		createProtectedRoutes(userService, userSettingsService, collectionService),
+		{
+			prefix: "/api",
+		},
+	);
 
 	return app;
 }

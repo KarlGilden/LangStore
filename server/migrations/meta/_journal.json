@@ -15,6 +15,13 @@
       "when": 1793799186757,
       "tag": "0001_stale_scorpion",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793800294479,
+      "tag": "0002_glossy_mauler",
+      "breakpoints": false
     }
   ]
 }

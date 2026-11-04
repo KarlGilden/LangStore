@@ -1,4 +1,3 @@
-import type { UserRow } from "../../infrastructure/data/schema.js";
 import type { User } from "../entities/user.entity.js";
 
 export interface UserRepository {

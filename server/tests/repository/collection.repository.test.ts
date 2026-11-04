@@ -91,9 +91,9 @@ describe("Collection repository", () => {
 			iso: "de",
 		});
 
-		await expect(repository.findByIdForUser(created.id, owner.id)).resolves.toEqual(
-			created,
-		);
+		await expect(
+			repository.findByIdForUserAndIso(created.id, owner.id, "de"),
+		).resolves.toEqual(created);
 	});
 
 	it("does not retrieve a collection through another owner's scope", async () => {
@@ -108,7 +108,12 @@ describe("Collection repository", () => {
 			iso: "de",
 		});
 
-		await expect(repository.findByIdForUser(created.id, other.id)).resolves.toBeNull();
+		await expect(
+			repository.findByIdForUserAndIso(created.id, other.id, "de"),
+		).resolves.toBeNull();
+		await expect(
+			repository.findByIdForUserAndIso(created.id, owner.id, "fr"),
+		).resolves.toBeNull();
 	});
 
 	it("updates a collection only through its owner's scope", async () => {
@@ -124,14 +129,21 @@ describe("Collection repository", () => {
 		});
 
 		await expect(
-			repository.updateForUser(created.id, other.id, {
+			repository.updateForUserAndIso(created.id, other.id, "de", {
 				name: "Attacker title",
 				description: null,
 				imgUrl: null,
 			}),
 		).resolves.toBeNull();
 		await expect(
-			repository.updateForUser(created.id, owner.id, {
+			repository.updateForUserAndIso(created.id, owner.id, "fr", {
+				name: "Wrong language title",
+				description: null,
+				imgUrl: null,
+			}),
+		).resolves.toBeNull();
+		await expect(
+			repository.updateForUserAndIso(created.id, owner.id, "de", {
 				name: "Updated title",
 				description: "Updated description",
 				imgUrl: null,
@@ -196,6 +208,8 @@ describe("Collection repository", () => {
 			iso: "de",
 		});
 		await database.pool.query("delete from users where id = $1", [owner.id]);
-		await expect(repository.findByIdForUser(created.id, owner.id)).resolves.toBeNull();
+		await expect(
+			repository.findByIdForUserAndIso(created.id, owner.id, "de"),
+		).resolves.toBeNull();
 	});
 });

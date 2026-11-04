@@ -61,7 +61,6 @@ export async function buildApp(
 	const collectionService = createCollectionService(
 		collectionRepository,
 		userService,
-		userSettingsService,
 	);
 
 	// routes

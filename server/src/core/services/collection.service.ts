@@ -6,13 +6,11 @@ import {
 import { isAssignedIso6391Code } from "../language/iso-639-1.js";
 import type { CollectionRepository } from "../repositories/collection.repository.js";
 import type { UserService } from "./user.service.js";
-import type { UserSettingsService } from "./user-settings.service.js";
 
 export interface CreateCollectionInput {
 	name: string;
 	description?: string | null;
 	imgUrl?: string | null;
-	iso: string;
 }
 
 export interface UpdateCollectionInput {
@@ -30,13 +28,19 @@ function requireNonBlank(
 	}
 }
 
+function requireLanguageCode(iso: string): void {
+	if (!isAssignedIso6391Code(iso)) {
+		throw new InvalidCollectionLanguageCodeError();
+	}
+}
+
 export const createCollectionService = (
 	collectionRepository: CollectionRepository,
 	userService: UserService,
-	userSettingsService: UserSettingsService,
 ) => {
 	const createCollection = async (
 		providerId: string,
+		iso: string,
 		input: CreateCollectionInput,
 	) => {
 		requireNonBlank("name", input.name);
@@ -46,9 +50,7 @@ export const createCollectionService = (
 		if (input.imgUrl !== undefined && input.imgUrl !== null) {
 			requireNonBlank("imgUrl", input.imgUrl);
 		}
-		if (!isAssignedIso6391Code(input.iso)) {
-			throw new InvalidCollectionLanguageCodeError();
-		}
+		requireLanguageCode(iso);
 
 		const user = await userService.getOrCreateUser(providerId);
 		return collectionRepository.create({
@@ -56,15 +58,21 @@ export const createCollectionService = (
 			description: input.description ?? null,
 			imgUrl: input.imgUrl ?? null,
 			userId: user.id,
-			iso: input.iso,
+			iso,
 		});
 	};
 
-	const getCollection = async (providerId: string, collectionId: string) => {
+	const getCollection = async (
+		providerId: string,
+		iso: string,
+		collectionId: string,
+	) => {
+		requireLanguageCode(iso);
 		const user = await userService.getOrCreateUser(providerId);
-		const collection = await collectionRepository.findByIdForUser(
+		const collection = await collectionRepository.findByIdForUserAndIso(
 			collectionId,
 			user.id,
+			iso,
 		);
 
 		if (!collection) {
@@ -76,6 +84,7 @@ export const createCollectionService = (
 
 	const updateCollection = async (
 		providerId: string,
+		iso: string,
 		collectionId: string,
 		input: UpdateCollectionInput,
 	) => {
@@ -86,11 +95,13 @@ export const createCollectionService = (
 		if (input.imgUrl !== undefined && input.imgUrl !== null) {
 			requireNonBlank("imgUrl", input.imgUrl);
 		}
+		requireLanguageCode(iso);
 
 		const user = await userService.getOrCreateUser(providerId);
-		const collection = await collectionRepository.updateForUser(
+		const collection = await collectionRepository.updateForUserAndIso(
 			collectionId,
 			user.id,
+			iso,
 			{
 				name: input.name,
 				description: input.description ?? null,
@@ -105,13 +116,10 @@ export const createCollectionService = (
 		return collection;
 	};
 
-	const listCollections = async (providerId: string) => {
+	const listCollections = async (providerId: string, iso: string) => {
+		requireLanguageCode(iso);
 		const user = await userService.getOrCreateUser(providerId);
-		const settings = await userSettingsService.getSettingsForUser(user.id);
-		return collectionRepository.listByUserAndIso(
-			user.id,
-			settings.targetLanguage,
-		);
+		return collectionRepository.listByUserAndIso(user.id, iso);
 	};
 
 	return {

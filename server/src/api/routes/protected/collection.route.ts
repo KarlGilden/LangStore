@@ -12,6 +12,7 @@ import {
 	updateCollectionSchema,
 	type CollectionParams,
 	type CreateCollectionBody,
+	type LanguageParams,
 	type UpdateCollectionBody,
 } from "../../schema/collection.schema.js";
 
@@ -19,7 +20,7 @@ export function createCollectionRoutes(
 	collectionService: CollectionService,
 ): FastifyPluginAsync {
 	return async (app) => {
-		app.post<{ Body: CreateCollectionBody }>(
+		app.post<{ Params: LanguageParams; Body: CreateCollectionBody }>(
 			"/",
 			{ schema: createCollectionSchema },
 			async (request, reply) => {
@@ -30,23 +31,29 @@ export function createCollectionRoutes(
 
 				const collection = await collectionService.createCollection(
 					providerId,
+					request.params.iso,
 					request.body,
 				);
 				return reply.code(201).send(toCollectionViewModel(collection));
 			},
 		);
 
-		app.get(
+		app.get<{ Params: LanguageParams }>(
 			"/",
 			{ schema: listCollectionsSchema },
-			async (request: FastifyRequest, reply: FastifyReply) => {
+			async (
+				request: FastifyRequest<{ Params: LanguageParams }>,
+				reply: FastifyReply,
+			) => {
 				const providerId = request.authenticatedUserId;
 				if (!providerId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
-				const collections =
-					await collectionService.listCollections(providerId);
+				const collections = await collectionService.listCollections(
+					providerId,
+					request.params.iso,
+				);
 				return reply.code(200).send(collections.map(toCollectionViewModel));
 			},
 		);
@@ -62,6 +69,7 @@ export function createCollectionRoutes(
 
 				const collection = await collectionService.getCollection(
 					providerId,
+					request.params.iso,
 					request.params.id,
 				);
 				return reply.code(200).send(toCollectionViewModel(collection));
@@ -79,6 +87,7 @@ export function createCollectionRoutes(
 
 				const collection = await collectionService.updateCollection(
 					providerId,
+					request.params.iso,
 					request.params.id,
 					request.body,
 				);

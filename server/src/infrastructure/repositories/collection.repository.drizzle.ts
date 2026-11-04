@@ -17,14 +17,21 @@ export function createDrizzleCollectionRepository(
 		return toDomainCollection(row);
 	};
 
-	const findByIdForUser: CollectionRepository["findByIdForUser"] = async (
+	const findByIdForUserAndIso: CollectionRepository["findByIdForUserAndIso"] = async (
 		id,
 		userId,
+		iso,
 	) => {
 		const [row] = await db
 			.select()
 			.from(collections)
-			.where(and(eq(collections.id, id), eq(collections.userId, userId)))
+			.where(
+				and(
+					eq(collections.id, id),
+					eq(collections.userId, userId),
+					eq(collections.iso, iso),
+				),
+			)
 			.limit(1);
 
 		return row ? toDomainCollection(row) : null;
@@ -42,19 +49,31 @@ export function createDrizzleCollectionRepository(
 		return rows.map(toDomainCollection);
 	};
 
-	const updateForUser: CollectionRepository["updateForUser"] = async (
+	const updateForUserAndIso: CollectionRepository["updateForUserAndIso"] = async (
 		id,
 		userId,
+		iso,
 		input,
 	) => {
 		const [row] = await db
 			.update(collections)
 			.set(input)
-			.where(and(eq(collections.id, id), eq(collections.userId, userId)))
+			.where(
+				and(
+					eq(collections.id, id),
+					eq(collections.userId, userId),
+					eq(collections.iso, iso),
+				),
+			)
 			.returning();
 
 		return row ? toDomainCollection(row) : null;
 	};
 
-	return { create, findByIdForUser, updateForUser, listByUserAndIso };
+	return {
+		create,
+		findByIdForUserAndIso,
+		updateForUserAndIso,
+		listByUserAndIso,
+	};
 }

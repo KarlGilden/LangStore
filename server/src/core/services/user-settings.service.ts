@@ -40,7 +40,7 @@ export const createUserSettingsService = (
 		return userSettingsRepository.upsert({ userId: user.id, ...input });
 	};
 
-	return { getSettings, getSettingsForUser, replaceSettings };
+	return { getSettings, replaceSettings };
 };
 
 export type UserSettingsService = ReturnType<typeof createUserSettingsService>;

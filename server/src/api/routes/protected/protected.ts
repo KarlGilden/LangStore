@@ -17,7 +17,7 @@ export function createProtectedRoutes(
 			prefix: "/user",
 		});
 		app.register(createCollectionRoutes(collectionService), {
-			prefix: "/collections",
+			prefix: "/:iso/collections",
 		});
 	};
 }

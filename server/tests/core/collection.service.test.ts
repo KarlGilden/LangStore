@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { CollectionRepository } from "../../src/core/repositories/collection.repository.js";
 import { createCollectionService } from "../../src/core/services/collection.service.js";
 import type { UserService } from "../../src/core/services/user.service.js";
-import type { UserSettingsService } from "../../src/core/services/user-settings.service.js";
 
 const user = {
 	id: "4fd7d240-cbce-4735-bfd9-a1f62347c29e",
@@ -15,22 +14,14 @@ const user = {
 function createDependencies() {
 	const collectionRepository: CollectionRepository = {
 		create: vi.fn(),
-		findByIdForUser: vi.fn(),
-		updateForUser: vi.fn(),
+		findByIdForUserAndIso: vi.fn(),
+		updateForUserAndIso: vi.fn(),
 		listByUserAndIso: vi.fn(),
 	};
 	const userService = {
 		getOrCreateUser: vi.fn().mockResolvedValue(user),
 	} as unknown as UserService;
-	const userSettingsService = {
-		getSettingsForUser: vi.fn().mockResolvedValue({
-			userId: user.id,
-			targetLanguage: "de",
-			userLanguage: "en",
-		}),
-	} as unknown as UserSettingsService;
-
-	return { collectionRepository, userService, userSettingsService };
+	return { collectionRepository, userService };
 }
 
 describe("CollectionService", () => {
@@ -45,14 +36,12 @@ describe("CollectionService", () => {
 		const service = createCollectionService(
 			dependencies.collectionRepository,
 			dependencies.userService,
-			dependencies.userSettingsService,
 		);
 
 		await expect(
-			service.createCollection("provider_authenticated", {
+			service.createCollection("provider_authenticated", "de", {
 				name: "Der Vorleser",
 				description: "A reading collection",
-				iso: "de",
 			}),
 		).resolves.toMatchObject({
 			userId: user.id,
@@ -79,13 +68,11 @@ describe("CollectionService", () => {
 			const service = createCollectionService(
 				dependencies.collectionRepository,
 				dependencies.userService,
-				dependencies.userSettingsService,
 			);
 
 			await expect(
-				service.createCollection("provider_authenticated", {
+				service.createCollection("provider_authenticated", iso, {
 					name: "Book",
-					iso,
 				}),
 			).rejects.toMatchObject({ name: "InvalidCollectionLanguageCodeError" });
 			expect(dependencies.userService.getOrCreateUser).not.toHaveBeenCalled();
@@ -94,19 +81,18 @@ describe("CollectionService", () => {
 	);
 
 	it.each([
-		["name", { name: "  ", iso: "de" }],
-		["description", { name: "Book", description: "\t", iso: "de" }],
-		["imgUrl", { name: "Book", imgUrl: " ", iso: "de" }],
+		["name", { name: "  " }],
+		["description", { name: "Book", description: "\t" }],
+		["imgUrl", { name: "Book", imgUrl: " " }],
 	] as const)("rejects blank %s", async (field, input) => {
 		const dependencies = createDependencies();
 		const service = createCollectionService(
 			dependencies.collectionRepository,
 			dependencies.userService,
-			dependencies.userSettingsService,
 		);
 
 		await expect(
-			service.createCollection("provider_authenticated", input),
+			service.createCollection("provider_authenticated", "de", input),
 		).rejects.toMatchObject({ name: "InvalidCollectionTextError", field });
 	});
 
@@ -120,37 +106,36 @@ describe("CollectionService", () => {
 			userId: user.id,
 			iso: "de",
 		};
-		vi.mocked(dependencies.collectionRepository.findByIdForUser).mockResolvedValue(
-			collection,
-		);
+		vi.mocked(
+			dependencies.collectionRepository.findByIdForUserAndIso,
+		).mockResolvedValue(collection);
 		const service = createCollectionService(
 			dependencies.collectionRepository,
 			dependencies.userService,
-			dependencies.userSettingsService,
 		);
 
 		await expect(
-			service.getCollection("provider_authenticated", collection.id),
+			service.getCollection("provider_authenticated", "de", collection.id),
 		).resolves.toEqual(collection);
 		expect(
-			dependencies.collectionRepository.findByIdForUser,
-		).toHaveBeenCalledWith(collection.id, user.id);
+			dependencies.collectionRepository.findByIdForUserAndIso,
+		).toHaveBeenCalledWith(collection.id, user.id, "de");
 	});
 
 	it("returns not found when a collection is outside the authenticated owner scope", async () => {
 		const dependencies = createDependencies();
-		vi.mocked(dependencies.collectionRepository.findByIdForUser).mockResolvedValue(
-			null,
-		);
+		vi.mocked(
+			dependencies.collectionRepository.findByIdForUserAndIso,
+		).mockResolvedValue(null);
 		const service = createCollectionService(
 			dependencies.collectionRepository,
 			dependencies.userService,
-			dependencies.userSettingsService,
 		);
 
 		await expect(
 			service.getCollection(
 				"provider_authenticated",
+				"fr",
 				"07572e8b-ad66-4e7c-bd42-cea9097fd142",
 			),
 		).rejects.toMatchObject({ name: "CollectionNotFoundError" });
@@ -158,18 +143,23 @@ describe("CollectionService", () => {
 
 	it("updates editable fields through an owner-scoped write", async () => {
 		const dependencies = createDependencies();
-		vi.mocked(dependencies.collectionRepository.updateForUser).mockImplementation(
-			async (id, userId, input) => ({ id, userId, iso: "de", ...input }),
-		);
+		vi.mocked(
+			dependencies.collectionRepository.updateForUserAndIso,
+		).mockImplementation(async (id, userId, iso, input) => ({
+			id,
+			userId,
+			iso,
+			...input,
+		}));
 		const service = createCollectionService(
 			dependencies.collectionRepository,
 			dependencies.userService,
-			dependencies.userSettingsService,
 		);
 
 		await expect(
 			service.updateCollection(
 				"provider_authenticated",
+				"de",
 				"07572e8b-ad66-4e7c-bd42-cea9097fd142",
 				{ name: "Updated title" },
 			),
@@ -179,34 +169,37 @@ describe("CollectionService", () => {
 			imgUrl: null,
 			iso: "de",
 		});
-		expect(dependencies.collectionRepository.updateForUser).toHaveBeenCalledWith(
+		expect(
+			dependencies.collectionRepository.updateForUserAndIso,
+		).toHaveBeenCalledWith(
 			"07572e8b-ad66-4e7c-bd42-cea9097fd142",
 			user.id,
+			"de",
 			{ name: "Updated title", description: null, imgUrl: null },
 		);
 	});
 
 	it("returns not found instead of updating another user's collection", async () => {
 		const dependencies = createDependencies();
-		vi.mocked(dependencies.collectionRepository.updateForUser).mockResolvedValue(
-			null,
-		);
+		vi.mocked(
+			dependencies.collectionRepository.updateForUserAndIso,
+		).mockResolvedValue(null);
 		const service = createCollectionService(
 			dependencies.collectionRepository,
 			dependencies.userService,
-			dependencies.userSettingsService,
 		);
 
 		await expect(
 			service.updateCollection(
 				"provider_authenticated",
+				"fr",
 				"07572e8b-ad66-4e7c-bd42-cea9097fd142",
 				{ name: "Updated title" },
 			),
 		).rejects.toMatchObject({ name: "CollectionNotFoundError" });
 	});
 
-	it("lists only the authenticated user's selected language", async () => {
+	it("lists only the explicitly requested language for the authenticated user", async () => {
 		const dependencies = createDependencies();
 		vi.mocked(dependencies.collectionRepository.listByUserAndIso).mockResolvedValue(
 			[],
@@ -214,14 +207,10 @@ describe("CollectionService", () => {
 		const service = createCollectionService(
 			dependencies.collectionRepository,
 			dependencies.userService,
-			dependencies.userSettingsService,
 		);
 
-		await service.listCollections("provider_authenticated");
+		await service.listCollections("provider_authenticated", "de");
 
-		expect(dependencies.userSettingsService.getSettingsForUser).toHaveBeenCalledWith(
-			user.id,
-		);
 		expect(
 			dependencies.collectionRepository.listByUserAndIso,
 		).toHaveBeenCalledWith(user.id, "de");

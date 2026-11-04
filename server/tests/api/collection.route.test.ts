@@ -33,7 +33,7 @@ describe("collection routes", () => {
 		});
 		app.setErrorHandler(errorHandler);
 		app.register(createCollectionRoutes(service), {
-			prefix: "/api/collections",
+			prefix: "/api/:iso/collections",
 		});
 		return app;
 	}
@@ -44,21 +44,23 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "POST",
-			url: "/api/collections",
+			url: "/api/de/collections",
 			payload: {
 				name: collection.name,
 				description: collection.description,
-				iso: collection.iso,
 				userId: "provider_attacker",
 			},
 		});
 
 		expect(response.statusCode).toBe(201);
-		expect(createCollection).toHaveBeenCalledWith("provider_authenticated", {
-			name: collection.name,
-			description: collection.description,
-			iso: collection.iso,
-		});
+		expect(createCollection).toHaveBeenCalledWith(
+			"provider_authenticated",
+			"de",
+			{
+				name: collection.name,
+				description: collection.description,
+			},
+		);
 		expect(response.json()).toEqual({
 			id: collection.id,
 			name: collection.name,
@@ -74,12 +76,13 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/collections/${collection.id}`,
+			url: `/api/de/collections/${collection.id}`,
 		});
 
 		expect(response.statusCode).toBe(200);
 		expect(getCollection).toHaveBeenCalledWith(
 			"provider_authenticated",
+			"de",
 			collection.id,
 		);
 		expect(response.json()).not.toHaveProperty("userId");
@@ -91,11 +94,11 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: "/api/collections",
+			url: "/api/de/collections",
 		});
 
 		expect(response.statusCode).toBe(200);
-		expect(listCollections).toHaveBeenCalledWith("provider_authenticated");
+		expect(listCollections).toHaveBeenCalledWith("provider_authenticated", "de");
 		expect(response.json()).toHaveLength(1);
 	});
 
@@ -106,13 +109,14 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "PUT",
-			url: `/api/collections/${collection.id}`,
+			url: `/api/de/collections/${collection.id}`,
 			payload: { name: "Updated title", userId: "provider_attacker" },
 		});
 
 		expect(response.statusCode).toBe(200);
 		expect(updateCollection).toHaveBeenCalledWith(
 			"provider_authenticated",
+			"de",
 			collection.id,
 			{ name: "Updated title" },
 		);
@@ -128,8 +132,8 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "POST",
-			url: "/api/collections",
-			payload: { name: "Book", iso },
+			url: `/api/${iso}/collections`,
+			payload: { name: "Book" },
 		});
 
 		expect(response.statusCode).toBe(400);
@@ -141,7 +145,7 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/collections/${collection.id}`,
+			url: `/api/fr/collections/${collection.id}`,
 		});
 
 		expect(response.statusCode).toBe(404);

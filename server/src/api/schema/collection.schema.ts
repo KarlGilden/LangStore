@@ -15,28 +15,42 @@ const collectionResponseSchema = {
 	},
 } as const;
 
+const languageParamsSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: ["iso"],
+	properties: {
+		iso: { type: "string", pattern: "^[a-z]{2}$" },
+	},
+} as const;
+
+const collectionParamsSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: ["iso", "id"],
+	properties: {
+		iso: { type: "string", pattern: "^[a-z]{2}$" },
+		id: { type: "string", format: "uuid" },
+	},
+} as const;
+
 export const createCollectionSchema = {
+	params: languageParamsSchema,
 	body: {
 		type: "object",
 		additionalProperties: false,
-		required: ["name", "iso"],
+		required: ["name"],
 		properties: {
 			name: { type: "string", minLength: 1 },
 			description: nullableTextSchema,
 			imgUrl: nullableTextSchema,
-			iso: { type: "string", pattern: "^[a-z]{2}$" },
 		},
 	},
 	response: { 201: collectionResponseSchema },
 } as const;
 
 export const getCollectionSchema = {
-	params: {
-		type: "object",
-		additionalProperties: false,
-		required: ["id"],
-		properties: { id: { type: "string", format: "uuid" } },
-	},
+	params: collectionParamsSchema,
 	response: { 200: collectionResponseSchema },
 } as const;
 
@@ -56,6 +70,7 @@ export const updateCollectionSchema = {
 } as const;
 
 export const listCollectionsSchema = {
+	params: languageParamsSchema,
 	response: {
 		200: { type: "array", items: collectionResponseSchema },
 	},
@@ -65,10 +80,13 @@ export interface CreateCollectionBody {
 	name: string;
 	description?: string | null;
 	imgUrl?: string | null;
+}
+
+export interface LanguageParams {
 	iso: string;
 }
 
-export interface CollectionParams {
+export interface CollectionParams extends LanguageParams {
 	id: string;
 }
 

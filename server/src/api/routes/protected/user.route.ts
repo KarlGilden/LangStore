@@ -5,12 +5,12 @@ import type {
 	FastifyRequest,
 } from "fastify";
 import type { UserService } from "../../../core/services/user.service.js";
-import { type ClerkClient } from "@clerk/fastify";
 import { getUserSchema } from "../../schema/user.schema.js";
+import type { AuthClient } from "../../auth/authClient.js";
 
 export function createUserRoutes(
 	userService: UserService,
-	clerkClient: ClerkClient,
+	authClient: AuthClient,
 ): FastifyPluginAsync {
 	return async (app: FastifyInstance) => {
 		app.get(
@@ -34,11 +34,7 @@ export function createUserRoutes(
 				let user = await userService.findByProviderId(userId);
 
 				if (!user) {
-					const clerkUser = await clerkClient.users.getUser(userId);
-
-					const email = clerkUser.emailAddresses.find(
-						(address) => address.id === clerkUser.primaryEmailAddressId,
-					)?.emailAddress;
+					const email = await authClient.getUserEmail(userId);
 
 					if (!email) {
 						return reply.code(400).send({

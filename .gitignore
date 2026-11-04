@@ -1,1 +1,4 @@
 /client
+/docs/*
+!/docs/langstore-schema.md
+!/docs/langstore-schema-decisions.md

@@ -1,3 +1,5 @@
+import { entryResponseSchema } from "./entry.schema.js";
+
 const nullableTextSchema = {
 	anyOf: [{ type: "string", minLength: 1 }, { type: "null" }],
 } as const;
@@ -72,6 +74,23 @@ export const createPageSchema = {
 		},
 	},
 	response: { 201: pageResponseSchema },
+} as const;
+
+export const getPageVocabularySchema = {
+	params: getPageSchema.params,
+	response: {
+		200: {
+			type: "array",
+			items: {
+				...entryResponseSchema,
+				required: [...entryResponseSchema.required, "count"],
+				properties: {
+					...entryResponseSchema.properties,
+					count: { type: "integer", minimum: 1 },
+				},
+			},
+		},
+	},
 } as const;
 
 export interface LanguageParams {

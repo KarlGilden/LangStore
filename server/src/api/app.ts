@@ -17,6 +17,8 @@ import { createDrizzlePageRepository } from "../infrastructure/repositories/page
 import { createPageService } from "../core/services/page.service.js";
 import { createDrizzleEntryRepository } from "../infrastructure/repositories/entry.repository.drizzle.js";
 import { createEntryService } from "../core/services/entry.service.js";
+import { createDrizzleEntryEncounterRepository } from "../infrastructure/repositories/entry-encounter.repository.drizzle.js";
+import { createEntryEncounterService } from "../core/services/entry-encounter.service.js";
 
 export async function buildApp(
 	options: FastifyServerOptions = {},
@@ -57,6 +59,7 @@ export async function buildApp(
 	const collectionRepository = createDrizzleCollectionRepository(db);
 	const pageRepository = createDrizzlePageRepository(db);
 	const entryRepository = createDrizzleEntryRepository(db);
+	const entryEncounterRepository = createDrizzleEntryEncounterRepository(db);
 
 	// services
 	const userService = createUserService(userRepository, identityProfileReader);
@@ -78,6 +81,12 @@ export async function buildApp(
 		userService,
 		userSettingsService,
 	);
+	const entryEncounterService = createEntryEncounterService(
+		entryEncounterRepository,
+		entryRepository,
+		pageRepository,
+		userService,
+	);
 
 	// routes
 	app.register(healthRoutes);
@@ -88,6 +97,7 @@ export async function buildApp(
 			collectionService,
 			pageService,
 			entryService,
+			entryEncounterService,
 		),
 		{
 			prefix: "/api",

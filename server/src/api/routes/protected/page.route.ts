@@ -1,10 +1,13 @@
 import type { FastifyPluginAsync } from "fastify";
 import type { PageService } from "../../../core/services/page.service.js";
+import type { EntryEncounterService } from "../../../core/services/entry-encounter.service.js";
+import { toPageVocabularyEntryViewModel } from "../../mappers/entry-encounter.mapper.js";
 import { toPageViewModel } from "../../mappers/page.mapper.js";
 import {
 	createPageSchema,
 	getLatestPageSchema,
 	getPageSchema,
+	getPageVocabularySchema,
 	listCollectionPagesSchema,
 	type CollectionPagesParams,
 	type CreatePageBody,
@@ -12,7 +15,10 @@ import {
 	type PageParams,
 } from "../../schema/page.schema.js";
 
-export function createPageRoutes(pageService: PageService): FastifyPluginAsync {
+export function createPageRoutes(
+	pageService: PageService,
+	entryEncounterService?: EntryEncounterService,
+): FastifyPluginAsync {
 	return async (app) => {
 		app.get<{ Params: LanguageParams }>(
 			"/latest",
@@ -48,6 +54,28 @@ export function createPageRoutes(pageService: PageService): FastifyPluginAsync {
 				return reply.code(200).send(toPageViewModel(page));
 			},
 		);
+
+		if (entryEncounterService) {
+			app.get<{ Params: PageParams }>(
+				"/:id/vocabulary",
+				{ schema: getPageVocabularySchema },
+				async (request, reply) => {
+					const providerId = request.authenticatedUserId;
+					if (!providerId) {
+						return reply.code(401).send({ error: "Unauthorized" });
+					}
+
+					const vocabulary = await entryEncounterService.getPageVocabulary(
+						providerId,
+						request.params.iso,
+						request.params.id,
+					);
+					return reply
+						.code(200)
+						.send(vocabulary.map(toPageVocabularyEntryViewModel));
+				},
+			);
+		}
 
 	};
 }

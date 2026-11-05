@@ -19,6 +19,26 @@ import { createDrizzleEntryRepository } from "../infrastructure/repositories/ent
 import { createEntryService } from "../core/services/entry.service.js";
 import { createDrizzleEntryEncounterRepository } from "../infrastructure/repositories/entry-encounter.repository.drizzle.js";
 import { createEntryEncounterService } from "../core/services/entry-encounter.service.js";
+import type { TextRecognitionProvider } from "../core/port/text-recognition.provider.js";
+import type { TranslationProvider } from "../core/port/translation.provider.js";
+import type { PageIngestionServiceDependencies } from "../core/services/page-ingestion.service.js";
+import type { Database } from "../infrastructure/data/db.js";
+import { createDrizzlePageIngestionPersistence } from "../infrastructure/repositories/page-ingestion.persistence.drizzle.js";
+
+export interface PageIngestionProviders {
+	textRecognitionProvider: TextRecognitionProvider;
+	translationProvider: TranslationProvider;
+}
+
+export function composePageIngestionDependencies(
+	db: Database,
+	providers: PageIngestionProviders,
+): PageIngestionServiceDependencies {
+	return {
+		...providers,
+		persistence: createDrizzlePageIngestionPersistence(db),
+	};
+}
 
 export async function buildApp(
 	options: FastifyServerOptions = {},

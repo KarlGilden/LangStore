@@ -71,6 +71,7 @@ export const createPageService = (
 			collectionId: input.collectionId,
 			name: input.name,
 			description: input.description ?? null,
+			summary: null,
 		});
 	};
 

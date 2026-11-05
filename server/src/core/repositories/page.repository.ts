@@ -6,6 +6,7 @@ export interface CreatePageInput {
 	collectionId: string;
 	name: string;
 	description: string | null;
+	summary: string | null;
 }
 
 export interface PageRepository {

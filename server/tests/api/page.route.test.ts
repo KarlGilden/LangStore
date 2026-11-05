@@ -1,7 +1,10 @@
 import Fastify from "fastify";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { errorHandler } from "../../src/api/middleware/errors.js";
-import { createPageRoutes } from "../../src/api/routes/protected/page.route.js";
+import {
+	createCollectionPageRoutes,
+	createPageRoutes,
+} from "../../src/api/routes/protected/page.route.js";
 import { CollectionNotFoundError } from "../../src/core/errors/collection.error.js";
 import { PageNotFoundError } from "../../src/core/errors/page.error.js";
 import type { PageService } from "../../src/core/services/page.service.js";
@@ -31,7 +34,10 @@ describe("page routes", () => {
 			request.authenticatedUserId = "provider_authenticated";
 		});
 		app.setErrorHandler(errorHandler);
-		app.register(createPageRoutes(service), { prefix: "/api/:iso" });
+		app.register(createPageRoutes(service), { prefix: "/api/:iso/page" });
+		app.register(createCollectionPageRoutes(service), {
+			prefix: "/api/:iso/collection",
+		});
 		return app;
 	}
 
@@ -41,7 +47,7 @@ describe("page routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/de/pages/${page.id}`,
+			url: `/api/de/page/${page.id}`,
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -66,7 +72,7 @@ describe("page routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/de/collections/${page.collectionId}/pages`,
+			url: `/api/de/collection/${page.collectionId}/page`,
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -78,13 +84,39 @@ describe("page routes", () => {
 		expect(response.json()).toEqual([]);
 	});
 
+	it("creates a page in the collection from the authenticated route context", async () => {
+		const createPage = vi.fn().mockResolvedValue(page);
+		const app = createApp({ createPage } as unknown as PageService);
+
+		const response = await app.inject({
+			method: "POST",
+			url: `/api/de/collection/${page.collectionId}/page`,
+			payload: {
+				id: page.id,
+				name: page.name,
+				description: page.description,
+				collectionId: "attacker-collection",
+				userId: "provider_attacker",
+			},
+		});
+
+		expect(response.statusCode).toBe(201);
+		expect(createPage).toHaveBeenCalledWith("provider_authenticated", "de", {
+			id: page.id,
+			name: page.name,
+			description: null,
+			collectionId: page.collectionId,
+		});
+		expect(response.json().id).toBe(page.id);
+	});
+
 	it("returns the latest page for an explicit language", async () => {
 		const getLatestPage = vi.fn().mockResolvedValue(page);
 		const app = createApp({ getLatestPage } as unknown as PageService);
 
 		const response = await app.inject({
 			method: "GET",
-			url: "/api/de/pages/latest",
+			url: "/api/de/page/latest",
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -98,7 +130,7 @@ describe("page routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/fr/pages/${page.id}`,
+			url: `/api/fr/page/${page.id}`,
 		});
 
 		expect(response.statusCode).toBe(404);
@@ -113,7 +145,7 @@ describe("page routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/de/collections/${page.collectionId}/pages`,
+			url: `/api/de/collection/${page.collectionId}/page`,
 		});
 
 		expect(response.statusCode).toBe(404);

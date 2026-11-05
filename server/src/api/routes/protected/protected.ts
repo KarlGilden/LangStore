@@ -6,7 +6,10 @@ import type { UserSettingsService } from "../../../core/services/user-settings.s
 import type { CollectionService } from "../../../core/services/collection.service.js";
 import { createCollectionRoutes } from "./collection.route.js";
 import type { PageService } from "../../../core/services/page.service.js";
-import { createPageRoutes } from "./page.route.js";
+import {
+	createCollectionPageRoutes,
+	createPageRoutes,
+} from "./page.route.js";
 
 export function createProtectedRoutes(
 	userService: UserService,
@@ -20,10 +23,13 @@ export function createProtectedRoutes(
 			prefix: "/user",
 		});
 		app.register(createCollectionRoutes(collectionService), {
-			prefix: "/:iso/collections",
+			prefix: "/:iso/collection",
 		});
 		app.register(createPageRoutes(pageService), {
-			prefix: "/:iso",
+			prefix: "/:iso/page",
+		});
+		app.register(createCollectionPageRoutes(pageService), {
+			prefix: "/:iso/collection",
 		});
 	};
 }

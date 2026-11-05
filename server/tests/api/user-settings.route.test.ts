@@ -37,7 +37,7 @@ describe("current-user settings routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: "/api/user/settings?userId=provider_attacker",
+			url: "/api/user/setting?userId=provider_attacker",
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -55,7 +55,7 @@ describe("current-user settings routes", () => {
 
 		const response = await app.inject({
 			method: "PUT",
-			url: "/api/user/settings",
+			url: "/api/user/setting",
 			payload: { targetLanguage: "fr", userLanguage: "en" },
 		});
 
@@ -77,7 +77,7 @@ describe("current-user settings routes", () => {
 
 		const response = await app.inject({
 			method: "PUT",
-			url: "/api/user/settings",
+			url: "/api/user/setting",
 			payload: {
 				userId: "provider_attacker",
 				targetLanguage: "fr",
@@ -98,7 +98,7 @@ describe("current-user settings routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: "/api/user/settings",
+			url: "/api/user/setting",
 		});
 
 		expect(response.statusCode).toBe(404);
@@ -114,7 +114,7 @@ describe("current-user settings routes", () => {
 
 		const response = await app.inject({
 			method: "PUT",
-			url: "/api/user/settings",
+			url: "/api/user/setting",
 			payload: { targetLanguage, userLanguage: "en" },
 		});
 

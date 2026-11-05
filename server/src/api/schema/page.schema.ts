@@ -59,6 +59,21 @@ export const listCollectionPagesSchema = {
 	response: { 200: { type: "array", items: pageResponseSchema } },
 } as const;
 
+export const createPageSchema = {
+	params: listCollectionPagesSchema.params,
+	body: {
+		type: "object",
+		additionalProperties: false,
+		required: ["id", "name"],
+		properties: {
+			id: { type: "string", format: "uuid" },
+			name: { type: "string", minLength: 1 },
+			description: nullableTextSchema,
+		},
+	},
+	response: { 201: pageResponseSchema },
+} as const;
+
 export interface LanguageParams {
 	iso: string;
 }
@@ -69,4 +84,10 @@ export interface PageParams extends LanguageParams {
 
 export interface CollectionPagesParams extends LanguageParams {
 	collectionId: string;
+}
+
+export interface CreatePageBody {
+	id: string;
+	name: string;
+	description?: string | null;
 }

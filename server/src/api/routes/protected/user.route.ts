@@ -48,7 +48,7 @@ export function createUserRoutes(
 		);
 
 		app.get(
-			"/settings",
+			"/setting",
 			{ schema: getUserSettingsSchema },
 			async (request: FastifyRequest, reply: FastifyReply) => {
 				const providerId = request.authenticatedUserId;
@@ -62,7 +62,7 @@ export function createUserRoutes(
 		);
 
 		app.put<{ Body: ReplaceUserSettingsBody }>(
-			"/settings",
+			"/setting",
 			{ schema: replaceUserSettingsSchema },
 			async (
 				request: FastifyRequest<{ Body: ReplaceUserSettingsBody }>,

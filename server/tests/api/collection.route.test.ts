@@ -33,7 +33,7 @@ describe("collection routes", () => {
 		});
 		app.setErrorHandler(errorHandler);
 		app.register(createCollectionRoutes(service), {
-			prefix: "/api/:iso/collections",
+			prefix: "/api/:iso/collection",
 		});
 		return app;
 	}
@@ -44,7 +44,7 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "POST",
-			url: "/api/de/collections",
+			url: "/api/de/collection",
 			payload: {
 				name: collection.name,
 				description: collection.description,
@@ -76,7 +76,7 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/de/collections/${collection.id}`,
+			url: `/api/de/collection/${collection.id}`,
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -94,7 +94,7 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: "/api/de/collections",
+			url: "/api/de/collection",
 		});
 
 		expect(response.statusCode).toBe(200);
@@ -109,7 +109,7 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "PUT",
-			url: `/api/de/collections/${collection.id}`,
+			url: `/api/de/collection/${collection.id}`,
 			payload: { name: "Updated title", userId: "provider_attacker" },
 		});
 
@@ -132,7 +132,7 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "POST",
-			url: `/api/${iso}/collections`,
+			url: `/api/${iso}/collection`,
 			payload: { name: "Book" },
 		});
 
@@ -145,7 +145,7 @@ describe("collection routes", () => {
 
 		const response = await app.inject({
 			method: "GET",
-			url: `/api/fr/collections/${collection.id}`,
+			url: `/api/fr/collection/${collection.id}`,
 		});
 
 		expect(response.statusCode).toBe(404);

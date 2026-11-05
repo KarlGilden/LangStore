@@ -10,12 +10,15 @@ import {
 	createCollectionPageRoutes,
 	createPageRoutes,
 } from "./page.route.js";
+import type { EntryService } from "../../../core/services/entry.service.js";
+import { createEntryRoutes } from "./entry.route.js";
 
 export function createProtectedRoutes(
 	userService: UserService,
 	userSettingsService: UserSettingsService,
 	collectionService: CollectionService,
 	pageService: PageService,
+	entryService: EntryService,
 ): FastifyPluginAsync {
 	return async (app) => {
 		app.addHook("preHandler", requireAuth);
@@ -30,6 +33,9 @@ export function createProtectedRoutes(
 		});
 		app.register(createCollectionPageRoutes(pageService), {
 			prefix: "/:iso/collection",
+		});
+		app.register(createEntryRoutes(entryService), {
+			prefix: "/entry",
 		});
 	};
 }

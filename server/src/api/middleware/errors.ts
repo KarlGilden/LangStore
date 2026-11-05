@@ -16,6 +16,11 @@ import {
 	PageCreateConflictError,
 	PageNotFoundError,
 } from "../../core/errors/page.error.js";
+import {
+	EntryNotFoundError,
+	InvalidEntryLanguageCodeError,
+	InvalidEntryTextError,
+} from "../../core/errors/entry.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -74,6 +79,18 @@ export const errorHandler = (
 	} else if (error instanceof InvalidPageTextError) {
 		statusCode = 400;
 		code = "INVALID_PAGE_TEXT";
+		message = error.message;
+	} else if (error instanceof EntryNotFoundError) {
+		statusCode = 404;
+		code = "ENTRY_NOT_FOUND";
+		message = error.message;
+	} else if (error instanceof InvalidEntryLanguageCodeError) {
+		statusCode = 400;
+		code = "INVALID_LANGUAGE_CODE";
+		message = error.message;
+	} else if (error instanceof InvalidEntryTextError) {
+		statusCode = 400;
+		code = "INVALID_ENTRY_TEXT";
 		message = error.message;
 	} else if (
 		typeof error.statusCode === "number" &&

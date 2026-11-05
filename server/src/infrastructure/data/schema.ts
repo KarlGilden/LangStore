@@ -123,3 +123,55 @@ export const pages = pgTable(
 
 export type PageRow = typeof pages.$inferSelect;
 export type NewPageRow = typeof pages.$inferInsert;
+
+export const entries = pgTable(
+	"entries",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		text: text("text").notNull(),
+		userId: uuid("user_id")
+			.notNull()
+			.references(() => users.id, {
+				onDelete: "cascade",
+				onUpdate: "no action",
+			}),
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+			precision: 3,
+		})
+			.notNull()
+			.defaultNow(),
+		iso: char("iso", { length: 2 }).notNull(),
+	},
+	(table) => [
+		check("entries_iso_check", sql`${table.iso} ~ '^[a-z]{2}$'`),
+		index("entries_user_id_iso_idx").on(table.userId, table.iso),
+	],
+);
+
+export type EntryRow = typeof entries.$inferSelect;
+export type NewEntryRow = typeof entries.$inferInsert;
+
+export const translations = pgTable(
+	"translations",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		text: text("text").notNull(),
+		entryId: uuid("entry_id")
+			.notNull()
+			.references(() => entries.id, {
+				onDelete: "cascade",
+				onUpdate: "no action",
+			}),
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+			precision: 3,
+		})
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [index("translations_entry_id_idx").on(table.entryId)],
+);
+
+export type TranslationRow = typeof translations.$inferSelect;
+export type NewTranslationRow = typeof translations.$inferInsert;

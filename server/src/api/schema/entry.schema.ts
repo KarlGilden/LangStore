@@ -9,7 +9,7 @@ const translationResponseSchema = {
 	},
 } as const;
 
-const entryResponseSchema = {
+export const entryResponseSchema = {
 	type: "object",
 	additionalProperties: false,
 	required: ["id", "text", "iso", "createdAt", "translations"],

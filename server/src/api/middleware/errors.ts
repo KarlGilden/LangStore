@@ -21,6 +21,7 @@ import {
 	InvalidEntryLanguageCodeError,
 	InvalidEntryTextError,
 } from "../../core/errors/entry.error.js";
+import { InvalidEntryEncounterCountError } from "../../core/errors/entry-encounter.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -91,6 +92,10 @@ export const errorHandler = (
 	} else if (error instanceof InvalidEntryTextError) {
 		statusCode = 400;
 		code = "INVALID_ENTRY_TEXT";
+		message = error.message;
+	} else if (error instanceof InvalidEntryEncounterCountError) {
+		statusCode = 400;
+		code = "INVALID_ENTRY_ENCOUNTER_COUNT";
 		message = error.message;
 	} else if (
 		typeof error.statusCode === "number" &&

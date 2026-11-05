@@ -8,6 +8,7 @@ import {
 import { CollectionNotFoundError } from "../../src/core/errors/collection.error.js";
 import { PageNotFoundError } from "../../src/core/errors/page.error.js";
 import type { PageService } from "../../src/core/services/page.service.js";
+import type { EntryEncounterService } from "../../src/core/services/entry-encounter.service.js";
 
 const page = {
 	id: "d6b3df44-bfd1-4ac6-9e7c-6d828a235f0c",
@@ -26,7 +27,10 @@ describe("page routes", () => {
 		await Promise.all(apps.map((app) => app.close()));
 	});
 
-	function createApp(service: PageService) {
+	function createApp(
+		service: PageService,
+		entryEncounterService?: EntryEncounterService,
+	) {
 		const app = Fastify();
 		apps.push(app);
 		app.decorateRequest("authenticatedUserId", null);
@@ -34,7 +38,9 @@ describe("page routes", () => {
 			request.authenticatedUserId = "provider_authenticated";
 		});
 		app.setErrorHandler(errorHandler);
-		app.register(createPageRoutes(service), { prefix: "/api/:iso/page" });
+		app.register(createPageRoutes(service, entryEncounterService), {
+			prefix: "/api/:iso/page",
+		});
 		app.register(createCollectionPageRoutes(service), {
 			prefix: "/api/:iso/collection",
 		});
@@ -150,5 +156,79 @@ describe("page routes", () => {
 
 		expect(response.statusCode).toBe(404);
 		expect(response.json().error.code).toBe("COLLECTION_NOT_FOUND");
+	});
+
+	it("returns page vocabulary counts and translations", async () => {
+		const vocabulary = [{
+			entry: {
+				id: "1197bff7-03e9-40b8-933d-faa88de99154",
+				text: "ausgezeichnet",
+				userId: page.userId,
+				iso: "de",
+				createdAt: new Date("2026-11-05T12:00:00.000Z"),
+				translations: [
+					{
+						id: "139ada60-7504-43f6-ac80-092d065f645e",
+						text: "excellent",
+						entryId: "1197bff7-03e9-40b8-933d-faa88de99154",
+						createdAt: new Date("2026-11-05T12:00:00.000Z"),
+					},
+				],
+			},
+			encounter: {
+				id: "f93f0f16-ff92-47f0-b4de-e9d454a34102",
+				entryId: "1197bff7-03e9-40b8-933d-faa88de99154",
+				pageId: page.id,
+				count: 3,
+				createdAt: new Date("2026-11-05T12:00:00.000Z"),
+			},
+		}];
+		const getPageVocabulary = vi.fn().mockResolvedValue(vocabulary);
+		const app = createApp({} as PageService, {
+			getPageVocabulary,
+		} as unknown as EntryEncounterService);
+
+		const response = await app.inject({
+			method: "GET",
+			url: `/api/de/page/${page.id}/vocabulary`,
+		});
+
+		expect(response.statusCode).toBe(200);
+		expect(getPageVocabulary).toHaveBeenCalledWith(
+			"provider_authenticated",
+			"de",
+			page.id,
+		);
+		expect(response.json()).toEqual([
+			{
+				id: vocabulary[0]!.entry.id,
+				text: "ausgezeichnet",
+				iso: "de",
+				createdAt: "2026-11-05T12:00:00.000Z",
+				count: 3,
+				translations: [
+					{
+						id: vocabulary[0]!.entry.translations[0]!.id,
+						text: "excellent",
+						createdAt: "2026-11-05T12:00:00.000Z",
+					},
+				],
+			},
+		]);
+	});
+
+	it("returns 404 for another user's page vocabulary", async () => {
+		const getPageVocabulary = vi.fn().mockRejectedValue(new PageNotFoundError());
+		const app = createApp({} as PageService, {
+			getPageVocabulary,
+		} as unknown as EntryEncounterService);
+
+		const response = await app.inject({
+			method: "GET",
+			url: `/api/de/page/${page.id}/vocabulary`,
+		});
+
+		expect(response.statusCode).toBe(404);
+		expect(response.json().error.code).toBe("PAGE_NOT_FOUND");
 	});
 });

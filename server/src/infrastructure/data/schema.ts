@@ -4,6 +4,7 @@ import {
 	check,
 	foreignKey,
 	index,
+	integer,
 	pgTable,
 	text,
 	timestamp,
@@ -175,3 +176,43 @@ export const translations = pgTable(
 
 export type TranslationRow = typeof translations.$inferSelect;
 export type NewTranslationRow = typeof translations.$inferInsert;
+
+export const entryEncounters = pgTable(
+	"entry_encounters",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		entryId: uuid("entry_id")
+			.notNull()
+			.references(() => entries.id, {
+				onDelete: "cascade",
+				onUpdate: "no action",
+			}),
+		pageId: uuid("page_id")
+			.notNull()
+			.references(() => pages.id, {
+				onDelete: "cascade",
+				onUpdate: "no action",
+			}),
+		count: integer("count").notNull().default(1),
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+			precision: 3,
+		})
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		check("entry_encounters_count_check", sql`${table.count} > 0`),
+		unique("entry_encounters_entry_id_page_id_unique").on(
+			table.entryId,
+			table.pageId,
+		),
+		index("entry_encounters_page_id_entry_id_idx").on(
+			table.pageId,
+			table.entryId,
+		),
+	],
+);
+
+export type EntryEncounterRow = typeof entryEncounters.$inferSelect;
+export type NewEntryEncounterRow = typeof entryEncounters.$inferInsert;

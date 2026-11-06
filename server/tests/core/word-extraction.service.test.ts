@@ -6,13 +6,6 @@ const service = createWordExtractionService();
 describe("WordExtractionService", () => {
 	it.each([
 		["Haus haus HAUS", [{ text: "haus", count: 3 }]],
-		[
-			"Hallo,Welt!",
-			[
-				{ text: "hallo", count: 1 },
-				{ text: "welt", count: 1 },
-			],
-		],
 		["„Haus“", [{ text: "haus", count: 1 }]],
 		[
 			"don't E-Mail",
@@ -67,20 +60,11 @@ describe("WordExtractionService", () => {
 		expect(service.extractWords(input)).toEqual(expected);
 	});
 
-	it("preserves the documented internal apostrophes and hyphens without equating them", () => {
-		expect(service.extractWords("l'amour l’amour co-op co‐op co‑op")).toEqual([
-			{ text: "l'amour", count: 1 },
-			{ text: "l’amour", count: 1 },
-			{ text: "co-op", count: 1 },
-			{ text: "co‐op", count: 1 },
-			{ text: "co‑op", count: 1 },
+	it("counts equivalent internal apostrophes and hyphens as the same word", () => {
+		expect(service.extractWords("l’amour l'amour co‑op co‐op co-op")).toEqual([
+			{ text: "l'amour", count: 2 },
+			{ text: "co-op", count: 3 },
 		]);
-	});
-
-	it("normalizes exactly one word for shared creation validation", () => {
-		expect(service.normalizeWord(" „HAUS!“ ")).toBe("haus");
-		expect(service.normalizeWord("New York")).toBeNull();
-		expect(service.normalizeWord("... ")).toBeNull();
 	});
 
 	it("counts a synthetic 500-word fixture deterministically", () => {

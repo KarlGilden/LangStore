@@ -66,7 +66,9 @@ async function readPageIngestionMultipart(
 	request: FastifyRequest,
 ): Promise<ParsedPageIngestion> {
 	if (!request.isMultipart()) {
-		throw new InvalidPageUploadError("Content-Type must be multipart/form-data");
+		throw new InvalidPageUploadError(
+			"Content-Type must be multipart/form-data",
+		);
 	}
 
 	let name: string | undefined;
@@ -85,7 +87,9 @@ async function readPageIngestionMultipart(
 		})) {
 			if (part.type === "file") {
 				if (part.fieldname !== "photo" || photo) {
-					throw new InvalidPageUploadError("Exactly one photo file is required");
+					throw new InvalidPageUploadError(
+						"Exactly one photo file is required",
+					);
 				}
 				const bytes = await part.toBuffer();
 				photo = validatePagePhoto(bytes, part.mimetype);
@@ -97,10 +101,15 @@ async function readPageIngestionMultipart(
 			}
 			if (part.fieldname === "name" && name === undefined) {
 				name = part.value;
-			} else if (part.fieldname === "description" && description === undefined) {
+			} else if (
+				part.fieldname === "description" &&
+				description === undefined
+			) {
 				description = part.value;
 			} else {
-				throw new InvalidPageUploadError("Multipart fields must contain one name and optional description");
+				throw new InvalidPageUploadError(
+					"Multipart fields must contain one name and optional description",
+				);
 			}
 		}
 	} catch (error) {
@@ -109,12 +118,15 @@ async function readPageIngestionMultipart(
 			throw new PageUploadTooLargeError();
 		}
 		if (isMultipartLimitError(error)) {
-			throw new InvalidPageUploadError("Multipart upload contains too many fields or files");
+			throw new InvalidPageUploadError(
+				"Multipart upload contains too many fields or files",
+			);
 		}
 		throw error;
 	}
 
-	if (!photo) throw new InvalidPageUploadError("Exactly one photo file is required");
+	if (!photo)
+		throw new InvalidPageUploadError("Exactly one photo file is required");
 	if (name === undefined) {
 		photo.bytes.fill(0);
 		throw new InvalidPageUploadError("The name field is required");
@@ -126,10 +138,13 @@ function isMultipartLimitError(error: unknown, code?: string): boolean {
 	if (!(error instanceof Error) || !("code" in error)) return false;
 	const errorCode = (error as Error & { code?: unknown }).code;
 	if (code) return errorCode === code;
-	return typeof errorCode === "string" && [
-		"FST_REQ_FILE_TOO_LARGE",
-		"FST_FILES_LIMIT",
-		"FST_FIELDS_LIMIT",
-		"FST_PARTS_LIMIT",
-	].includes(errorCode);
+	return (
+		typeof errorCode === "string" &&
+		[
+			"FST_REQ_FILE_TOO_LARGE",
+			"FST_FILES_LIMIT",
+			"FST_FIELDS_LIMIT",
+			"FST_PARTS_LIMIT",
+		].includes(errorCode)
+	);
 }

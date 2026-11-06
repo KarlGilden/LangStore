@@ -33,12 +33,11 @@ export async function buildApp(
 	await registerEnv(app);
 	await app.register(multipart);
 
-	// db
-	const { db, close } = createDatabase(app.config.DATABASE_URL);
+	// error handling
+	app.setErrorHandler(errorHandler);
 
-	app.addHook("onClose", async () => {
-		await close();
-	});
+	// db
+	const { db, close: closeDatabase } = createDatabase(app.config.DATABASE_URL);
 
 	// auth
 	app.register(clerkPlugin, {
@@ -53,20 +52,14 @@ export async function buildApp(
 
 	app.decorateRequest("authenticatedUserId", null);
 
-	// error handling
-	app.setErrorHandler(errorHandler);
-
 	// external services
-	const textRecognitionProvider = createGoogleTextRecognitionProvider({
-		projectId: app.config.GOOGLE_CLOUD_PROJECT_ID,
-		location: app.config.GOOGLE_CLOUD_LOCATION,
-		processorId: app.config.GOOGLE_CLOUD_PROCESSOR_ID,
-		credentials: app.config.GOOGLE_APPLICATION_CREDENTIALS,
-	});
-
-	app.addHook("onClose", async () => {
-		await textRecognitionProvider.close();
-	});
+	const { textRecognitionProvider, close: closeTextRecognition } =
+		createGoogleTextRecognitionProvider({
+			projectId: app.config.GOOGLE_CLOUD_PROJECT_ID,
+			location: app.config.GOOGLE_CLOUD_LOCATION,
+			processorId: app.config.GOOGLE_CLOUD_PROCESSOR_ID,
+			credentials: app.config.GOOGLE_APPLICATION_CREDENTIALS,
+		});
 
 	// repositories
 	const userRepository = createDrizzleUserRepository(db);
@@ -78,7 +71,10 @@ export async function buildApp(
 	const pageIngestionPersistence = createDrizzlePageIngestionPersistence(db);
 
 	// services
-	const userService = createUserService(userRepository, identityProfileProvider);
+	const userService = createUserService(
+		userRepository,
+		identityProfileProvider,
+	);
 	const userSettingsService = createUserSettingsService(
 		userSettingsRepository,
 		userService,
@@ -108,6 +104,10 @@ export async function buildApp(
 		textRecognitionProvider,
 		pageIngestionPersistence,
 	);
+
+	app.addHook("onClose", async () => {
+		await Promise.all([closeDatabase(), closeTextRecognition()]);
+	});
 
 	// routes
 	app.register(healthRoutes);

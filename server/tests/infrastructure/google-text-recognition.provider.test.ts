@@ -1,38 +1,52 @@
-import { describe, expect, it, vi } from "vitest";
-import {
-	createGoogleTextRecognitionProvider,
-	type GoogleDocumentAIClient,
-} from "../../src/infrastructure/ocr/google-text-recognition.provider.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createGoogleTextRecognitionProvider } from "../../src/infrastructure/ocr/google-text-recognition.provider.js";
 
+const documentAIMocks = vi.hoisted(() => ({
+	close: vi.fn(),
+	createClient: vi.fn(),
+	processDocument: vi.fn(),
+}));
+
+vi.mock("@google-cloud/documentai", () => ({
+	DocumentProcessorServiceClient: documentAIMocks.createClient,
+}));
+
+const credentials = {
+	client_email: "test@example.com",
+	private_key: "test-key",
+};
 const config = {
 	projectId: "test-project",
 	location: "eu",
 	processorId: "test-processor",
-	credentials: Buffer.from(JSON.stringify({
-		client_email: "test@example.com",
-		private_key: "test-key",
-	})).toString("base64"),
+	credentials: Buffer.from(JSON.stringify(credentials)).toString("base64"),
 };
 
-function createClient(text: string | null | undefined): GoogleDocumentAIClient {
-	return {
-		processDocument: vi.fn().mockResolvedValue([{
-			document: text === undefined ? undefined : { text },
-		}]),
-		close: vi.fn().mockResolvedValue(undefined),
-	};
-}
-
 describe("Google text recognition provider", () => {
-	it("sends the page to Document AI and returns normalized recognized text", async () => {
-		const client = createClient(" Haus, Haus!\n ");
-		const provider = createGoogleTextRecognitionProvider(config, client);
+	beforeEach(() => {
+		documentAIMocks.close.mockReset().mockResolvedValue(undefined);
+		documentAIMocks.createClient.mockReset().mockImplementation(class {
+			close = documentAIMocks.close;
+			processDocument = documentAIMocks.processDocument;
+		});
+		documentAIMocks.processDocument.mockReset();
+	});
 
-		await expect(provider.recognizeText({
+	it("constructs Document AI and returns normalized recognized text", async () => {
+		documentAIMocks.processDocument.mockResolvedValue([{
+			document: { text: " Haus, Haus!\n " },
+		}]);
+		const { textRecognitionProvider } = createGoogleTextRecognitionProvider(config);
+
+		await expect(textRecognitionProvider.recognizeText({
 			image: new Uint8Array([1, 2, 3]),
 			mediaType: "image/png",
 		})).resolves.toEqual({ text: "Haus, Haus!" });
-		expect(client.processDocument).toHaveBeenCalledWith({
+		expect(documentAIMocks.createClient).toHaveBeenCalledWith({
+			apiEndpoint: "eu-documentai.googleapis.com",
+			credentials,
+		});
+		expect(documentAIMocks.processDocument).toHaveBeenCalledWith({
 			name: "projects/test-project/locations/eu/processors/test-processor",
 			rawDocument: {
 				content: new Uint8Array([1, 2, 3]),
@@ -45,10 +59,13 @@ describe("Google text recognition provider", () => {
 		["missing text", undefined],
 		["null text", null],
 		["whitespace text", " \n"],
-	] as const)("maps %s to the new validation contract", async (_label, text) => {
-		const provider = createGoogleTextRecognitionProvider(config, createClient(text));
+	] as const)("maps %s to the validation contract", async (_label, text) => {
+		documentAIMocks.processDocument.mockResolvedValue([{
+			document: text === undefined ? undefined : { text },
+		}]);
+		const { textRecognitionProvider } = createGoogleTextRecognitionProvider(config);
 
-		await expect(provider.recognizeText({
+		await expect(textRecognitionProvider.recognizeText({
 			image: new Uint8Array([1]),
 			mediaType: "image/png",
 		})).rejects.toMatchObject({
@@ -57,14 +74,13 @@ describe("Google text recognition provider", () => {
 		});
 	});
 
-	it("maps provider failures to the new service-unavailable contract", async () => {
-		const client = createClient("unused");
-		vi.mocked(client.processDocument).mockRejectedValue(
+	it("maps provider failures without exposing provider details", async () => {
+		documentAIMocks.processDocument.mockRejectedValue(
 			new Error("deadline exceeded with credentials"),
 		);
-		const provider = createGoogleTextRecognitionProvider(config, client);
+		const { textRecognitionProvider } = createGoogleTextRecognitionProvider(config);
 
-		await expect(provider.recognizeText({
+		await expect(textRecognitionProvider.recognizeText({
 			image: new Uint8Array([1]),
 			mediaType: "image/jpeg",
 		})).rejects.toMatchObject({
@@ -73,12 +89,13 @@ describe("Google text recognition provider", () => {
 		});
 	});
 
-	it("closes the Document AI client", async () => {
-		const client = createClient("Haus");
-		const provider = createGoogleTextRecognitionProvider(config, client);
+	it("exposes infrastructure cleanup separately from the core provider", async () => {
+		const { close, textRecognitionProvider } =
+			createGoogleTextRecognitionProvider(config);
 
-		await provider.close();
+		expect(textRecognitionProvider).not.toHaveProperty("close");
+		await close();
 
-		expect(client.close).toHaveBeenCalledOnce();
+		expect(documentAIMocks.close).toHaveBeenCalledOnce();
 	});
 });

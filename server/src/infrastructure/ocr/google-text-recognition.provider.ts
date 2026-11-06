@@ -6,12 +6,12 @@ import { ServiceUnavailableError } from "../../core/errors/service.error.js";
 import { ValidationError } from "../../core/errors/validation.error.js";
 import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
 
-type GoogleDocumentAIClientConfig = {
+export interface GoogleDocumentAIClientConfig {
 	projectId: string;
 	location: string;
 	processorId: string;
 	credentials: string;
-};
+}
 
 export interface GoogleDocumentAIClient {
 	processDocument(request: {
@@ -20,16 +20,20 @@ export interface GoogleDocumentAIClient {
 			content: Uint8Array;
 			mimeType: string;
 		};
-	}): Promise<[{
-		document?: { text?: string | null } | null;
-	}, ...unknown[]]>;
+	}): Promise<
+		[
+			{
+				document?: { text?: string | null } | null;
+			},
+			...unknown[],
+		]
+	>;
 	close(): Promise<void>;
 }
 
-export function createGoogleTextRecognitionProvider(
+export function createGoogleDocumentAIClient(
 	config: GoogleDocumentAIClientConfig,
-	client?: GoogleDocumentAIClient,
-): TextRecognitionProvider {
+): GoogleDocumentAIClient {
 	const credentialsJsonString = Buffer.from(
 		config.credentials,
 		"base64",
@@ -37,43 +41,55 @@ export function createGoogleTextRecognitionProvider(
 
 	const credentialsObject = JSON.parse(credentialsJsonString);
 
-	const documentClient = client ?? new DocumentProcessorServiceClient({
+	return new DocumentProcessorServiceClient({
 		apiEndpoint: `${config.location}-documentai.googleapis.com`,
 		credentials: credentialsObject,
 	});
+}
 
+export function createGoogleTextRecognitionProvider(
+	config: GoogleDocumentAIClientConfig,
+): {
+	textRecognitionProvider: TextRecognitionProvider;
+	close: () => Promise<void>;
+} {
+	const client = createGoogleDocumentAIClient(config);
 	const processorName = `projects/${config.projectId}/locations/${config.location}/processors/${config.processorId}`;
 
 	return {
-		recognizeText: async (input) => {
-			let text: string | null | undefined;
+		textRecognitionProvider: {
+			recognizeText: async (input) => {
+				let text: string | null | undefined;
 
-			try {
-				const [result] = await documentClient.processDocument({
-					name: processorName,
-					rawDocument: {
-						content: input.image,
-						mimeType: input.mediaType,
-					},
-				});
+				try {
+					const [result] = await client.processDocument({
+						name: processorName,
+						rawDocument: {
+							content: input.image,
+							mimeType: input.mediaType,
+						},
+					});
 
-				text = result.document?.text;
-			} catch {
-				throw new ServiceUnavailableError(
-					"The text recognition service could not process the image.",
-				);
-			}
+					text = result.document?.text;
+				} catch {
+					throw new ServiceUnavailableError(
+						"The text recognition service could not process the image.",
+					);
+				}
 
-			if (!text?.trim()) {
-				throw new ValidationError("No readable text was found in the image.");
-			}
+				if (!text?.trim()) {
+					throw new ValidationError("No readable text was found in the image.");
+				}
 
-			const response: TextRecognitionResult = {
-				text: text.trim(),
-			};
+				const response: TextRecognitionResult = {
+					text: text.trim(),
+				};
 
-			return response;
+				return response;
+			},
 		},
-		close: async () => await documentClient.close(),
+		close: async () => {
+			await client.close();
+		},
 	};
 }

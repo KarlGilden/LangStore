@@ -10,5 +10,4 @@ export interface TextRecognitionResult {
 /** Provider-neutral boundary for OCR implementations. */
 export interface TextRecognitionProvider {
 	recognizeText(input: TextRecognitionInput): Promise<TextRecognitionResult>;
-	close(): Promise<void>;
 }

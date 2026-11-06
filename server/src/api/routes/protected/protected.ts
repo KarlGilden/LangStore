@@ -13,6 +13,8 @@ import {
 import type { EntryService } from "../../../core/services/entry.service.js";
 import { createEntryRoutes } from "./entry.route.js";
 import type { EntryEncounterService } from "../../../core/services/entry-encounter.service.js";
+import type { PageIngestionService } from "../../../core/services/page-ingestion.service.js";
+import { createPageIngestionRoutes } from "./page-ingestion.route.js";
 
 export function createProtectedRoutes(
 	userService: UserService,
@@ -21,6 +23,7 @@ export function createProtectedRoutes(
 	pageService: PageService,
 	entryService: EntryService,
 	entryEncounterService: EntryEncounterService,
+	pageIngestionService: PageIngestionService,
 ): FastifyPluginAsync {
 	return async (app) => {
 		app.addHook("preHandler", requireAuth);
@@ -34,6 +37,9 @@ export function createProtectedRoutes(
 			prefix: "/:iso/page",
 		});
 		app.register(createCollectionPageRoutes(pageService), {
+			prefix: "/:iso/collection",
+		});
+		app.register(createPageIngestionRoutes(pageIngestionService), {
 			prefix: "/:iso/collection",
 		});
 		app.register(createEntryRoutes(entryService), {

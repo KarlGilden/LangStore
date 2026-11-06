@@ -1,7 +1,9 @@
 import type { Page } from "../entities/page.entity.js";
+import { EmptyRecognizedTextError } from "../errors/page-ingestion.error.js";
 import type { TextRecognitionProvider } from "../port/text-recognition.provider.js";
-import type { TranslationProvider } from "../port/translation.provider.js";
 import type { PageIngestionPersistence } from "../repositories/page-ingestion.persistence.js";
+import type { CollectionService } from "./collection.service.js";
+import { requirePageLanguageCode, requirePageText } from "./page.validation.js";
 
 export interface PagePhotoInput {
 	bytes: Uint8Array;
@@ -33,9 +35,46 @@ export interface PageIngestionService {
 	ingestPage(input: IngestPageInput): Promise<IngestPageResult>;
 }
 
-/** Explicit dependencies for the coordinator implementation added by ING-05. */
-export interface PageIngestionServiceDependencies {
-	textRecognitionProvider: TextRecognitionProvider;
-	translationProvider: TranslationProvider;
-	persistence: PageIngestionPersistence;
-}
+export const createPageIngestionService = (
+	collectionService: CollectionService,
+	textRecognitionProvider: TextRecognitionProvider,
+	persistence: PageIngestionPersistence,
+) => {
+	const ingestPage = async (input: IngestPageInput): Promise<IngestPageResult> => {
+		requirePageLanguageCode(input.iso);
+		requirePageText("name", input.name);
+		if (input.description !== null) {
+			requirePageText("description", input.description);
+		}
+
+		const collection = await collectionService.getCollection(
+			input.providerId,
+			input.iso,
+			input.collectionId,
+		);
+		const recognition = await textRecognitionProvider.recognizeText({
+			image: input.photo.bytes,
+			mediaType: input.photo.mediaType,
+		});
+		if (!/\S/u.test(recognition.text)) {
+			throw new EmptyRecognizedTextError();
+		}
+
+		const result = await persistence.persistPageIngestion({
+			page: {
+				id: input.pageId,
+				userId: collection.userId,
+				collectionId: collection.id,
+				iso: collection.iso,
+				name: input.name,
+				description: input.description,
+				summary: recognition.text,
+			},
+			encounters: [],
+		});
+
+		return { page: result.page, suggestions: [] };
+	};
+
+	return { ingestPage };
+};

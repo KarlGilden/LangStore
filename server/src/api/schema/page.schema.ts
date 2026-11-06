@@ -93,6 +93,33 @@ export const getPageVocabularySchema = {
 	},
 } as const;
 
+export const createPageIngestionSchema = {
+	params: listCollectionPagesSchema.params,
+	response: {
+		201: {
+			type: "object",
+			additionalProperties: false,
+			required: ["page", "suggestions"],
+			properties: {
+				page: pageResponseSchema,
+				suggestions: {
+					type: "array",
+					items: {
+						type: "object",
+						additionalProperties: false,
+						required: ["text", "count", "translation"],
+						properties: {
+							text: { type: "string", minLength: 1 },
+							count: { type: "integer", minimum: 1 },
+							translation: { type: "string" },
+						},
+					},
+				},
+			},
+		},
+	},
+} as const;
+
 export interface LanguageParams {
 	iso: string;
 }

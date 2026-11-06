@@ -1,34 +1,17 @@
 import { CollectionNotFoundError } from "../errors/collection.error.js";
 import {
-	InvalidPageLanguageCodeError,
-	InvalidPageTextError,
 	PageNotFoundError,
 } from "../errors/page.error.js";
-import { isAssignedIso6391Code } from "../language/iso-639-1.js";
 import type { CollectionRepository } from "../repositories/collection.repository.js";
 import type { PageRepository } from "../repositories/page.repository.js";
 import type { UserService } from "./user.service.js";
+import { requirePageLanguageCode, requirePageText } from "./page.validation.js";
 
 export interface CreatePageInput {
 	id: string;
 	collectionId: string;
 	name: string;
 	description?: string | null;
-}
-
-function requireLanguageCode(iso: string): void {
-	if (!isAssignedIso6391Code(iso)) {
-		throw new InvalidPageLanguageCodeError();
-	}
-}
-
-function requireNonBlank(
-	field: "name" | "description",
-	value: string,
-): void {
-	if (!/\S/u.test(value)) {
-		throw new InvalidPageTextError(field);
-	}
 }
 
 export const createPageService = (
@@ -57,10 +40,10 @@ export const createPageService = (
 		iso: string,
 		input: CreatePageInput,
 	) => {
-		requireLanguageCode(iso);
-		requireNonBlank("name", input.name);
+		requirePageLanguageCode(iso);
+		requirePageText("name", input.name);
 		if (input.description !== undefined && input.description !== null) {
-			requireNonBlank("description", input.description);
+			requirePageText("description", input.description);
 		}
 
 		const user = await userService.getOrCreateUser(providerId);
@@ -76,7 +59,7 @@ export const createPageService = (
 	};
 
 	const getPage = async (providerId: string, iso: string, pageId: string) => {
-		requireLanguageCode(iso);
+		requirePageLanguageCode(iso);
 		const user = await userService.getOrCreateUser(providerId);
 		const page = await pageRepository.findByIdForUserAndIso(
 			pageId,
@@ -94,7 +77,7 @@ export const createPageService = (
 		iso: string,
 		collectionId: string,
 	) => {
-		requireLanguageCode(iso);
+		requirePageLanguageCode(iso);
 		const user = await userService.getOrCreateUser(providerId);
 		await requireCollection(user.id, iso, collectionId);
 		return pageRepository.listByCollectionForUserAndIso(
@@ -105,7 +88,7 @@ export const createPageService = (
 	};
 
 	const getLatestPage = async (providerId: string, iso: string) => {
-		requireLanguageCode(iso);
+		requirePageLanguageCode(iso);
 		const user = await userService.getOrCreateUser(providerId);
 		const page = await pageRepository.findLatestByUserAndIso(user.id, iso);
 		if (!page) {

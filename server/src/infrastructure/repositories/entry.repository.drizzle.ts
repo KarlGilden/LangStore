@@ -2,11 +2,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import type { EntryRepository } from "../../core/repositories/entry.repository.js";
 import type { Database } from "../data/db.js";
 import { toDomainEntry } from "../data/mappers/entry.mapper.js";
-import {
-	entries,
-	translations,
-	type TranslationRow,
-} from "../data/schema.js";
+import { entries, translations, type TranslationRow } from "../data/schema.js";
 
 export function createDrizzleEntryRepository(db: Database): EntryRepository {
 	const create: EntryRepository["create"] = async (input) =>
@@ -82,7 +78,12 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 			const translationRows = await db
 				.select()
 				.from(translations)
-				.where(inArray(translations.entryId, entryRows.map((entry) => entry.id)))
+				.where(
+					inArray(
+						translations.entryId,
+						entryRows.map((entry) => entry.id),
+					),
+				)
 				.orderBy(asc(translations.createdAt), asc(translations.id));
 			const byEntryId = new Map<string, TranslationRow[]>();
 			for (const translation of translationRows) {
@@ -113,7 +114,12 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 		const translationRows = await db
 			.select()
 			.from(translations)
-			.where(inArray(translations.entryId, entryRows.map((entry) => entry.id)))
+			.where(
+				inArray(
+					translations.entryId,
+					entryRows.map((entry) => entry.id),
+				),
+			)
 			.orderBy(asc(translations.createdAt), asc(translations.id));
 		const byEntryId = new Map<string, TranslationRow[]>();
 		for (const translation of translationRows) {

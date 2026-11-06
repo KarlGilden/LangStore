@@ -1,16 +1,16 @@
-import type { IdentityProfileReader } from "../port/identityProfile.provider.js";
+import type { IdentityProfileProvider } from "../port/identityProfile.provider.js";
 import type { UserRepository } from "../repositories/user.repository.js";
 import { MissingIdentityEmailError } from "../errors/identity-profile.error.js";
 
 export const createUserService = (
 	userRepository: UserRepository,
-	identityProfileReader: IdentityProfileReader,
+	identityProfileProvider: IdentityProfileProvider,
 ) => {
 	const getOrCreateUser = async (providerId: string) => {
 		let user = await userRepository.findByProviderId(providerId);
 
 		if (!user) {
-			const profile = await identityProfileReader.getUserProfile(providerId);
+			const profile = await identityProfileProvider.getUserProfile(providerId);
 
 			if (!profile) {
 				throw new MissingIdentityEmailError();

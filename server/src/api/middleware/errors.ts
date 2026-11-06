@@ -28,6 +28,8 @@ import {
 	PageUploadTooLargeError,
 	TextRecognitionFailedError,
 } from "../../core/errors/page-ingestion.error.js";
+import { ServiceUnavailableError } from "../../core/errors/service.error.js";
+import { ValidationError } from "../../core/errors/validation.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -102,6 +104,14 @@ export const errorHandler = (
 	} else if (error instanceof TextRecognitionFailedError) {
 		statusCode = 502;
 		code = "TEXT_RECOGNITION_FAILED";
+		message = error.message;
+	} else if (error instanceof ServiceUnavailableError) {
+		statusCode = 502;
+		code = "SERVICE_UNAVAILABLE";
+		message = error.message;
+	} else if (error instanceof ValidationError) {
+		statusCode = 422;
+		code = "VALIDATION_ERROR";
 		message = error.message;
 	} else if (error instanceof EntryNotFoundError) {
 		statusCode = 404;

@@ -13,8 +13,22 @@ type GoogleDocumentAIClientConfig = {
 	credentials: string;
 };
 
+export interface GoogleDocumentAIClient {
+	processDocument(request: {
+		name: string;
+		rawDocument: {
+			content: Uint8Array;
+			mimeType: string;
+		};
+	}): Promise<[{
+		document?: { text?: string | null } | null;
+	}, ...unknown[]]>;
+	close(): Promise<void>;
+}
+
 export function createGoogleTextRecognitionProvider(
 	config: GoogleDocumentAIClientConfig,
+	client?: GoogleDocumentAIClient,
 ): TextRecognitionProvider {
 	const credentialsJsonString = Buffer.from(
 		config.credentials,
@@ -23,7 +37,7 @@ export function createGoogleTextRecognitionProvider(
 
 	const credentialsObject = JSON.parse(credentialsJsonString);
 
-	const client = new DocumentProcessorServiceClient({
+	const documentClient = client ?? new DocumentProcessorServiceClient({
 		apiEndpoint: `${config.location}-documentai.googleapis.com`,
 		credentials: credentialsObject,
 	});
@@ -35,7 +49,7 @@ export function createGoogleTextRecognitionProvider(
 			let text: string | null | undefined;
 
 			try {
-				const [result] = await client.processDocument({
+				const [result] = await documentClient.processDocument({
 					name: processorName,
 					rawDocument: {
 						content: input.image,
@@ -44,10 +58,9 @@ export function createGoogleTextRecognitionProvider(
 				});
 
 				text = result.document?.text;
-			} catch (cause) {
+			} catch {
 				throw new ServiceUnavailableError(
 					"The text recognition service could not process the image.",
-					cause instanceof Error ? cause.message : String(cause),
 				);
 			}
 
@@ -61,6 +74,6 @@ export function createGoogleTextRecognitionProvider(
 
 			return response;
 		},
-		close: async () => await client.close(),
+		close: async () => await documentClient.close(),
 	};
 }

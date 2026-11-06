@@ -3,7 +3,7 @@ import type { FastifyInstance, FastifyServerOptions } from "fastify";
 import multipart from "@fastify/multipart";
 import { healthRoutes } from "./routes/health.route.js";
 import { errorHandler } from "./middleware/errors.js";
-import { clerkPlugin, createClerkClient } from "@clerk/fastify";
+import { clerkPlugin } from "@clerk/fastify";
 import { createProtectedRoutes } from "./routes/protected/protected.js";
 import { createUserService } from "../core/services/user.service.js";
 import { registerEnv } from "./config.js";
@@ -46,7 +46,7 @@ export async function buildApp(
 		secretKey: app.config.CLERK_SECRET_KEY,
 	});
 
-	const identityProfileReader = createClerkAdapter({
+	const identityProfileProvider = createClerkAdapter({
 		publishableKey: app.config.CLERK_PUBLISHABLE_KEY,
 		secretKey: app.config.CLERK_SECRET_KEY,
 	});
@@ -78,7 +78,7 @@ export async function buildApp(
 	const pageIngestionPersistence = createDrizzlePageIngestionPersistence(db);
 
 	// services
-	const userService = createUserService(userRepository, identityProfileReader);
+	const userService = createUserService(userRepository, identityProfileProvider);
 	const userSettingsService = createUserSettingsService(
 		userSettingsRepository,
 		userService,

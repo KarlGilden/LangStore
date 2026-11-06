@@ -1,19 +1,18 @@
-import { createClerkClient } from "@clerk/fastify";
+import { createClerkClient, type ClerkClient } from "@clerk/fastify";
 import type { IdentityProfileProvider } from "../../core/port/identityProfile.provider.js";
 
-interface ClerkClientConfig {
+export interface ClerkClientConfig {
 	publishableKey: string;
 	secretKey: string;
 }
 
 export const createClerkAdapter = (
 	config: ClerkClientConfig,
-): IdentityProfileProvider => {
-	const clerkClient = createClerkClient({
+	clerkClient: Pick<ClerkClient, "users"> = createClerkClient({
 		publishableKey: config.publishableKey,
 		secretKey: config.secretKey,
-	});
-
+	}),
+): IdentityProfileProvider => {
 	return {
 		getUserProfile: async (userId: string) => {
 			const clerkUser = await clerkClient.users.getUser(userId);

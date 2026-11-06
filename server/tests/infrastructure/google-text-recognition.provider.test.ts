@@ -1,72 +1,84 @@
 import { describe, expect, it, vi } from "vitest";
 import {
 	createGoogleTextRecognitionProvider,
-	type GoogleVisionDocumentTextClient,
+	type GoogleDocumentAIClient,
 } from "../../src/infrastructure/ocr/google-text-recognition.provider.js";
 
-function createClient(result: unknown): GoogleVisionDocumentTextClient {
+const config = {
+	projectId: "test-project",
+	location: "eu",
+	processorId: "test-processor",
+	credentials: Buffer.from(JSON.stringify({
+		client_email: "test@example.com",
+		private_key: "test-key",
+	})).toString("base64"),
+};
+
+function createClient(text: string | null | undefined): GoogleDocumentAIClient {
 	return {
-		batchAnnotateImages: vi.fn().mockResolvedValue([result]),
+		processDocument: vi.fn().mockResolvedValue([{
+			document: text === undefined ? undefined : { text },
+		}]),
+		close: vi.fn().mockResolvedValue(undefined),
 	};
 }
 
 describe("Google text recognition provider", () => {
-	it("requests document text detection and returns the original recognized text", async () => {
-		const client = createClient({
-			responses: [{ fullTextAnnotation: { text: "Haus, Haus!\n" } }],
-		});
-		const provider = createGoogleTextRecognitionProvider(client, 4_000);
+	it("sends the page to Document AI and returns normalized recognized text", async () => {
+		const client = createClient(" Haus, Haus!\n ");
+		const provider = createGoogleTextRecognitionProvider(config, client);
 
 		await expect(provider.recognizeText({
 			image: new Uint8Array([1, 2, 3]),
 			mediaType: "image/png",
-		})).resolves.toEqual({ text: "Haus, Haus!\n" });
-		expect(client.batchAnnotateImages).toHaveBeenCalledWith({
-			requests: [{
-				image: { content: new Uint8Array([1, 2, 3]) },
-				features: [{ type: "DOCUMENT_TEXT_DETECTION" }],
-			}],
-		}, { timeout: 4_000 });
+		})).resolves.toEqual({ text: "Haus, Haus!" });
+		expect(client.processDocument).toHaveBeenCalledWith({
+			name: "projects/test-project/locations/eu/processors/test-processor",
+			rawDocument: {
+				content: new Uint8Array([1, 2, 3]),
+				mimeType: "image/png",
+			},
+		});
 	});
 
 	it.each([
-		["missing annotation", { responses: [{}] }],
-		["whitespace annotation", { responses: [{ fullTextAnnotation: { text: " \n" } }] }],
-	] as const)("maps %s to a safe empty-text error", async (_label, result) => {
-		const provider = createGoogleTextRecognitionProvider(createClient(result));
+		["missing text", undefined],
+		["null text", null],
+		["whitespace text", " \n"],
+	] as const)("maps %s to the new validation contract", async (_label, text) => {
+		const provider = createGoogleTextRecognitionProvider(config, createClient(text));
+
 		await expect(provider.recognizeText({
 			image: new Uint8Array([1]),
 			mediaType: "image/png",
 		})).rejects.toMatchObject({
-			name: "EmptyRecognizedTextError",
-			message: "No readable text was found in the page photo",
+			name: "ValidationError",
+			message: "No readable text was found in the image.",
 		});
 	});
 
-	it("maps provider response errors without exposing provider details", async () => {
-		const provider = createGoogleTextRecognitionProvider(createClient({
-			responses: [{ error: { code: 8, message: "secret provider payload" } }],
-		}));
-		await expect(provider.recognizeText({
-			image: new Uint8Array([1]),
-			mediaType: "image/png",
-		})).rejects.toMatchObject({
-			name: "TextRecognitionFailedError",
-			message: "Text recognition is temporarily unavailable",
-		});
-	});
+	it("maps provider failures to the new service-unavailable contract", async () => {
+		const client = createClient("unused");
+		vi.mocked(client.processDocument).mockRejectedValue(
+			new Error("deadline exceeded with credentials"),
+		);
+		const provider = createGoogleTextRecognitionProvider(config, client);
 
-	it("maps timeouts to the same safe provider error", async () => {
-		const client: GoogleVisionDocumentTextClient = {
-			batchAnnotateImages: vi.fn().mockRejectedValue(new Error("deadline exceeded with credentials")),
-		};
-		const provider = createGoogleTextRecognitionProvider(client);
 		await expect(provider.recognizeText({
 			image: new Uint8Array([1]),
 			mediaType: "image/jpeg",
 		})).rejects.toMatchObject({
-			name: "TextRecognitionFailedError",
-			message: "Text recognition is temporarily unavailable",
+			name: "ServiceUnavailableError",
+			message: "The text recognition service could not process the image.",
 		});
+	});
+
+	it("closes the Document AI client", async () => {
+		const client = createClient("Haus");
+		const provider = createGoogleTextRecognitionProvider(config, client);
+
+		await provider.close();
+
+		expect(client.close).toHaveBeenCalledOnce();
 	});
 });

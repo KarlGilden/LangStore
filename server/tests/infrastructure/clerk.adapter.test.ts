@@ -1,6 +1,10 @@
-import type { ClerkClient } from "@clerk/fastify";
 import { describe, expect, it, vi } from "vitest";
 import { createClerkAdapter } from "../../src/infrastructure/auth/clerk.adapter.js";
+
+const config = {
+	publishableKey: "pk_test_example",
+	secretKey: "sk_test_example",
+};
 
 describe("Clerk identity profile adapter", () => {
 	it("maps the provider username and primary email", async () => {
@@ -12,10 +16,10 @@ describe("Clerk identity profile adapter", () => {
 				{ id: "primary", emailAddress: "reader@example.com" },
 			],
 		});
-		const clerkClient = { users: { getUser } } as unknown as ClerkClient;
-		const reader = createClerkAdapter(clerkClient);
+		const clerkClient = { users: { getUser } };
+		const provider = createClerkAdapter(config, clerkClient);
 
-		await expect(reader.getUserProfile("provider_user")).resolves.toEqual({
+		await expect(provider.getUserProfile("provider_user")).resolves.toEqual({
 			username: "reader",
 			email: "reader@example.com",
 		});
@@ -27,9 +31,9 @@ describe("Clerk identity profile adapter", () => {
 			primaryEmailAddressId: null,
 			emailAddresses: [],
 		});
-		const clerkClient = { users: { getUser } } as unknown as ClerkClient;
-		const reader = createClerkAdapter(clerkClient);
+		const clerkClient = { users: { getUser } };
+		const provider = createClerkAdapter(config, clerkClient);
 
-		await expect(reader.getUserProfile("provider_user")).resolves.toBeNull();
+		await expect(provider.getUserProfile("provider_user")).resolves.toBeNull();
 	});
 });

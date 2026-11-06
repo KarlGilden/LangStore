@@ -1,4 +1,4 @@
-import type { IdentityProfileReader } from "../port/identityProfileReader.js";
+import type { IdentityProfileReader } from "../port/identityProfile.provider.js";
 import type { UserRepository } from "../repositories/user.repository.js";
 import { MissingIdentityEmailError } from "../errors/identity-profile.error.js";
 

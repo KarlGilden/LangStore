@@ -46,6 +46,7 @@ function createDependencies() {
 	const collectionService = { getCollection } as unknown as CollectionService;
 	const textRecognitionProvider: TextRecognitionProvider = {
 		recognizeText: vi.fn().mockResolvedValue({ text: "Haus, Haus!" }),
+		close: vi.fn().mockResolvedValue(() => {}),
 	};
 	const persistence: PageIngestionPersistence = {
 		persistPageIngestion: vi.fn().mockResolvedValue({ page, encounters: [] }),
@@ -76,7 +77,9 @@ describe("PageIngestionService", () => {
 			input.iso,
 			input.collectionId,
 		);
-		expect(dependencies.textRecognitionProvider.recognizeText).toHaveBeenCalledWith({
+		expect(
+			dependencies.textRecognitionProvider.recognizeText,
+		).toHaveBeenCalledWith({
 			image: input.photo.bytes,
 			mediaType: input.photo.mediaType,
 		});
@@ -93,7 +96,8 @@ describe("PageIngestionService", () => {
 			encounters: [],
 		});
 		expect(dependencies.getCollection.mock.invocationCallOrder[0]).toBeLessThan(
-			vi.mocked(dependencies.textRecognitionProvider.recognizeText).mock.invocationCallOrder[0]!,
+			vi.mocked(dependencies.textRecognitionProvider.recognizeText).mock
+				.invocationCallOrder[0]!,
 		);
 	});
 
@@ -101,44 +105,63 @@ describe("PageIngestionService", () => {
 		const dependencies = createDependencies();
 		dependencies.getCollection.mockRejectedValue(new CollectionNotFoundError());
 
-		await expect(dependencies.service.ingestPage({ ...input, iso: "fr" }))
-			.rejects.toMatchObject({ name: "CollectionNotFoundError" });
-		expect(dependencies.textRecognitionProvider.recognizeText).not.toHaveBeenCalled();
-		expect(dependencies.persistence.persistPageIngestion).not.toHaveBeenCalled();
+		await expect(
+			dependencies.service.ingestPage({ ...input, iso: "fr" }),
+		).rejects.toMatchObject({ name: "CollectionNotFoundError" });
+		expect(
+			dependencies.textRecognitionProvider.recognizeText,
+		).not.toHaveBeenCalled();
+		expect(
+			dependencies.persistence.persistPageIngestion,
+		).not.toHaveBeenCalled();
 	});
 
 	it.each([
 		["invalid language", { iso: "DE" }],
 		["blank name", { name: "   " }],
 		["blank description", { description: "\n" }],
-	] as const)("rejects %s before resolving ownership", async (_label, override) => {
-		const dependencies = createDependencies();
-		await expect(dependencies.service.ingestPage({ ...input, ...override }))
-			.rejects.toBeInstanceOf(Error);
-		expect(dependencies.getCollection).not.toHaveBeenCalled();
-		expect(dependencies.textRecognitionProvider.recognizeText).not.toHaveBeenCalled();
-		expect(dependencies.persistence.persistPageIngestion).not.toHaveBeenCalled();
-	});
+	] as const)(
+		"rejects %s before resolving ownership",
+		async (_label, override) => {
+			const dependencies = createDependencies();
+			await expect(
+				dependencies.service.ingestPage({ ...input, ...override }),
+			).rejects.toBeInstanceOf(Error);
+			expect(dependencies.getCollection).not.toHaveBeenCalled();
+			expect(
+				dependencies.textRecognitionProvider.recognizeText,
+			).not.toHaveBeenCalled();
+			expect(
+				dependencies.persistence.persistPageIngestion,
+			).not.toHaveBeenCalled();
+		},
+	);
 
 	it("rejects empty recognized text without persisting a page", async () => {
 		const dependencies = createDependencies();
-		vi.mocked(dependencies.textRecognitionProvider.recognizeText)
-			.mockResolvedValue({ text: " \n" });
+		vi.mocked(
+			dependencies.textRecognitionProvider.recognizeText,
+		).mockResolvedValue({ text: " \n" });
 
 		await expect(dependencies.service.ingestPage(input)).rejects.toMatchObject({
 			name: "EmptyRecognizedTextError",
 		});
-		expect(dependencies.persistence.persistPageIngestion).not.toHaveBeenCalled();
+		expect(
+			dependencies.persistence.persistPageIngestion,
+		).not.toHaveBeenCalled();
 	});
 
 	it("does not persist when OCR fails", async () => {
 		const dependencies = createDependencies();
-		vi.mocked(dependencies.textRecognitionProvider.recognizeText)
-			.mockRejectedValue(new TextRecognitionFailedError());
+		vi.mocked(
+			dependencies.textRecognitionProvider.recognizeText,
+		).mockRejectedValue(new TextRecognitionFailedError());
 
 		await expect(dependencies.service.ingestPage(input)).rejects.toMatchObject({
 			name: "TextRecognitionFailedError",
 		});
-		expect(dependencies.persistence.persistPageIngestion).not.toHaveBeenCalled();
+		expect(
+			dependencies.persistence.persistPageIngestion,
+		).not.toHaveBeenCalled();
 	});
 });

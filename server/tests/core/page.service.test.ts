@@ -81,6 +81,7 @@ describe("PageService", () => {
 			collectionId: collection.id,
 			name: page.name,
 			description: null,
+			summary: null,
 		});
 	});
 

@@ -22,6 +22,12 @@ import {
 	InvalidEntryTextError,
 } from "../../core/errors/entry.error.js";
 import { InvalidEntryEncounterCountError } from "../../core/errors/entry-encounter.error.js";
+import {
+	EmptyRecognizedTextError,
+	InvalidPageUploadError,
+	PageUploadTooLargeError,
+	TextRecognitionFailedError,
+} from "../../core/errors/page-ingestion.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -80,6 +86,22 @@ export const errorHandler = (
 	} else if (error instanceof InvalidPageTextError) {
 		statusCode = 400;
 		code = "INVALID_PAGE_TEXT";
+		message = error.message;
+	} else if (error instanceof InvalidPageUploadError) {
+		statusCode = 400;
+		code = "INVALID_PAGE_UPLOAD";
+		message = error.message;
+	} else if (error instanceof PageUploadTooLargeError) {
+		statusCode = 413;
+		code = "PAGE_UPLOAD_TOO_LARGE";
+		message = error.message;
+	} else if (error instanceof EmptyRecognizedTextError) {
+		statusCode = 422;
+		code = "PAGE_TEXT_NOT_FOUND";
+		message = error.message;
+	} else if (error instanceof TextRecognitionFailedError) {
+		statusCode = 502;
+		code = "TEXT_RECOGNITION_FAILED";
 		message = error.message;
 	} else if (error instanceof EntryNotFoundError) {
 		statusCode = 404;

@@ -101,6 +101,7 @@ describe("Page repository", () => {
 			collectionId: collection.id,
 			name: "Page 1",
 			description: null,
+			summary: null,
 		};
 
 		const created = await repository.create(input);
@@ -128,6 +129,7 @@ describe("Page repository", () => {
 			collectionId: collection.id,
 			name: "Page 1",
 			description: null,
+			summary: null,
 		};
 		await repository.create(input);
 
@@ -154,6 +156,7 @@ describe("Page repository", () => {
 				collectionId: collection.id,
 				name: "Page 1",
 				description: null,
+				summary: null,
 			}),
 		).rejects.toMatchObject({ code: "23503" });
 	});
@@ -175,6 +178,7 @@ describe("Page repository", () => {
 			collectionId: collection.id,
 			name: "Page 1",
 			description: null,
+			summary: null,
 		});
 
 		await expect(
@@ -223,6 +227,7 @@ describe("Page repository", () => {
 			collectionId: german.id,
 			name: "First",
 			description: null,
+			summary: null,
 		});
 		const second = await repository.create({
 			id: "00000000-0000-4000-8000-000000000002",
@@ -230,6 +235,7 @@ describe("Page repository", () => {
 			collectionId: german.id,
 			name: "Second",
 			description: null,
+			summary: null,
 		});
 		await repository.create({
 			id: "00000000-0000-4000-8000-000000000003",
@@ -237,6 +243,7 @@ describe("Page repository", () => {
 			collectionId: french.id,
 			name: "French",
 			description: null,
+			summary: null,
 		});
 		await repository.create({
 			id: "00000000-0000-4000-8000-000000000004",
@@ -244,6 +251,7 @@ describe("Page repository", () => {
 			collectionId: otherGerman.id,
 			name: "Other user",
 			description: null,
+			summary: null,
 		});
 		const sameTime = new Date("2026-11-04T12:00:00.000Z");
 		await database.pool.query(

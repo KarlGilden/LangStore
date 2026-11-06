@@ -58,6 +58,7 @@ describe("EntryEncounter repository", () => {
 			collectionId: collection.id,
 			name: "Page 1",
 			description: null,
+			summary: null,
 		});
 		const entryOwner = options?.entryOwner === "other" ? other : owner;
 		const entry = await createDrizzleEntryRepository(database.db).create({

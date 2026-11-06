@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyServerOptions } from "fastify";
+import multipart from "@fastify/multipart";
 import { healthRoutes } from "./routes/health.route.js";
 import { errorHandler } from "./middleware/errors.js";
 import { clerkPlugin, createClerkClient } from "@clerk/fastify";
@@ -19,6 +20,9 @@ import { createDrizzleEntryRepository } from "../infrastructure/repositories/ent
 import { createEntryService } from "../core/services/entry.service.js";
 import { createDrizzleEntryEncounterRepository } from "../infrastructure/repositories/entry-encounter.repository.drizzle.js";
 import { createEntryEncounterService } from "../core/services/entry-encounter.service.js";
+import { createDrizzlePageIngestionPersistence } from "../infrastructure/repositories/page-ingestion.persistence.drizzle.js";
+import { createGoogleTextRecognitionProvider } from "../infrastructure/ocr/google-text-recognition.provider.js";
+import { createPageIngestionService } from "../core/services/page-ingestion.service.js";
 
 export async function buildApp(
 	options: FastifyServerOptions = {},
@@ -27,6 +31,7 @@ export async function buildApp(
 
 	/* Register plugins */
 	await registerEnv(app);
+	await app.register(multipart);
 
 	// db
 	const { db, close } = createDatabase(app.config.DATABASE_URL);
@@ -41,17 +46,27 @@ export async function buildApp(
 		secretKey: app.config.CLERK_SECRET_KEY,
 	});
 
-	const clerkClient = createClerkClient({
+	const identityProfileReader = createClerkAdapter({
 		publishableKey: app.config.CLERK_PUBLISHABLE_KEY,
 		secretKey: app.config.CLERK_SECRET_KEY,
 	});
-
-	const identityProfileReader = createClerkAdapter(clerkClient);
 
 	app.decorateRequest("authenticatedUserId", null);
 
 	// error handling
 	app.setErrorHandler(errorHandler);
+
+	// external services
+	const textRecognitionProvider = createGoogleTextRecognitionProvider({
+		projectId: app.config.GOOGLE_CLOUD_PROJECT_ID,
+		location: app.config.GOOGLE_CLOUD_LOCATION,
+		processorId: app.config.GOOGLE_CLOUD_PROCESSOR_ID,
+		credentials: app.config.GOOGLE_APPLICATION_CREDENTIALS,
+	});
+
+	app.addHook("onClose", async () => {
+		await textRecognitionProvider.close();
+	});
 
 	// repositories
 	const userRepository = createDrizzleUserRepository(db);
@@ -60,6 +75,7 @@ export async function buildApp(
 	const pageRepository = createDrizzlePageRepository(db);
 	const entryRepository = createDrizzleEntryRepository(db);
 	const entryEncounterRepository = createDrizzleEntryEncounterRepository(db);
+	const pageIngestionPersistence = createDrizzlePageIngestionPersistence(db);
 
 	// services
 	const userService = createUserService(userRepository, identityProfileReader);
@@ -87,6 +103,11 @@ export async function buildApp(
 		pageRepository,
 		userService,
 	);
+	const pageIngestionService = createPageIngestionService(
+		collectionService,
+		textRecognitionProvider,
+		pageIngestionPersistence,
+	);
 
 	// routes
 	app.register(healthRoutes);
@@ -98,6 +119,7 @@ export async function buildApp(
 			pageService,
 			entryService,
 			entryEncounterService,
+			pageIngestionService,
 		),
 		{
 			prefix: "/api",

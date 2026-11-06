@@ -7,11 +7,23 @@ export interface AppConfig {
 	DATABASE_URL: string;
 	CLERK_SECRET_KEY: string;
 	CLERK_PUBLISHABLE_KEY: string;
+	GOOGLE_CLOUD_PROJECT_ID: string;
+	GOOGLE_CLOUD_LOCATION: string;
+	GOOGLE_CLOUD_PROCESSOR_ID: string;
+	GOOGLE_APPLICATION_CREDENTIALS: string;
 }
 
 const schema = {
 	type: "object",
-	required: ["DATABASE_URL", "CLERK_SECRET_KEY", "CLERK_PUBLISHABLE_KEY"],
+	required: [
+		"DATABASE_URL",
+		"CLERK_SECRET_KEY",
+		"CLERK_PUBLISHABLE_KEY",
+		"GOOGLE_CLOUD_PROJECT_ID",
+		"GOOGLE_CLOUD_LOCATION",
+		"GOOGLE_CLOUD_PROCESSOR_ID",
+		"GOOGLE_APPLICATION_CREDENTIALS",
+	],
 	properties: {
 		PORT: {
 			type: "integer",
@@ -30,6 +42,22 @@ const schema = {
 			minLength: 1,
 		},
 		CLERK_PUBLISHABLE_KEY: {
+			type: "string",
+			minLength: 1,
+		},
+		GOOGLE_CLOUD_PROJECT_ID: {
+			type: "string",
+			minLength: 1,
+		},
+		GOOGLE_CLOUD_LOCATION: {
+			type: "string",
+			minLength: 1,
+		},
+		GOOGLE_CLOUD_PROCESSOR_ID: {
+			type: "string",
+			minLength: 1,
+		},
+		GOOGLE_APPLICATION_CREDENTIALS: {
 			type: "string",
 			minLength: 1,
 		},

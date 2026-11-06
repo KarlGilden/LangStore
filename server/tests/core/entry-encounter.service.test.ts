@@ -45,6 +45,7 @@ function createDependencies() {
 	const entryRepository: EntryRepository = {
 		create: vi.fn(),
 		findByIdForUser: vi.fn().mockResolvedValue(entry),
+		findExactByTextsForUserAndIso: vi.fn(),
 		listByUserAndIso: vi.fn(),
 	};
 	const pageRepository: PageRepository = {

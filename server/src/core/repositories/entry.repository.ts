@@ -12,5 +12,11 @@ export interface EntryRepository {
 
 	findByIdForUser(id: string, userId: string): Promise<Entry | null>;
 
+	findExactByTextsForUserAndIso(
+		texts: readonly string[],
+		userId: string,
+		iso: string,
+	): Promise<Entry[]>;
+
 	listByUserAndIso(userId: string, iso: string): Promise<Entry[]>;
 }

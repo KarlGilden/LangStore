@@ -23,6 +23,7 @@ import { createEntryEncounterService } from "../core/services/entry-encounter.se
 import { createDrizzlePageIngestionPersistence } from "../infrastructure/repositories/page-ingestion.persistence.drizzle.js";
 import { createGoogleTextRecognitionProvider } from "../infrastructure/ocr/google-text-recognition.provider.js";
 import { createPageIngestionService } from "../core/services/page-ingestion.service.js";
+import { createWordExtractionService } from "../core/services/word-extraction.service.js";
 
 export async function buildApp(
 	options: FastifyServerOptions = {},
@@ -102,6 +103,8 @@ export async function buildApp(
 	const pageIngestionService = createPageIngestionService(
 		collectionService,
 		textRecognitionProvider,
+		createWordExtractionService(),
+		entryRepository,
 		pageIngestionPersistence,
 	);
 

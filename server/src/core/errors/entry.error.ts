@@ -25,3 +25,10 @@ export class InvalidEntryTextError extends Error {
 		this.name = "InvalidEntryTextError";
 	}
 }
+
+export class EntryMatchConflictError extends Error {
+	constructor(public readonly text: string) {
+		super(`Multiple entries exactly match normalized word: ${text}`);
+		this.name = "EntryMatchConflictError";
+	}
+}

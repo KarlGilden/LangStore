@@ -17,6 +17,7 @@ import {
 	PageNotFoundError,
 } from "../../core/errors/page.error.js";
 import {
+	EntryMatchConflictError,
 	EntryNotFoundError,
 	InvalidEntryLanguageCodeError,
 	InvalidEntryTextError,
@@ -112,6 +113,10 @@ export const errorHandler = (
 	} else if (error instanceof ValidationError) {
 		statusCode = 422;
 		code = "VALIDATION_ERROR";
+		message = error.message;
+	} else if (error instanceof EntryMatchConflictError) {
+		statusCode = 409;
+		code = "ENTRY_MATCH_CONFLICT";
 		message = error.message;
 	} else if (error instanceof EntryNotFoundError) {
 		statusCode = 404;

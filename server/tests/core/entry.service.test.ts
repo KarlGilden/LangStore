@@ -32,6 +32,7 @@ function createDependencies(targetLanguage = "de") {
 	const entryRepository: EntryRepository = {
 		create: vi.fn(),
 		findByIdForUser: vi.fn(),
+		findExactByTextsForUserAndIso: vi.fn(),
 		listByUserAndIso: vi.fn(),
 	};
 	const userService = {

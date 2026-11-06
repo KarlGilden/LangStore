@@ -177,6 +177,50 @@ describe("Entry repository", () => {
 		]);
 	});
 
+	it("matches exact normalized text only within owner and language scope", async () => {
+		const owner = await createUser("provider_one", "one@example.com");
+		const other = await createUser("provider_two", "two@example.com");
+		const repository = createDrizzleEntryRepository(database.db);
+		const matchingWord = await repository.create({
+			text: "haus",
+			userId: owner.id,
+			iso: "de",
+			translations: [],
+		});
+		await repository.create({
+			text: "Haus",
+			userId: owner.id,
+			iso: "de",
+			translations: [],
+		});
+		await repository.create({
+			text: "haus",
+			userId: owner.id,
+			iso: "fr",
+			translations: [],
+		});
+		await repository.create({
+			text: "haus",
+			userId: other.id,
+			iso: "de",
+			translations: [],
+		});
+		await repository.create({
+			text: "new york",
+			userId: owner.id,
+			iso: "de",
+			translations: [],
+		});
+
+		await expect(
+			repository.findExactByTextsForUserAndIso(
+				["haus", "new", "york"],
+				owner.id,
+				"de",
+			),
+		).resolves.toEqual([matchingWord]);
+	});
+
 	it("does not merge entries with the same text", async () => {
 		const owner = await createUser("provider_one", "one@example.com");
 		const repository = createDrizzleEntryRepository(database.db);

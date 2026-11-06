@@ -57,3 +57,21 @@ npm start
 Tests run without opening a listening socket or contacting external services.
 The build emits JavaScript under `dist/`; startup handles SIGINT and SIGTERM
 by closing Fastify.
+
+## Word normalization
+
+OCR word extraction lowercases with JavaScript's locale-independent
+`toLowerCase`. Unicode letters, combining marks, and numbers form token bodies.
+U+0027 (`'`) and U+2019 (`’`) are preserved as distinct internal apostrophes;
+U+002D (`-`), U+2010 (`‐`), and U+2011 (`‑`) are preserved as distinct internal
+hyphens. A preserved apostrophe or hyphen must have a word character on each
+side. Every other whitespace, punctuation, symbol, control, or separator
+character is a boundary.
+
+Normalized words are matched exactly within the authenticated owner and
+collection language. Existing rows are not rewritten or case-folded. Multiple
+exact stored matches produce a conflict instead of an arbitrary match.
+
+This initial tokenizer does not extract phrases, normalize Unicode composition,
+equate curly and straight apostrophes, join words hyphenated across line breaks,
+or segment languages without explicit word boundaries.

@@ -33,7 +33,7 @@ export const createWordExtractionService = (
 		const counts = new Map<string, number>();
 		const extractedWords = normaliseSentence(text).split(" ");
 
-		const entries = await entryRepository.listByUserAndIso(userId, iso);
+		const entries = await entryRepository.getAll(userId, iso);
 
 		const filteredWords = extractedWords.filter(
 			(word) => !entries.some((entry) => entry.text === word),

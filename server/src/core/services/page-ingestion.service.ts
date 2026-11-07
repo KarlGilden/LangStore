@@ -14,7 +14,7 @@ export interface PagePhotoInput {
 }
 
 export interface IngestPageInput {
-	providerId: string;
+	userId: string;
 	iso: string;
 	pageId: string;
 	collectionId: string;
@@ -45,7 +45,9 @@ export const createPageIngestionService = (
 	entryRepository: EntryRepository,
 	persistence: PageIngestionPersistence,
 ) => {
-	const ingestPage = async (input: IngestPageInput): Promise<IngestPageResult> => {
+	const ingestPage = async (
+		input: IngestPageInput,
+	): Promise<IngestPageResult> => {
 		requirePageLanguageCode(input.iso);
 		requirePageText("name", input.name);
 		if (input.description !== null) {
@@ -53,7 +55,7 @@ export const createPageIngestionService = (
 		}
 
 		const collection = await collectionService.getCollection(
-			input.providerId,
+			input.userId,
 			input.iso,
 			input.collectionId,
 		);

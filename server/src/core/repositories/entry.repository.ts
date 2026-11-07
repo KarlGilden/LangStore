@@ -10,13 +10,13 @@ export interface CreateEntryInput {
 export interface EntryRepository {
 	create(input: CreateEntryInput): Promise<Entry>;
 
-	findByIdForUser(id: string, userId: string): Promise<Entry | null>;
+	getById(id: string, userId: string): Promise<Entry | null>;
 
-	findExactByTextsForUserAndIso(
+	getByPages(
 		texts: readonly string[],
 		userId: string,
 		iso: string,
 	): Promise<Entry[]>;
 
-	listByUserAndIso(userId: string, iso: string): Promise<Entry[]>;
+	getAll(userId: string, iso: string): Promise<Entry[]>;
 }

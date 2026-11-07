@@ -35,11 +35,7 @@ export function createDrizzlePageRepository(db: Database): PageRepository {
 		throw new PageCreateConflictError();
 	};
 
-	const findByIdForUserAndIso: PageRepository["findByIdForUserAndIso"] = async (
-		id,
-		userId,
-		iso,
-	) => {
+	const getById: PageRepository["getById"] = async (id, userId, iso) => {
 		const [row] = await db
 			.select({ page: pages })
 			.from(pages)
@@ -62,34 +58,12 @@ export function createDrizzlePageRepository(db: Database): PageRepository {
 		return row ? toDomainPage(row.page) : null;
 	};
 
-	const listByCollectionForUserAndIso: PageRepository["listByCollectionForUserAndIso"] =
-		async (collectionId, userId, iso) => {
-			const rows = await db
-				.select({ page: pages })
-				.from(pages)
-				.innerJoin(
-					collections,
-					and(
-						eq(pages.collectionId, collections.id),
-						eq(pages.userId, collections.userId),
-					),
-				)
-				.where(
-					and(
-						eq(pages.collectionId, collectionId),
-						eq(pages.userId, userId),
-						eq(collections.iso, iso),
-					),
-				);
-
-			return rows.map((row) => toDomainPage(row.page));
-		};
-
-	const findLatestByUserAndIso: PageRepository["findLatestByUserAndIso"] = async (
+	const getByCollection: PageRepository["getByCollection"] = async (
+		collectionId,
 		userId,
 		iso,
 	) => {
-		const [row] = await db
+		const rows = await db
 			.select({ page: pages })
 			.from(pages)
 			.innerJoin(
@@ -100,8 +74,28 @@ export function createDrizzlePageRepository(db: Database): PageRepository {
 				),
 			)
 			.where(
-				and(eq(pages.userId, userId), eq(collections.iso, iso)),
+				and(
+					eq(pages.collectionId, collectionId),
+					eq(pages.userId, userId),
+					eq(collections.iso, iso),
+				),
+			);
+
+		return rows.map((row) => toDomainPage(row.page));
+	};
+
+	const getLatest: PageRepository["getLatest"] = async (userId, iso) => {
+		const [row] = await db
+			.select({ page: pages })
+			.from(pages)
+			.innerJoin(
+				collections,
+				and(
+					eq(pages.collectionId, collections.id),
+					eq(pages.userId, collections.userId),
+				),
 			)
+			.where(and(eq(pages.userId, userId), eq(collections.iso, iso)))
 			.orderBy(desc(pages.createdAt), desc(pages.id))
 			.limit(1);
 
@@ -110,8 +104,8 @@ export function createDrizzlePageRepository(db: Database): PageRepository {
 
 	return {
 		create,
-		findByIdForUserAndIso,
-		listByCollectionForUserAndIso,
-		findLatestByUserAndIso,
+		getById,
+		getByCollection,
+		getLatest,
 	};
 }

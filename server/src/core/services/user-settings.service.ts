@@ -8,10 +8,9 @@ import type { UserService } from "./user.service.js";
 
 export const createUserSettingsService = (
 	userSettingsRepository: UserSettingsRepository,
-	userService: UserService,
 ) => {
-	const getSettingsForUser = async (userId: string) => {
-		const settings = await userSettingsRepository.findByUserId(userId);
+	const getSettings = async (userId: string) => {
+		const settings = await userSettingsRepository.get(userId);
 
 		if (!settings) {
 			throw new SettingsNotFoundError();
@@ -20,13 +19,8 @@ export const createUserSettingsService = (
 		return settings;
 	};
 
-	const getSettings = async (providerId: string) => {
-		const user = await userService.getOrCreateUser(providerId);
-		return getSettingsForUser(user.id);
-	};
-
 	const replaceSettings = async (
-		providerId: string,
+		userId: string,
 		input: { targetLanguage: string; userLanguage: string },
 	) => {
 		if (!isAssignedIso6391Code(input.targetLanguage)) {
@@ -36,8 +30,7 @@ export const createUserSettingsService = (
 			throw new InvalidLanguageCodeError("userLanguage");
 		}
 
-		const user = await userService.getOrCreateUser(providerId);
-		return userSettingsRepository.upsert({ userId: user.id, ...input });
+		return userSettingsRepository.upsert({ userId, ...input });
 	};
 
 	return { getSettings, replaceSettings };

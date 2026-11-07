@@ -7,7 +7,7 @@ import { userSettings } from "../data/schema.js";
 export function createDrizzleUserSettingsRepository(
 	db: Database,
 ): UserSettingsRepository {
-	const findByUserId: UserSettingsRepository["findByUserId"] = async (userId) => {
+	const get: UserSettingsRepository["get"] = async (userId) => {
 		const [row] = await db
 			.select()
 			.from(userSettings)
@@ -37,5 +37,5 @@ export function createDrizzleUserSettingsRepository(
 		return toDomainUserSettings(row);
 	};
 
-	return { findByUserId, upsert };
+	return { get, upsert };
 }

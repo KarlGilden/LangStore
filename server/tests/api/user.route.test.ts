@@ -22,14 +22,13 @@ describe("GET /api/user", () => {
 		const userService = { getOrCreateUser } as UserService;
 		const app = Fastify();
 		apps.push(app);
-		app.decorateRequest("authenticatedUserId", null);
+		app.decorateRequest("currentUserId", null);
 		app.addHook("preHandler", async (request) => {
-			request.authenticatedUserId = "provider_authenticated";
+			request.currentUserId = "provider_authenticated";
 		});
-		app.register(
-			createUserRoutes(userService, {} as UserSettingsService),
-			{ prefix: "/api/user" },
-		);
+		app.register(createUserRoutes(userService, {} as UserSettingsService), {
+			prefix: "/api/user",
+		});
 
 		const response = await app.inject({
 			method: "GET",

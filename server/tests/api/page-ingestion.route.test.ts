@@ -33,9 +33,12 @@ function multipartPayload(parts: MultipartPart[]) {
 			? `Content-Disposition: form-data; name="${part.name}"; filename="${part.filename}"\r\n`
 			: `Content-Disposition: form-data; name="${part.name}"\r\n`;
 		chunks.push(Buffer.from(disposition));
-		if (part.contentType) chunks.push(Buffer.from(`Content-Type: ${part.contentType}\r\n`));
+		if (part.contentType)
+			chunks.push(Buffer.from(`Content-Type: ${part.contentType}\r\n`));
 		chunks.push(Buffer.from("\r\n"));
-		chunks.push(typeof part.value === "string" ? Buffer.from(part.value) : part.value);
+		chunks.push(
+			typeof part.value === "string" ? Buffer.from(part.value) : part.value,
+		);
 		chunks.push(Buffer.from("\r\n"));
 	}
 	chunks.push(Buffer.from(`--${boundary}--\r\n`));
@@ -54,9 +57,9 @@ function pngFixture(): Buffer {
 
 function jpegFixture(size?: number): Buffer {
 	const prefix = Buffer.from([
-		0xff, 0xd8,
-		0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00,
-		0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00,
+		0xff, 0xd8, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01,
+		0x01, 0x11, 0x00, 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f,
+		0x00,
 	]);
 	const targetSize = size ?? prefix.length + 3;
 	const bytes = Buffer.alloc(targetSize);
@@ -82,15 +85,16 @@ describe("page ingestion route", () => {
 			page: { ...page, name: input.name, description: input.description },
 			suggestions: [],
 		}));
-		const pageIngestionService = options?.pageIngestionService ?? ({ ingestPage } as PageIngestionService);
-		const app = Fastify(options?.loggerStream
-			? { logger: { stream: options.loggerStream } }
-			: {});
+		const pageIngestionService =
+			options?.pageIngestionService ?? ({ ingestPage } as PageIngestionService);
+		const app = Fastify(
+			options?.loggerStream ? { logger: { stream: options.loggerStream } } : {},
+		);
 		apps.push(app);
-		app.decorateRequest("authenticatedUserId", null);
+		app.decorateRequest("currentUserId", null);
 		if (options?.authenticated !== false) {
 			app.addHook("preHandler", async (request) => {
-				request.authenticatedUserId = "provider_authenticated";
+				request.currentUserId = "provider_authenticated";
 			});
 		}
 		app.setErrorHandler(errorHandler);
@@ -104,70 +108,128 @@ describe("page ingestion route", () => {
 	it.each([
 		["PNG", pngFixture(), "image/png"],
 		["JPEG", jpegFixture(), "image/jpeg"],
-	] as const)("passes a validated %s upload to the coordinator", async (_label, photo, mediaType) => {
-		let receivedPhoto: Buffer | undefined;
-		const ingestPage = vi.fn().mockImplementation(async (input) => {
-			receivedPhoto = Buffer.from(input.photo.bytes);
-			return { page, suggestions: [] };
-		});
-		const { app } = createApp({ pageIngestionService: { ingestPage } });
-		const upload = multipartPayload([
-			{ name: "name", value: "Page 1" },
-			{ name: "description", value: "Opening page" },
-			{ name: "photo", value: photo, filename: "page", contentType: mediaType },
-		]);
+	] as const)(
+		"passes a validated %s upload to the coordinator",
+		async (_label, photo, mediaType) => {
+			let receivedPhoto: Buffer | undefined;
+			const ingestPage = vi.fn().mockImplementation(async (input) => {
+				receivedPhoto = Buffer.from(input.photo.bytes);
+				return { page, suggestions: [] };
+			});
+			const { app } = createApp({ pageIngestionService: { ingestPage } });
+			const upload = multipartPayload([
+				{ name: "name", value: "Page 1" },
+				{ name: "description", value: "Opening page" },
+				{
+					name: "photo",
+					value: photo,
+					filename: "page",
+					contentType: mediaType,
+				},
+			]);
 
-		const response = await app.inject({
-			method: "POST",
-			url: `/api/de/collection/${collectionId}/page-ingestions`,
-			...upload,
-		});
+			const response = await app.inject({
+				method: "POST",
+				url: `/api/de/collection/${collectionId}/page-ingestions`,
+				...upload,
+			});
 
-		expect(response.statusCode).toBe(201);
-		expect(receivedPhoto).toEqual(photo);
-		expect(ingestPage).toHaveBeenCalledWith(expect.objectContaining({
-			providerId: "provider_authenticated",
-			iso: "de",
-			collectionId,
-			name: "Page 1",
-			description: "Opening page",
-			photo: expect.objectContaining({ mediaType }),
-		}));
-	});
+			expect(response.statusCode).toBe(201);
+			expect(receivedPhoto).toEqual(photo);
+			expect(ingestPage).toHaveBeenCalledWith(
+				expect.objectContaining({
+					providerId: "provider_authenticated",
+					iso: "de",
+					collectionId,
+					name: "Page 1",
+					description: "Opening page",
+					photo: expect.objectContaining({ mediaType }),
+				}),
+			);
+		},
+	);
 
 	it.each([
 		["missing photo", [{ name: "name", value: "Page 1" }]],
-		["missing name", [
-			{ name: "photo", value: pngFixture(), filename: "page.png", contentType: "image/png" },
-		]],
-		["unsupported content", [
-			{ name: "name", value: "Page 1" },
-			{ name: "photo", value: Buffer.from("not an image"), filename: "page.gif", contentType: "image/gif" },
-		]],
-		["spoofed media type", [
-			{ name: "name", value: "Page 1" },
-			{ name: "photo", value: pngFixture(), filename: "page.jpg", contentType: "image/jpeg" },
-		]],
-		["malformed image", [
-			{ name: "name", value: "Page 1" },
-			{ name: "photo", value: Buffer.from([0x89, 0x50, 0x4e, 0x47]), filename: "page.png", contentType: "image/png" },
-		]],
-		["multiple photos", [
-			{ name: "name", value: "Page 1" },
-			{ name: "photo", value: pngFixture(), filename: "one.png", contentType: "image/png" },
-			{ name: "photo", value: pngFixture(), filename: "two.png", contentType: "image/png" },
-		]],
-	] as const)("rejects %s before calling the coordinator", async (_label, parts) => {
-		const { app, ingestPage } = createApp();
-		const response = await app.inject({
-			method: "POST",
-			url: `/api/de/collection/${collectionId}/page-ingestions`,
-			...multipartPayload([...parts]),
-		});
+		[
+			"missing name",
+			[
+				{
+					name: "photo",
+					value: pngFixture(),
+					filename: "page.png",
+					contentType: "image/png",
+				},
+			],
+		],
+		[
+			"unsupported content",
+			[
+				{ name: "name", value: "Page 1" },
+				{
+					name: "photo",
+					value: Buffer.from("not an image"),
+					filename: "page.gif",
+					contentType: "image/gif",
+				},
+			],
+		],
+		[
+			"spoofed media type",
+			[
+				{ name: "name", value: "Page 1" },
+				{
+					name: "photo",
+					value: pngFixture(),
+					filename: "page.jpg",
+					contentType: "image/jpeg",
+				},
+			],
+		],
+		[
+			"malformed image",
+			[
+				{ name: "name", value: "Page 1" },
+				{
+					name: "photo",
+					value: Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+					filename: "page.png",
+					contentType: "image/png",
+				},
+			],
+		],
+		[
+			"multiple photos",
+			[
+				{ name: "name", value: "Page 1" },
+				{
+					name: "photo",
+					value: pngFixture(),
+					filename: "one.png",
+					contentType: "image/png",
+				},
+				{
+					name: "photo",
+					value: pngFixture(),
+					filename: "two.png",
+					contentType: "image/png",
+				},
+			],
+		],
+	] as const)(
+		"rejects %s before calling the coordinator",
+		async (_label, parts) => {
+			const { app, ingestPage } = createApp();
+			const response = await app.inject({
+				method: "POST",
+				url: `/api/de/collection/${collectionId}/page-ingestions`,
+				...multipartPayload([...parts]),
+			});
 
-		expect(response.statusCode).toBe(400);
-		expect(ingestPage).not.toHaveBeenCalled();
-	});
+			expect(response.statusCode).toBe(400);
+			expect(ingestPage).not.toHaveBeenCalled();
+		},
+	);
 
 	it("accepts exactly 10,000,000 bytes", async () => {
 		const { app, ingestPage } = createApp();
@@ -176,7 +238,12 @@ describe("page ingestion route", () => {
 			url: `/api/de/collection/${collectionId}/page-ingestions`,
 			...multipartPayload([
 				{ name: "name", value: "Page 1" },
-				{ name: "photo", value: jpegFixture(10_000_000), filename: "page.jpg", contentType: "image/jpeg" },
+				{
+					name: "photo",
+					value: jpegFixture(10_000_000),
+					filename: "page.jpg",
+					contentType: "image/jpeg",
+				},
 			]),
 		});
 
@@ -191,7 +258,12 @@ describe("page ingestion route", () => {
 			url: `/api/de/collection/${collectionId}/page-ingestions`,
 			...multipartPayload([
 				{ name: "name", value: "Page 1" },
-				{ name: "photo", value: jpegFixture(10_000_001), filename: "page.jpg", contentType: "image/jpeg" },
+				{
+					name: "photo",
+					value: jpegFixture(10_000_001),
+					filename: "page.jpg",
+					contentType: "image/jpeg",
+				},
 			]),
 		});
 
@@ -207,7 +279,12 @@ describe("page ingestion route", () => {
 			url: `/api/de/collection/${collectionId}/page-ingestions`,
 			...multipartPayload([
 				{ name: "name", value: "Page 1" },
-				{ name: "photo", value: pngFixture(), filename: "page.png", contentType: "image/png" },
+				{
+					name: "photo",
+					value: pngFixture(),
+					filename: "page.png",
+					contentType: "image/png",
+				},
 			]),
 		});
 
@@ -221,7 +298,9 @@ describe("page ingestion route", () => {
 		const photo = jpegFixture(256);
 		photo.write(imageSentinel, 32, "ascii");
 		const logs: string[] = [];
-		const ingestPage = vi.fn().mockRejectedValue(new TextRecognitionFailedError());
+		const ingestPage = vi
+			.fn()
+			.mockRejectedValue(new TextRecognitionFailedError());
 		const { app } = createApp({
 			pageIngestionService: { ingestPage },
 			loggerStream: { write: (message) => logs.push(message) },
@@ -233,7 +312,12 @@ describe("page ingestion route", () => {
 			...multipartPayload([
 				{ name: "name", value: "Page 1" },
 				{ name: "description", value: textSentinel },
-				{ name: "photo", value: photo, filename: "page.jpg", contentType: "image/jpeg" },
+				{
+					name: "photo",
+					value: photo,
+					filename: "page.jpg",
+					contentType: "image/jpeg",
+				},
 			]),
 		});
 

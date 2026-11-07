@@ -6,7 +6,9 @@ import { toDomainUser } from "../data/mappers/user.mapper.js";
 import { UserEmailConflictError } from "../../core/errors/user.error.js";
 
 export function createDrizzleUserRepository(db: Database): UserRepository {
-	const findByProviderId = async (providerId: string) => {
+	const getByProviderId: UserRepository["getByProviderId"] = async (
+		providerId: string,
+	) => {
 		const [row] = await db
 			.select()
 			.from(users)
@@ -50,7 +52,7 @@ export function createDrizzleUserRepository(db: Database): UserRepository {
 	};
 
 	return {
-		findByProviderId,
+		getByProviderId,
 		create,
 	};
 }

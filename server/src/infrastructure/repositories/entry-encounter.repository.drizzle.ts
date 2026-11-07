@@ -19,7 +19,7 @@ import {
 export function createDrizzleEntryEncounterRepository(
 	db: Database,
 ): EntryEncounterRepository {
-	const record: EntryEncounterRepository["record"] = async (input) =>
+	const create: EntryEncounterRepository["create"] = async (input) =>
 		db.transaction(async (transaction) => {
 			const [entry] = await transaction
 				.select({ userId: entries.userId, iso: entries.iso })
@@ -70,7 +70,7 @@ export function createDrizzleEntryEncounterRepository(
 			return toDomainEntryEncounter(row);
 		});
 
-	const listPageVocabulary: EntryEncounterRepository["listPageVocabulary"] =
+	const getAllPageVocabulary: EntryEncounterRepository["getAllPageVocabulary"] =
 		async (pageId, userId, iso) => {
 			const [ownedPage] = await db
 				.select({ id: pages.id })
@@ -117,7 +117,12 @@ export function createDrizzleEntryEncounterRepository(
 			const translationRows = await db
 				.select()
 				.from(translations)
-				.where(inArray(translations.entryId, rows.map(({ entry }) => entry.id)))
+				.where(
+					inArray(
+						translations.entryId,
+						rows.map(({ entry }) => entry.id),
+					),
+				)
 				.orderBy(asc(translations.createdAt), asc(translations.id));
 			const translationsByEntryId = new Map<string, TranslationRow[]>();
 			for (const translation of translationRows) {
@@ -128,12 +133,9 @@ export function createDrizzleEntryEncounterRepository(
 
 			return rows.map(({ encounter, entry }) => ({
 				encounter: toDomainEntryEncounter(encounter),
-				entry: toDomainEntry(
-					entry,
-					translationsByEntryId.get(entry.id) ?? [],
-				),
+				entry: toDomainEntry(entry, translationsByEntryId.get(entry.id) ?? []),
 			}));
 		};
 
-	return { record, listPageVocabulary };
+	return { create, getAllPageVocabulary };
 }

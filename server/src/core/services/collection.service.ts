@@ -5,7 +5,6 @@ import {
 } from "../errors/collection.error.js";
 import { isAssignedIso6391Code } from "../language/iso-639-1.js";
 import type { CollectionRepository } from "../repositories/collection.repository.js";
-import type { UserService } from "./user.service.js";
 
 export interface CreateCollectionInput {
 	name: string;
@@ -36,10 +35,9 @@ function requireLanguageCode(iso: string): void {
 
 export const createCollectionService = (
 	collectionRepository: CollectionRepository,
-	userService: UserService,
 ) => {
 	const createCollection = async (
-		providerId: string,
+		userId: string,
 		iso: string,
 		input: CreateCollectionInput,
 	) => {
@@ -52,26 +50,24 @@ export const createCollectionService = (
 		}
 		requireLanguageCode(iso);
 
-		const user = await userService.getOrCreateUser(providerId);
 		return collectionRepository.create({
 			name: input.name,
 			description: input.description ?? null,
 			imgUrl: input.imgUrl ?? null,
-			userId: user.id,
+			userId: userId,
 			iso,
 		});
 	};
 
 	const getCollection = async (
-		providerId: string,
+		userId: string,
 		iso: string,
 		collectionId: string,
 	) => {
 		requireLanguageCode(iso);
-		const user = await userService.getOrCreateUser(providerId);
-		const collection = await collectionRepository.findByIdForUserAndIso(
+		const collection = await collectionRepository.getById(
 			collectionId,
-			user.id,
+			userId,
 			iso,
 		);
 
@@ -83,7 +79,7 @@ export const createCollectionService = (
 	};
 
 	const updateCollection = async (
-		providerId: string,
+		userId: string,
 		iso: string,
 		collectionId: string,
 		input: UpdateCollectionInput,
@@ -97,10 +93,9 @@ export const createCollectionService = (
 		}
 		requireLanguageCode(iso);
 
-		const user = await userService.getOrCreateUser(providerId);
-		const collection = await collectionRepository.updateForUserAndIso(
+		const collection = await collectionRepository.update(
 			collectionId,
-			user.id,
+			userId,
 			iso,
 			{
 				name: input.name,
@@ -116,17 +111,16 @@ export const createCollectionService = (
 		return collection;
 	};
 
-	const listCollections = async (providerId: string, iso: string) => {
+	const getAllCollections = async (userId: string, iso: string) => {
 		requireLanguageCode(iso);
-		const user = await userService.getOrCreateUser(providerId);
-		return collectionRepository.listByUserAndIso(user.id, iso);
+		return collectionRepository.getAll(userId, iso);
 	};
 
 	return {
 		createCollection,
 		getCollection,
 		updateCollection,
-		listCollections,
+		getAllCollections,
 	};
 };
 

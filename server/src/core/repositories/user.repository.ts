@@ -1,7 +1,7 @@
 import type { User } from "../entities/user.entity.js";
 
 export interface UserRepository {
-	findByProviderId(providerId: string): Promise<User | null>;
+	getByProviderId(providerId: string): Promise<User | null>;
 
 	create(input: {
 		providerId: string;

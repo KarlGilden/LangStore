@@ -31,10 +31,7 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 			return toDomainEntry(entryRow, translationRows);
 		});
 
-	const findByIdForUser: EntryRepository["findByIdForUser"] = async (
-		id,
-		userId,
-	) => {
+	const getById: EntryRepository["getById"] = async (id, userId) => {
 		const [entryRow] = await db
 			.select()
 			.from(entries)
@@ -53,54 +50,54 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 		return toDomainEntry(entryRow, translationRows);
 	};
 
-	const findExactByTextsForUserAndIso: EntryRepository["findExactByTextsForUserAndIso"] =
-		async (texts, userId, iso) => {
-			if (texts.length === 0) {
-				return [];
-			}
-
-			const entryRows = await db
-				.select()
-				.from(entries)
-				.where(
-					and(
-						eq(entries.userId, userId),
-						eq(entries.iso, iso),
-						inArray(entries.text, [...new Set(texts)]),
-					),
-				)
-				.orderBy(asc(entries.createdAt), asc(entries.id));
-
-			if (entryRows.length === 0) {
-				return [];
-			}
-
-			const translationRows = await db
-				.select()
-				.from(translations)
-				.where(
-					inArray(
-						translations.entryId,
-						entryRows.map((entry) => entry.id),
-					),
-				)
-				.orderBy(asc(translations.createdAt), asc(translations.id));
-			const byEntryId = new Map<string, TranslationRow[]>();
-			for (const translation of translationRows) {
-				const grouped = byEntryId.get(translation.entryId) ?? [];
-				grouped.push(translation);
-				byEntryId.set(translation.entryId, grouped);
-			}
-
-			return entryRows.map((entry) =>
-				toDomainEntry(entry, byEntryId.get(entry.id) ?? []),
-			);
-		};
-
-	const listByUserAndIso: EntryRepository["listByUserAndIso"] = async (
+	const getByPages: EntryRepository["getByPages"] = async (
+		texts,
 		userId,
 		iso,
 	) => {
+		if (texts.length === 0) {
+			return [];
+		}
+
+		const entryRows = await db
+			.select()
+			.from(entries)
+			.where(
+				and(
+					eq(entries.userId, userId),
+					eq(entries.iso, iso),
+					inArray(entries.text, [...new Set(texts)]),
+				),
+			)
+			.orderBy(asc(entries.createdAt), asc(entries.id));
+
+		if (entryRows.length === 0) {
+			return [];
+		}
+
+		const translationRows = await db
+			.select()
+			.from(translations)
+			.where(
+				inArray(
+					translations.entryId,
+					entryRows.map((entry) => entry.id),
+				),
+			)
+			.orderBy(asc(translations.createdAt), asc(translations.id));
+		const byEntryId = new Map<string, TranslationRow[]>();
+		for (const translation of translationRows) {
+			const grouped = byEntryId.get(translation.entryId) ?? [];
+			grouped.push(translation);
+			byEntryId.set(translation.entryId, grouped);
+		}
+
+		return entryRows.map((entry) =>
+			toDomainEntry(entry, byEntryId.get(entry.id) ?? []),
+		);
+	};
+
+	const getAll: EntryRepository["getAll"] = async (userId, iso) => {
 		const entryRows = await db
 			.select()
 			.from(entries)
@@ -135,8 +132,8 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 
 	return {
 		create,
-		findByIdForUser,
-		findExactByTextsForUserAndIso,
-		listByUserAndIso,
+		getById,
+		getByPages,
+		getAll,
 	};
 }

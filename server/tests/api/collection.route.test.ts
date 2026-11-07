@@ -27,9 +27,9 @@ describe("collection routes", () => {
 	function createApp(service: CollectionService) {
 		const app = Fastify();
 		apps.push(app);
-		app.decorateRequest("authenticatedUserId", null);
+		app.decorateRequest("currentUserId", null);
 		app.addHook("preHandler", async (request) => {
-			request.authenticatedUserId = "provider_authenticated";
+			request.currentUserId = "provider_authenticated";
 		});
 		app.setErrorHandler(errorHandler);
 		app.register(createCollectionRoutes(service), {
@@ -98,7 +98,10 @@ describe("collection routes", () => {
 		});
 
 		expect(response.statusCode).toBe(200);
-		expect(listCollections).toHaveBeenCalledWith("provider_authenticated", "de");
+		expect(listCollections).toHaveBeenCalledWith(
+			"provider_authenticated",
+			"de",
+		);
 		expect(response.json()).toHaveLength(1);
 	});
 
@@ -126,21 +129,28 @@ describe("collection routes", () => {
 	it.each([
 		["DE", new Error("schema validation")],
 		["zz", new InvalidCollectionLanguageCodeError()],
-	] as const)("rejects invalid collection language %s", async (iso, failure) => {
-		const createCollection = vi.fn().mockRejectedValue(failure);
-		const app = createApp({ createCollection } as unknown as CollectionService);
+	] as const)(
+		"rejects invalid collection language %s",
+		async (iso, failure) => {
+			const createCollection = vi.fn().mockRejectedValue(failure);
+			const app = createApp({
+				createCollection,
+			} as unknown as CollectionService);
 
-		const response = await app.inject({
-			method: "POST",
-			url: `/api/${iso}/collection`,
-			payload: { name: "Book" },
-		});
+			const response = await app.inject({
+				method: "POST",
+				url: `/api/${iso}/collection`,
+				payload: { name: "Book" },
+			});
 
-		expect(response.statusCode).toBe(400);
-	});
+			expect(response.statusCode).toBe(400);
+		},
+	);
 
 	it("returns 404 when another user's collection is requested", async () => {
-		const getCollection = vi.fn().mockRejectedValue(new CollectionNotFoundError());
+		const getCollection = vi
+			.fn()
+			.mockRejectedValue(new CollectionNotFoundError());
 		const app = createApp({ getCollection } as unknown as CollectionService);
 
 		const response = await app.inject({

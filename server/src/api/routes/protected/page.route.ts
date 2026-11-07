@@ -9,22 +9,21 @@ import {
 	getPageSchema,
 	getPageVocabularySchema,
 	listCollectionPagesSchema,
-	type CollectionPagesParams,
-	type CreatePageBody,
-	type LanguageParams,
-	type PageParams,
 } from "../../schema/page.schema.js";
+import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
 export function createPageRoutes(
 	pageService: PageService,
-	entryEncounterService?: EntryEncounterService,
+	entryEncounterService: EntryEncounterService,
 ): FastifyPluginAsync {
 	return async (app) => {
-		app.get<{ Params: LanguageParams }>(
+		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
+
+		routes.get(
 			"/latest",
 			{ schema: getLatestPageSchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
+				const providerId = request.currentUserId;
 				if (!providerId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
@@ -37,46 +36,39 @@ export function createPageRoutes(
 			},
 		);
 
-		app.get<{ Params: PageParams }>(
-			"/:id",
-			{ schema: getPageSchema },
+		routes.get("/:id", { schema: getPageSchema }, async (request, reply) => {
+			const providerId = request.currentUserId;
+			if (!providerId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
+
+			const page = await pageService.getPage(
+				providerId,
+				request.params.iso,
+				request.params.id,
+			);
+			return reply.code(200).send(toPageViewModel(page));
+		});
+
+		routes.get(
+			"/:id/vocabulary",
+			{ schema: getPageVocabularySchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
+				const providerId = request.currentUserId;
 				if (!providerId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
-				const page = await pageService.getPage(
+				const vocabulary = await entryEncounterService.getPageVocabulary(
 					providerId,
 					request.params.iso,
 					request.params.id,
 				);
-				return reply.code(200).send(toPageViewModel(page));
+				return reply
+					.code(200)
+					.send(vocabulary.map(toPageVocabularyEntryViewModel));
 			},
 		);
-
-		if (entryEncounterService) {
-			app.get<{ Params: PageParams }>(
-				"/:id/vocabulary",
-				{ schema: getPageVocabularySchema },
-				async (request, reply) => {
-					const providerId = request.authenticatedUserId;
-					if (!providerId) {
-						return reply.code(401).send({ error: "Unauthorized" });
-					}
-
-					const vocabulary = await entryEncounterService.getPageVocabulary(
-						providerId,
-						request.params.iso,
-						request.params.id,
-					);
-					return reply
-						.code(200)
-						.send(vocabulary.map(toPageVocabularyEntryViewModel));
-				},
-			);
-		}
-
 	};
 }
 
@@ -84,11 +76,13 @@ export function createCollectionPageRoutes(
 	pageService: PageService,
 ): FastifyPluginAsync {
 	return async (app) => {
-		app.post<{ Params: CollectionPagesParams; Body: CreatePageBody }>(
+		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
+
+		routes.post(
 			"/:collectionId/page",
 			{ schema: createPageSchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
+				const providerId = request.currentUserId;
 				if (!providerId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
@@ -105,16 +99,16 @@ export function createCollectionPageRoutes(
 			},
 		);
 
-		app.get<{ Params: CollectionPagesParams }>(
+		routes.get(
 			"/:collectionId/page",
 			{ schema: listCollectionPagesSchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
+				const providerId = request.currentUserId;
 				if (!providerId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
-				const pages = await pageService.listCollectionPages(
+				const pages = await pageService.getAllCollectionPages(
 					providerId,
 					request.params.iso,
 					request.params.collectionId,

@@ -11,9 +11,9 @@ export interface RecordEntryEncounterInput {
 }
 
 export interface EntryEncounterRepository {
-	record(input: RecordEntryEncounterInput): Promise<EntryEncounter>;
+	create(input: RecordEntryEncounterInput): Promise<EntryEncounter>;
 
-	listPageVocabulary(
+	getAllPageVocabulary(
 		pageId: string,
 		userId: string,
 		iso: string,

@@ -10,23 +10,25 @@ import { toUserSettingsViewModel } from "../../mappers/user-settings.mapper.js";
 import {
 	getUserSettingsSchema,
 	replaceUserSettingsSchema,
-	type ReplaceUserSettingsBody,
 } from "../../schema/user-settings.schema.js";
 import { getUserSchema } from "../../schema/user.schema.js";
-import type { UserViewModel } from "../../viewmodels/user.viewmodel.js";
+import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+import { toUserViewModel } from "../../mappers/user.mapper.js";
 
 export function createUserRoutes(
 	userService: UserService,
 	userSettingsService: UserSettingsService,
 ): FastifyPluginAsync {
 	return async (app: FastifyInstance) => {
-		app.get(
+		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
+
+		routes.get(
 			"/",
 			{
 				schema: getUserSchema,
 			},
-			async (request: FastifyRequest, reply: FastifyReply) => {
-				const userId = request.authenticatedUserId;
+			async (request, reply) => {
+				const userId = request.currentUserId;
 
 				if (!userId) {
 					return reply.code(401).send({
@@ -36,45 +38,35 @@ export function createUserRoutes(
 
 				const user = await userService.getOrCreateUser(userId);
 
-				const response: UserViewModel = {
-					id: user.id,
-					username: user.username,
-					email: user.email,
-					createdAt: user.createdAt.toISOString(),
-				};
-
-				return reply.code(200).send(response);
+				return reply.code(200).send(toUserViewModel(user));
 			},
 		);
 
-		app.get(
+		routes.get(
 			"/setting",
 			{ schema: getUserSettingsSchema },
-			async (request: FastifyRequest, reply: FastifyReply) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
+			async (request, reply) => {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
-				const settings = await userSettingsService.getSettings(providerId);
+				const settings = await userSettingsService.getSettings(userId);
 				return reply.code(200).send(toUserSettingsViewModel(settings));
 			},
 		);
 
-		app.put<{ Body: ReplaceUserSettingsBody }>(
+		routes.put(
 			"/setting",
 			{ schema: replaceUserSettingsSchema },
-			async (
-				request: FastifyRequest<{ Body: ReplaceUserSettingsBody }>,
-				reply: FastifyReply,
-			) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
+			async (request, reply) => {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const settings = await userSettingsService.replaceSettings(
-					providerId,
+					userId,
 					request.body,
 				);
 				return reply.code(200).send(toUserSettingsViewModel(settings));

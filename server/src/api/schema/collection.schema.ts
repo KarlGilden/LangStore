@@ -1,7 +1,18 @@
-const nullableTextSchema = {
-	anyOf: [{ type: "string", minLength: 1 }, { type: "null" }],
-} as const;
+import {
+	commonErrorResponses,
+	createParamSchema,
+	languageParamsSchema,
+	nullableTextSchema,
+	resourceParamsSchema,
+} from "./common.schema.js";
+import type { FromSchema } from "json-schema-to-ts";
 
+const isoAndIdParams = createParamSchema(
+	languageParamsSchema,
+	resourceParamsSchema,
+);
+
+// Response Schemas
 const collectionResponseSchema = {
 	type: "object",
 	additionalProperties: false,
@@ -15,23 +26,33 @@ const collectionResponseSchema = {
 	},
 } as const;
 
-const languageParamsSchema = {
-	type: "object",
-	additionalProperties: false,
-	required: ["iso"],
-	properties: {
-		iso: { type: "string", pattern: "^[a-z]{2}$" },
+// Input/Output Schemas
+export const listCollectionsSchema = {
+	params: languageParamsSchema,
+	response: {
+		200: { type: "array", items: collectionResponseSchema },
+		...commonErrorResponses,
 	},
 } as const;
 
-const collectionParamsSchema = {
-	type: "object",
-	additionalProperties: false,
-	required: ["iso", "id"],
-	properties: {
-		iso: { type: "string", pattern: "^[a-z]{2}$" },
-		id: { type: "string", format: "uuid" },
+export const getCollectionSchema = {
+	params: isoAndIdParams,
+	response: { 200: collectionResponseSchema, ...commonErrorResponses },
+} as const;
+
+export const updateCollectionSchema = {
+	params: isoAndIdParams,
+	body: {
+		type: "object",
+		additionalProperties: false,
+		required: ["name"],
+		properties: {
+			name: { type: "string", minLength: 1 },
+			description: nullableTextSchema,
+			imgUrl: nullableTextSchema,
+		},
 	},
+	response: { 200: collectionResponseSchema, ...commonErrorResponses },
 } as const;
 
 export const createCollectionSchema = {
@@ -46,52 +67,7 @@ export const createCollectionSchema = {
 			imgUrl: nullableTextSchema,
 		},
 	},
-	response: { 201: collectionResponseSchema },
+	response: { 201: collectionResponseSchema, ...commonErrorResponses },
 } as const;
 
-export const getCollectionSchema = {
-	params: collectionParamsSchema,
-	response: { 200: collectionResponseSchema },
-} as const;
-
-export const updateCollectionSchema = {
-	params: getCollectionSchema.params,
-	body: {
-		type: "object",
-		additionalProperties: false,
-		required: ["name"],
-		properties: {
-			name: { type: "string", minLength: 1 },
-			description: nullableTextSchema,
-			imgUrl: nullableTextSchema,
-		},
-	},
-	response: { 200: collectionResponseSchema },
-} as const;
-
-export const listCollectionsSchema = {
-	params: languageParamsSchema,
-	response: {
-		200: { type: "array", items: collectionResponseSchema },
-	},
-} as const;
-
-export interface CreateCollectionBody {
-	name: string;
-	description?: string | null;
-	imgUrl?: string | null;
-}
-
-export interface LanguageParams {
-	iso: string;
-}
-
-export interface CollectionParams extends LanguageParams {
-	id: string;
-}
-
-export interface UpdateCollectionBody {
-	name: string;
-	description?: string | null;
-	imgUrl?: string | null;
-}
+export type CollectionViewModel = FromSchema<typeof collectionResponseSchema>;

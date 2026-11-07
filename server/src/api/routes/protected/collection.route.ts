@@ -1,8 +1,4 @@
-import type {
-	FastifyPluginAsync,
-	FastifyReply,
-	FastifyRequest,
-} from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import type { CollectionService } from "../../../core/services/collection.service.js";
 import { toCollectionViewModel } from "../../mappers/collection.mapper.js";
 import {
@@ -10,27 +6,26 @@ import {
 	getCollectionSchema,
 	listCollectionsSchema,
 	updateCollectionSchema,
-	type CollectionParams,
-	type CreateCollectionBody,
-	type LanguageParams,
-	type UpdateCollectionBody,
 } from "../../schema/collection.schema.js";
+import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
 export function createCollectionRoutes(
 	collectionService: CollectionService,
 ): FastifyPluginAsync {
 	return async (app) => {
-		app.post<{ Params: LanguageParams; Body: CreateCollectionBody }>(
+		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
+
+		routes.post(
 			"/",
 			{ schema: createCollectionSchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const collection = await collectionService.createCollection(
-					providerId,
+					userId,
 					request.params.iso,
 					request.body,
 				);
@@ -38,55 +33,53 @@ export function createCollectionRoutes(
 			},
 		);
 
-		app.get<{ Params: LanguageParams }>(
+		routes.get(
 			"/",
 			{ schema: listCollectionsSchema },
-			async (
-				request: FastifyRequest<{ Params: LanguageParams }>,
-				reply: FastifyReply,
-			) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
+			async (request, reply) => {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
-				const collections = await collectionService.listCollections(
-					providerId,
+				const collections = await collectionService.getAllCollections(
+					userId,
 					request.params.iso,
 				);
 				return reply.code(200).send(collections.map(toCollectionViewModel));
 			},
 		);
 
-		app.get<{ Params: CollectionParams }>(
+		routes.get(
 			"/:id",
 			{ schema: getCollectionSchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const collection = await collectionService.getCollection(
-					providerId,
+					userId,
 					request.params.iso,
 					request.params.id,
 				);
+
 				return reply.code(200).send(toCollectionViewModel(collection));
 			},
 		);
 
-		app.put<{ Params: CollectionParams; Body: UpdateCollectionBody }>(
+		routes.put(
 			"/:id",
 			{ schema: updateCollectionSchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const collection = await collectionService.updateCollection(
-					providerId,
+					userId,
 					request.params.iso,
 					request.params.id,
 					request.body,

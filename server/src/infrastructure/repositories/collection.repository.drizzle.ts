@@ -17,11 +17,7 @@ export function createDrizzleCollectionRepository(
 		return toDomainCollection(row);
 	};
 
-	const findByIdForUserAndIso: CollectionRepository["findByIdForUserAndIso"] = async (
-		id,
-		userId,
-		iso,
-	) => {
+	const getById: CollectionRepository["getById"] = async (id, userId, iso) => {
 		const [row] = await db
 			.select()
 			.from(collections)
@@ -37,10 +33,7 @@ export function createDrizzleCollectionRepository(
 		return row ? toDomainCollection(row) : null;
 	};
 
-	const listByUserAndIso: CollectionRepository["listByUserAndIso"] = async (
-		userId,
-		iso,
-	) => {
+	const getAll: CollectionRepository["getAll"] = async (userId, iso) => {
 		const rows = await db
 			.select()
 			.from(collections)
@@ -49,7 +42,7 @@ export function createDrizzleCollectionRepository(
 		return rows.map(toDomainCollection);
 	};
 
-	const updateForUserAndIso: CollectionRepository["updateForUserAndIso"] = async (
+	const update: CollectionRepository["update"] = async (
 		id,
 		userId,
 		iso,
@@ -72,8 +65,8 @@ export function createDrizzleCollectionRepository(
 
 	return {
 		create,
-		findByIdForUserAndIso,
-		updateForUserAndIso,
-		listByUserAndIso,
+		getById,
+		update,
+		getAll,
 	};
 }

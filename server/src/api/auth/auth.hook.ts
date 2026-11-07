@@ -1,14 +1,18 @@
 import { getAuth } from "@clerk/fastify";
 import type { preHandlerHookHandler } from "fastify";
+import type { UserService } from "../../core/services/user.service.js";
 
-export const requireAuth: preHandlerHookHandler = async (request, reply) => {
-	const { isAuthenticated, userId } = getAuth(request);
+export function createRequireAuth(
+	userService: Pick<UserService, "getOrCreateUser">,
+): preHandlerHookHandler {
+	return async (request, reply) => {
+		const { isAuthenticated, userId: providerId } = getAuth(request);
 
-	if (!isAuthenticated || !userId) {
-		return reply.code(401).send({
-			error: "Unauthorized",
-		});
-	}
+		if (!isAuthenticated || !providerId) {
+			return reply.code(401).send({ error: "Unauthorized" });
+		}
 
-	request.authenticatedUserId = userId;
-};
+		const user = await userService.getOrCreateUser(providerId);
+		request.currentUserId = user.id;
+	};
+}

@@ -30,7 +30,7 @@ export function createPageIngestionRoutes(
 			"/:collectionId/page-ingestions",
 			{ schema: createPageIngestionSchema },
 			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
+				const providerId = request.currentUserId;
 				if (!providerId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}

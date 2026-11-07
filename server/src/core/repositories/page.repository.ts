@@ -12,17 +12,13 @@ export interface CreatePageInput {
 export interface PageRepository {
 	create(input: CreatePageInput): Promise<Page>;
 
-	findByIdForUserAndIso(
-		id: string,
-		userId: string,
-		iso: string,
-	): Promise<Page | null>;
+	getById(id: string, userId: string, iso: string): Promise<Page | null>;
 
-	listByCollectionForUserAndIso(
+	getByCollection(
 		collectionId: string,
 		userId: string,
 		iso: string,
 	): Promise<Page[]>;
 
-	findLatestByUserAndIso(userId: string, iso: string): Promise<Page | null>;
+	getLatest(userId: string, iso: string): Promise<Page | null>;
 }

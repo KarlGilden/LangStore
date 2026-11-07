@@ -34,9 +34,9 @@ describe("entry routes", () => {
 	function createApp(service: EntryService) {
 		const app = Fastify();
 		apps.push(app);
-		app.decorateRequest("authenticatedUserId", null);
+		app.decorateRequest("currentUserId", null);
 		app.addHook("preHandler", async (request) => {
-			request.authenticatedUserId = "provider_authenticated";
+			request.currentUserId = "provider_authenticated";
 		});
 		app.setErrorHandler(errorHandler);
 		app.register(createEntryRoutes(service), { prefix: "/api/entry" });

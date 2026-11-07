@@ -1,63 +1,56 @@
-import type {
-	FastifyPluginAsync,
-	FastifyReply,
-	FastifyRequest,
-} from "fastify";
+import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import type { EntryService } from "../../../core/services/entry.service.js";
 import { toEntryViewModel } from "../../mappers/entry.mapper.js";
 import {
 	createEntrySchema,
 	getEntrySchema,
 	listEntriesSchema,
-	type CreateEntryBody,
-	type EntryParams,
 } from "../../schema/entry.schema.js";
+import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
-export function createEntryRoutes(entryService: EntryService): FastifyPluginAsync {
+export function createEntryRoutes(
+	entryService: EntryService,
+): FastifyPluginAsync {
 	return async (app) => {
-		app.post<{ Body: CreateEntryBody }>(
-			"/",
-			{ schema: createEntrySchema },
-			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
-					return reply.code(401).send({ error: "Unauthorized" });
-				}
+		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
 
-				const entry = await entryService.createEntry(providerId, request.body);
-				return reply.code(201).send(toEntryViewModel(entry));
-			},
-		);
+		routes.post("/", { schema: createEntrySchema }, async (request, reply) => {
+			const userId = request.currentUserId;
 
-		app.get(
+			if (!userId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
+
+			const entry = await entryService.createEntry(
+				userId,
+				request.params.iso,
+				request.body,
+			);
+			return reply.code(201).send(toEntryViewModel(entry));
+		});
+
+		routes.get(
 			"/",
 			{ schema: listEntriesSchema },
 			async (request: FastifyRequest, reply: FastifyReply) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
-				const entries = await entryService.listEntries(providerId);
+				const entries = await entryService.getAllEntries(userId);
 				return reply.code(200).send(entries.map(toEntryViewModel));
 			},
 		);
 
-		app.get<{ Params: EntryParams }>(
-			"/:id",
-			{ schema: getEntrySchema },
-			async (request, reply) => {
-				const providerId = request.authenticatedUserId;
-				if (!providerId) {
-					return reply.code(401).send({ error: "Unauthorized" });
-				}
+		routes.get("/:id", { schema: getEntrySchema }, async (request, reply) => {
+			const userId = request.currentUserId;
+			if (!userId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
 
-				const entry = await entryService.getEntry(
-					providerId,
-					request.params.id,
-				);
-				return reply.code(200).send(toEntryViewModel(entry));
-			},
-		);
+			const entry = await entryService.getEntry(userId, request.params.id);
+			return reply.code(200).send(toEntryViewModel(entry));
+		});
 	};
 }

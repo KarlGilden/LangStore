@@ -7,7 +7,7 @@ export const createUserService = (
 	identityProfileProvider: IdentityProfileProvider,
 ) => {
 	const getOrCreateUser = async (providerId: string) => {
-		let user = await userRepository.findByProviderId(providerId);
+		let user = await userRepository.getByProviderId(providerId);
 
 		if (!user) {
 			const profile = await identityProfileProvider.getUserProfile(providerId);
@@ -23,7 +23,7 @@ export const createUserService = (
 			});
 
 			if (!user) {
-				user = await userRepository.findByProviderId(providerId);
+				user = await userRepository.getByProviderId(providerId);
 			}
 
 			if (!user) {

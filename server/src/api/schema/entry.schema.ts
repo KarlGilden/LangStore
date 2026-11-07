@@ -1,3 +1,11 @@
+import type { FromSchema } from "json-schema-to-ts";
+import {
+	commonErrorResponses,
+	createParamSchema,
+	languageParamsSchema,
+	resourceParamsSchema,
+} from "./common.schema.js";
+
 const translationResponseSchema = {
 	type: "object",
 	additionalProperties: false,
@@ -12,24 +20,32 @@ const translationResponseSchema = {
 export const entryResponseSchema = {
 	type: "object",
 	additionalProperties: false,
-	required: ["id", "text", "iso", "createdAt", "translations"],
+	required: ["id", "text", "createdAt", "translations"],
 	properties: {
 		id: { type: "string", format: "uuid" },
 		text: { type: "string", minLength: 1 },
-		iso: { type: "string", pattern: "^[a-z]{2}$" },
 		createdAt: { type: "string", format: "date-time" },
 		translations: { type: "array", items: translationResponseSchema },
 	},
 } as const;
 
-const entryParamsSchema = {
-	type: "object",
-	additionalProperties: false,
-	required: ["id"],
-	properties: { id: { type: "string", format: "uuid" } },
+// Input/Output Schemas
+
+export const listEntriesSchema = {
+	params: languageParamsSchema,
+	response: {
+		200: { type: "array", items: entryResponseSchema },
+		...commonErrorResponses,
+	},
+} as const;
+
+export const getEntrySchema = {
+	params: resourceParamsSchema,
+	response: { 200: entryResponseSchema, ...commonErrorResponses },
 } as const;
 
 export const createEntrySchema = {
+	params: languageParamsSchema,
 	body: {
 		type: "object",
 		additionalProperties: false,
@@ -47,23 +63,8 @@ export const createEntrySchema = {
 			},
 		},
 	},
-	response: { 201: entryResponseSchema },
+	response: { 201: entryResponseSchema, ...commonErrorResponses },
 } as const;
 
-export const getEntrySchema = {
-	params: entryParamsSchema,
-	response: { 200: entryResponseSchema },
-} as const;
-
-export const listEntriesSchema = {
-	response: { 200: { type: "array", items: entryResponseSchema } },
-} as const;
-
-export interface CreateEntryBody {
-	text: string;
-	translations?: { text: string }[];
-}
-
-export interface EntryParams {
-	id: string;
-}
+export type TranslationViewModel = FromSchema<typeof translationResponseSchema>;
+export type EntryViewModel = FromSchema<typeof entryResponseSchema>;

@@ -17,18 +17,14 @@ export interface UpdateCollectionInput {
 export interface CollectionRepository {
 	create(input: CreateCollectionInput): Promise<Collection>;
 
-	findByIdForUserAndIso(
-		id: string,
-		userId: string,
-		iso: string,
-	): Promise<Collection | null>;
+	getById(id: string, userId: string, iso: string): Promise<Collection | null>;
 
-	updateForUserAndIso(
+	update(
 		id: string,
 		userId: string,
 		iso: string,
 		input: UpdateCollectionInput,
 	): Promise<Collection | null>;
 
-	listByUserAndIso(userId: string, iso: string): Promise<Collection[]>;
+	getAll(userId: string, iso: string): Promise<Collection[]>;
 }

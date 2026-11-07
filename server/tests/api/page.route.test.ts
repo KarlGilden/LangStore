@@ -33,9 +33,9 @@ describe("page routes", () => {
 	) {
 		const app = Fastify();
 		apps.push(app);
-		app.decorateRequest("authenticatedUserId", null);
+		app.decorateRequest("currentUserId", null);
 		app.addHook("preHandler", async (request) => {
-			request.authenticatedUserId = "provider_authenticated";
+			request.currentUserId = "provider_authenticated";
 		});
 		app.setErrorHandler(errorHandler);
 		app.register(createPageRoutes(service, entryEncounterService), {
@@ -159,34 +159,39 @@ describe("page routes", () => {
 	});
 
 	it("returns page vocabulary counts and translations", async () => {
-		const vocabulary = [{
-			entry: {
-				id: "1197bff7-03e9-40b8-933d-faa88de99154",
-				text: "ausgezeichnet",
-				userId: page.userId,
-				iso: "de",
-				createdAt: new Date("2026-11-05T12:00:00.000Z"),
-				translations: [
-					{
-						id: "139ada60-7504-43f6-ac80-092d065f645e",
-						text: "excellent",
-						entryId: "1197bff7-03e9-40b8-933d-faa88de99154",
-						createdAt: new Date("2026-11-05T12:00:00.000Z"),
-					},
-				],
+		const vocabulary = [
+			{
+				entry: {
+					id: "1197bff7-03e9-40b8-933d-faa88de99154",
+					text: "ausgezeichnet",
+					userId: page.userId,
+					iso: "de",
+					createdAt: new Date("2026-11-05T12:00:00.000Z"),
+					translations: [
+						{
+							id: "139ada60-7504-43f6-ac80-092d065f645e",
+							text: "excellent",
+							entryId: "1197bff7-03e9-40b8-933d-faa88de99154",
+							createdAt: new Date("2026-11-05T12:00:00.000Z"),
+						},
+					],
+				},
+				encounter: {
+					id: "f93f0f16-ff92-47f0-b4de-e9d454a34102",
+					entryId: "1197bff7-03e9-40b8-933d-faa88de99154",
+					pageId: page.id,
+					count: 3,
+					createdAt: new Date("2026-11-05T12:00:00.000Z"),
+				},
 			},
-			encounter: {
-				id: "f93f0f16-ff92-47f0-b4de-e9d454a34102",
-				entryId: "1197bff7-03e9-40b8-933d-faa88de99154",
-				pageId: page.id,
-				count: 3,
-				createdAt: new Date("2026-11-05T12:00:00.000Z"),
-			},
-		}];
+		];
 		const getPageVocabulary = vi.fn().mockResolvedValue(vocabulary);
-		const app = createApp({} as PageService, {
-			getPageVocabulary,
-		} as unknown as EntryEncounterService);
+		const app = createApp(
+			{} as PageService,
+			{
+				getPageVocabulary,
+			} as unknown as EntryEncounterService,
+		);
 
 		const response = await app.inject({
 			method: "GET",
@@ -218,10 +223,15 @@ describe("page routes", () => {
 	});
 
 	it("returns 404 for another user's page vocabulary", async () => {
-		const getPageVocabulary = vi.fn().mockRejectedValue(new PageNotFoundError());
-		const app = createApp({} as PageService, {
-			getPageVocabulary,
-		} as unknown as EntryEncounterService);
+		const getPageVocabulary = vi
+			.fn()
+			.mockRejectedValue(new PageNotFoundError());
+		const app = createApp(
+			{} as PageService,
+			{
+				getPageVocabulary,
+			} as unknown as EntryEncounterService,
+		);
 
 		const response = await app.inject({
 			method: "GET",

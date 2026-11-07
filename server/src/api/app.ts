@@ -51,7 +51,7 @@ export async function buildApp(
 		secretKey: app.config.CLERK_SECRET_KEY,
 	});
 
-	app.decorateRequest("authenticatedUserId", null);
+	app.decorateRequest("currentUserId", null);
 
 	// external services
 	const { textRecognitionProvider, close: closeTextRecognition } =
@@ -76,34 +76,21 @@ export async function buildApp(
 		userRepository,
 		identityProfileProvider,
 	);
-	const userSettingsService = createUserSettingsService(
-		userSettingsRepository,
-		userService,
-	);
-	const collectionService = createCollectionService(
-		collectionRepository,
-		userService,
-	);
-	const pageService = createPageService(
-		pageRepository,
-		collectionRepository,
-		userService,
-	);
-	const entryService = createEntryService(
-		entryRepository,
-		userService,
-		userSettingsService,
-	);
+	const userSettingsService = createUserSettingsService(userSettingsRepository);
+	const collectionService = createCollectionService(collectionRepository);
+	const pageService = createPageService(pageRepository, collectionRepository);
+	const entryService = createEntryService(entryRepository, userSettingsService);
 	const entryEncounterService = createEntryEncounterService(
 		entryEncounterRepository,
 		entryRepository,
 		pageRepository,
-		userService,
 	);
+	const wordExtractionService = createWordExtractionService(entryRepository);
+
 	const pageIngestionService = createPageIngestionService(
 		collectionService,
 		textRecognitionProvider,
-		createWordExtractionService(),
+		wordExtractionService,
 		entryRepository,
 		pageIngestionPersistence,
 	);

@@ -43,6 +43,30 @@ const pageVocabularyResponseSchema = {
 	},
 } as const;
 
+const pageSuggestionResponseSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: ["text", "count", "translation"],
+	properties: {
+		text: { type: "string", minLength: 1 },
+		count: { type: "integer", minimum: 1 },
+		translation: { type: "string" },
+	},
+} as const;
+
+const pageIngestionResponseSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: ["page", "suggestions"],
+	properties: {
+		page: pageResponseSchema,
+		suggestions: {
+			type: "array",
+			items: pageSuggestionResponseSchema,
+		},
+	},
+} as const;
+
 export const getPageSchema = {
 	params: isoAndIdParams,
 	response: { 200: pageResponseSchema, ...commonErrorResponses },
@@ -96,27 +120,7 @@ export const createPageIngestionSchema = {
 		collectionId: { type: "string", format: "uuid" },
 	}),
 	response: {
-		201: {
-			type: "object",
-			additionalProperties: false,
-			required: ["page", "suggestions"],
-			properties: {
-				page: pageResponseSchema,
-				suggestions: {
-					type: "array",
-					items: {
-						type: "object",
-						additionalProperties: false,
-						required: ["text", "count", "translation"],
-						properties: {
-							text: { type: "string", minLength: 1 },
-							count: { type: "integer", minimum: 1 },
-							translation: { type: "string" },
-						},
-					},
-				},
-			},
-		},
+		201: pageIngestionResponseSchema,
 		...commonErrorResponses,
 	},
 } as const;
@@ -124,4 +128,7 @@ export const createPageIngestionSchema = {
 export type PageViewModel = FromSchema<typeof pageResponseSchema>;
 export type PageVocabularyEntryViewModel = FromSchema<
 	typeof pageVocabularyResponseSchema
+>;
+export type PageSuggestionViewModel = FromSchema<
+	typeof pageSuggestionResponseSchema
 >;

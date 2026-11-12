@@ -31,7 +31,7 @@ export interface PageIngestionSuggestion {
 
 export interface IngestPageResult {
 	page: Page;
-	suggestions: readonly PageIngestionSuggestion[];
+	suggestions: PageIngestionSuggestion[];
 }
 
 export interface PageIngestionService {
@@ -42,7 +42,6 @@ export const createPageIngestionService = (
 	collectionService: CollectionService,
 	textRecognitionProvider: TextRecognitionProvider,
 	wordExtractionService: WordExtractionService,
-	entryRepository: EntryRepository,
 	persistence: PageIngestionPersistence,
 ) => {
 	const ingestPage = async (
@@ -67,24 +66,11 @@ export const createPageIngestionService = (
 			throw new EmptyRecognizedTextError();
 		}
 
-		const extractedWords = wordExtractionService.extractWords(recognition.text);
-		const existingEntries = await entryRepository.findExactByTextsForUserAndIso(
-			extractedWords.map(({ text }) => text),
-			collection.userId,
-			collection.iso,
+		const extractedWords = await wordExtractionService.extractWords(
+			recognition.text,
+			input.userId,
+			input.iso,
 		);
-		const entryByText = new Map<string, (typeof existingEntries)[number]>();
-		for (const entry of existingEntries) {
-			if (entryByText.has(entry.text)) {
-				throw new EntryMatchConflictError(entry.text);
-			}
-			entryByText.set(entry.text, entry);
-		}
-
-		const encounters = extractedWords.flatMap(({ text, count }) => {
-			const entry = entryByText.get(text);
-			return entry ? [{ entryId: entry.id, count }] : [];
-		});
 
 		const result = await persistence.persistPageIngestion({
 			page: {
@@ -96,14 +82,13 @@ export const createPageIngestionService = (
 				description: input.description,
 				summary: recognition.text,
 			},
-			encounters,
 		});
 
 		return {
 			page: result.page,
-			suggestions: extractedWords.flatMap(({ text, count }) =>
-				entryByText.has(text) ? [] : [{ text, count, translation: "" }],
-			),
+			suggestions: extractedWords.flatMap(({ text, count }) => [
+				{ text, count, translation: "" },
+			]),
 		};
 	};
 

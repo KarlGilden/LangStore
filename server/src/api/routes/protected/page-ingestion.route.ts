@@ -6,15 +6,13 @@ import {
 } from "../../../core/errors/page-ingestion.error.js";
 import type { PageIngestionService } from "../../../core/services/page-ingestion.service.js";
 import { toPageViewModel } from "../../mappers/page.mapper.js";
-import {
-	createPageIngestionSchema,
-	type CollectionPagesParams,
-} from "../../schema/page.schema.js";
+import { createPageIngestionSchema } from "../../schema/page.schema.js";
 import {
 	MAX_PAGE_PHOTO_BYTES,
 	validatePagePhoto,
 	type ValidatedPagePhoto,
 } from "../../upload/page-photo.js";
+import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
 interface ParsedPageIngestion {
 	name: string;
@@ -26,19 +24,21 @@ export function createPageIngestionRoutes(
 	pageIngestionService: PageIngestionService,
 ): FastifyPluginAsync {
 	return async (app) => {
-		app.post<{ Params: CollectionPagesParams }>(
+		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
+
+		routes.post(
 			"/:collectionId/page-ingestions",
 			{ schema: createPageIngestionSchema },
 			async (request, reply) => {
-				const providerId = request.currentUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const input = await readPageIngestionMultipart(request);
 				try {
 					const result = await pageIngestionService.ingestPage({
-						providerId,
+						userId,
 						iso: request.params.iso,
 						pageId: randomUUID(),
 						collectionId: request.params.collectionId,

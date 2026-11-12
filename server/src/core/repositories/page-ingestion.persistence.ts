@@ -16,7 +16,6 @@ export interface PersistPageIngestionInput {
 		description: string | null;
 		summary: string;
 	};
-	encounters: readonly PageIngestionEncounterInput[];
 }
 
 export interface PersistPageIngestionResult {

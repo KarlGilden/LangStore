@@ -23,7 +23,7 @@ import { createEntryEncounterService } from "../core/services/entry-encounter.se
 import { createGoogleTextRecognitionProvider } from "../infrastructure/ocr/google-text-recognition.provider.js";
 import { createPageIngestionService } from "../core/services/page-ingestion.service.js";
 import { createWordExtractionService } from "../core/services/word-extraction.service.js";
-
+import cors from "@fastify/cors";
 export async function buildApp(
 	options: FastifyServerOptions = {},
 ): Promise<FastifyInstance> {
@@ -31,6 +31,13 @@ export async function buildApp(
 
 	/* Register plugins */
 	await registerEnv(app);
+	await app.register(cors, {
+		origin: ["http://localhost:5173"],
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true,
+	});
+
 	await app.register(multipart);
 
 	// error handling

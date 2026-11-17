@@ -25,7 +25,7 @@
 	"include": [
 		"src/main.tsx",
 		"src/vite-env.d.ts",
-		"src/app/AppProviders.tsx",
+		"src/router/AppProviders.tsx",
 		"src/test/setup.ts",
 		"src/theme/**/*.ts",
 		"src/theme/**/*.tsx"

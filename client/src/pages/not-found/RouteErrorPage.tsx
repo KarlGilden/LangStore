@@ -1,5 +1,5 @@
 import { Link, isRouteErrorResponse, useRouteError } from "react-router";
-import { paths } from "../../router/paths";
+import { defaultAppPath } from "../../router/paths";
 
 export function RouteErrorPage() {
 	const error = useRouteError();
@@ -26,7 +26,7 @@ export function RouteErrorPage() {
 				</p>
 				<Link
 					className="mt-8 inline-flex rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-					to={paths.collections}
+					to={defaultAppPath}
 				>
 					Return to collections
 				</Link>

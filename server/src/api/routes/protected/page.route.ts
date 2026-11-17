@@ -1,15 +1,15 @@
 import type { FastifyPluginAsync } from "fastify";
-import type { PageService } from "../../../core/services/page.service.js";
-import type { EntryEncounterService } from "../../../core/services/entry-encounter.service.js";
-import { toPageVocabularyEntryViewModel } from "../../mappers/entry-encounter.mapper.js";
-import { toPageViewModel } from "../../mappers/page.mapper.js";
 import {
 	createPageSchema,
 	getLatestPageSchema,
 	getPageSchema,
 	getPageVocabularySchema,
 	listCollectionPagesSchema,
-} from "../../schema/page.schema.js";
+} from "@langstore/contracts";
+import type { PageService } from "../../../core/services/page.service.js";
+import type { EntryEncounterService } from "../../../core/services/entry-encounter.service.js";
+import { toPageVocabularyEntryViewModel } from "../../mappers/entry-encounter.mapper.js";
+import { toPageViewModel } from "../../mappers/page.mapper.js";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
 export function createPageRoutes(

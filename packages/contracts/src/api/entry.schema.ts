@@ -1,12 +1,11 @@
 import type { FromSchema } from "json-schema-to-ts";
 import {
 	commonErrorResponses,
-	createParamSchema,
 	languageParamsSchema,
 	resourceParamsSchema,
 } from "./common.schema.js";
 
-const translationResponseSchema = {
+export const translationResponseSchema = {
 	type: "object",
 	additionalProperties: false,
 	required: ["id", "text", "createdAt"],
@@ -28,8 +27,6 @@ export const entryResponseSchema = {
 		translations: { type: "array", items: translationResponseSchema },
 	},
 } as const;
-
-// Input/Output Schemas
 
 export const listEntriesSchema = {
 	params: languageParamsSchema,

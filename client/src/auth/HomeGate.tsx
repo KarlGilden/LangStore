@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router";
-import { paths } from "../router/paths";
+import { defaultAppPath } from "../router/paths";
 import { useSession } from "./useSession";
 
 export function HomeGate() {
@@ -16,7 +16,7 @@ export function HomeGate() {
 	}
 
 	return session.isSignedIn ? (
-		<Navigate replace to={paths.collections} />
+		<Navigate replace to={defaultAppPath} />
 	) : (
 		<Outlet />
 	);

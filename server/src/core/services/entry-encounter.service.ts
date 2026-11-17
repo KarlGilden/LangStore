@@ -8,7 +8,7 @@ import {
 	InvalidPageLanguageCodeError,
 	PageNotFoundError,
 } from "../errors/page.error.js";
-import { isAssignedIso6391Code } from "../language/iso-639-1.js";
+import { isSupportedLanguageIso } from "@langstore/contracts";
 import type { EntryEncounterRepository } from "../repositories/entry-encounter.repository.js";
 import type { EntryRepository } from "../repositories/entry.repository.js";
 import type { PageRepository } from "../repositories/page.repository.js";
@@ -62,7 +62,7 @@ export const createEntryEncounterService = (
 		iso: string,
 		pageId: string,
 	) => {
-		if (!isAssignedIso6391Code(iso)) {
+		if (!isSupportedLanguageIso(iso)) {
 			throw new InvalidPageLanguageCodeError();
 		}
 		const vocabulary = await entryEncounterRepository.getAllPageVocabulary(

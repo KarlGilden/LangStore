@@ -4,6 +4,9 @@
 /client/.env
 /client/.env.*
 !/client/.env.example
+/node_modules/
+/packages/*/node_modules/
+/packages/*/dist/
 /docs/*
 !/docs/langstore-schema.md
 !/docs/langstore-schema-decisions.md

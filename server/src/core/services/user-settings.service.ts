@@ -2,7 +2,7 @@ import {
 	InvalidLanguageCodeError,
 	SettingsNotFoundError,
 } from "../errors/user-settings.error.js";
-import { isAssignedIso6391Code } from "../language/iso-639-1.js";
+import { isSupportedLanguageIso } from "@langstore/contracts";
 import type { UserSettingsRepository } from "../repositories/user-settings.repository.js";
 import type { UserService } from "./user.service.js";
 
@@ -23,10 +23,10 @@ export const createUserSettingsService = (
 		userId: string,
 		input: { targetLanguage: string; userLanguage: string },
 	) => {
-		if (!isAssignedIso6391Code(input.targetLanguage)) {
+		if (!isSupportedLanguageIso(input.targetLanguage)) {
 			throw new InvalidLanguageCodeError("targetLanguage");
 		}
-		if (!isAssignedIso6391Code(input.userLanguage)) {
+		if (!isSupportedLanguageIso(input.userLanguage)) {
 			throw new InvalidLanguageCodeError("userLanguage");
 		}
 

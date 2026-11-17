@@ -1,19 +1,19 @@
+import type { FromSchema } from "json-schema-to-ts";
 import {
 	commonErrorResponses,
 	createParamSchema,
+	isoSchema,
 	languageParamsSchema,
 	nullableTextSchema,
 	resourceParamsSchema,
 } from "./common.schema.js";
-import type { FromSchema } from "json-schema-to-ts";
 
 const isoAndIdParams = createParamSchema(
 	languageParamsSchema,
 	resourceParamsSchema,
 );
 
-// Response Schemas
-const collectionResponseSchema = {
+export const collectionResponseSchema = {
 	type: "object",
 	additionalProperties: false,
 	required: ["id", "name", "description", "imgUrl", "iso"],
@@ -22,11 +22,10 @@ const collectionResponseSchema = {
 		name: { type: "string", minLength: 1 },
 		description: nullableTextSchema,
 		imgUrl: nullableTextSchema,
-		iso: { type: "string", pattern: "^[a-z]{2}$" },
+		iso: isoSchema,
 	},
 } as const;
 
-// Input/Output Schemas
 export const listCollectionsSchema = {
 	params: languageParamsSchema,
 	response: {

@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyPluginAsync, FastifyRequest } from "fastify";
+import { createPageIngestionSchema } from "@langstore/contracts";
 import {
 	InvalidPageUploadError,
 	PageUploadTooLargeError,
 } from "../../../core/errors/page-ingestion.error.js";
 import type { PageIngestionService } from "../../../core/services/page-ingestion.service.js";
 import { toPageViewModel } from "../../mappers/page.mapper.js";
-import { createPageIngestionSchema } from "../../schema/page.schema.js";
 import {
 	MAX_PAGE_PHOTO_BYTES,
 	validatePagePhoto,

@@ -7,7 +7,7 @@ export class CollectionNotFoundError extends Error {
 
 export class InvalidCollectionLanguageCodeError extends Error {
 	constructor() {
-		super("iso must be an assigned lowercase ISO 639-1 code");
+		super("iso must be a supported language code");
 		this.name = "InvalidCollectionLanguageCodeError";
 	}
 }

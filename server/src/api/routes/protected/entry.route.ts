@@ -1,11 +1,11 @@
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
-import type { EntryService } from "../../../core/services/entry.service.js";
-import { toEntryViewModel } from "../../mappers/entry.mapper.js";
 import {
 	createEntrySchema,
 	getEntrySchema,
 	listEntriesSchema,
-} from "../../schema/entry.schema.js";
+} from "@langstore/contracts";
+import type { EntryService } from "../../../core/services/entry.service.js";
+import { toEntryViewModel } from "../../mappers/entry.mapper.js";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
 export function createEntryRoutes(

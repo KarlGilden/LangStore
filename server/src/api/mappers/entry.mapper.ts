@@ -1,5 +1,5 @@
 import type { Entry } from "../../core/entities/entry.entity.js";
-import type { EntryViewModel } from "../schema/entry.schema.js";
+import type { EntryViewModel } from "@langstore/contracts";
 
 export function toEntryViewModel(entry: Entry): EntryViewModel {
 	return {

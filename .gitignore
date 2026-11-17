@@ -1,4 +1,9 @@
-/client
+/client/node_modules/
+/client/dist/
+/client/coverage/
+/client/.env
+/client/.env.*
+!/client/.env.example
 /docs/*
 !/docs/langstore-schema.md
 !/docs/langstore-schema-decisions.md

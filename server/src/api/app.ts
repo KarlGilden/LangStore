@@ -20,7 +20,6 @@ import { createDrizzleEntryRepository } from "../infrastructure/repositories/ent
 import { createEntryService } from "../core/services/entry.service.js";
 import { createDrizzleEntryEncounterRepository } from "../infrastructure/repositories/entry-encounter.repository.drizzle.js";
 import { createEntryEncounterService } from "../core/services/entry-encounter.service.js";
-import { createDrizzlePageIngestionPersistence } from "../infrastructure/repositories/page-ingestion.persistence.drizzle.js";
 import { createGoogleTextRecognitionProvider } from "../infrastructure/ocr/google-text-recognition.provider.js";
 import { createPageIngestionService } from "../core/services/page-ingestion.service.js";
 import { createWordExtractionService } from "../core/services/word-extraction.service.js";
@@ -69,7 +68,6 @@ export async function buildApp(
 	const pageRepository = createDrizzlePageRepository(db);
 	const entryRepository = createDrizzleEntryRepository(db);
 	const entryEncounterRepository = createDrizzleEntryEncounterRepository(db);
-	const pageIngestionPersistence = createDrizzlePageIngestionPersistence(db);
 
 	// services
 	const userService = createUserService(
@@ -91,8 +89,7 @@ export async function buildApp(
 		collectionService,
 		textRecognitionProvider,
 		wordExtractionService,
-		entryRepository,
-		pageIngestionPersistence,
+		pageService,
 	);
 
 	app.addHook("onClose", async () => {

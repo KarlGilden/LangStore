@@ -1,10 +1,8 @@
 import type { Page } from "../entities/page.entity.js";
-import { EntryMatchConflictError } from "../errors/entry.error.js";
 import { EmptyRecognizedTextError } from "../errors/page-ingestion.error.js";
 import type { TextRecognitionProvider } from "../port/text-recognition.provider.js";
-import type { EntryRepository } from "../repositories/entry.repository.js";
-import type { PageIngestionPersistence } from "../repositories/page-ingestion.persistence.js";
 import type { CollectionService } from "./collection.service.js";
+import type { PageService } from "./page.service.js";
 import { requirePageLanguageCode, requirePageText } from "./page.validation.js";
 import type { WordExtractionService } from "./word-extraction.service.js";
 
@@ -42,13 +40,14 @@ export const createPageIngestionService = (
 	collectionService: CollectionService,
 	textRecognitionProvider: TextRecognitionProvider,
 	wordExtractionService: WordExtractionService,
-	persistence: PageIngestionPersistence,
+	pageService: PageService,
 ) => {
 	const ingestPage = async (
 		input: IngestPageInput,
 	): Promise<IngestPageResult> => {
 		requirePageLanguageCode(input.iso);
 		requirePageText("name", input.name);
+
 		if (input.description !== null) {
 			requirePageText("description", input.description);
 		}
@@ -58,13 +57,22 @@ export const createPageIngestionService = (
 			input.iso,
 			input.collectionId,
 		);
+
 		const recognition = await textRecognitionProvider.recognizeText({
 			image: input.photo.bytes,
 			mediaType: input.photo.mediaType,
 		});
+
 		if (!/\S/u.test(recognition.text)) {
 			throw new EmptyRecognizedTextError();
 		}
+
+		const page = await pageService.createPage(input.userId, input.iso, {
+			collectionId: collection.id,
+			name: input.name,
+			description: input.description,
+			summary: recognition.text,
+		});
 
 		const extractedWords = await wordExtractionService.extractWords(
 			recognition.text,
@@ -72,20 +80,8 @@ export const createPageIngestionService = (
 			input.iso,
 		);
 
-		const result = await persistence.persistPageIngestion({
-			page: {
-				id: input.pageId,
-				userId: collection.userId,
-				collectionId: collection.id,
-				iso: collection.iso,
-				name: input.name,
-				description: input.description,
-				summary: recognition.text,
-			},
-		});
-
 		return {
-			page: result.page,
+			page: page,
 			suggestions: extractedWords.flatMap(({ text, count }) => [
 				{ text, count, translation: "" },
 			]),

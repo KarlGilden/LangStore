@@ -1,11 +1,22 @@
 import type { IdentityProfileProvider } from "../port/identityProfile.provider.js";
 import type { UserRepository } from "../repositories/user.repository.js";
 import { MissingIdentityEmailError } from "../errors/identity-profile.error.js";
+import { NotFoundError } from "../errors/common.error.js";
 
 export const createUserService = (
 	userRepository: UserRepository,
 	identityProfileProvider: IdentityProfileProvider,
 ) => {
+	const getUserById = async (userId: string) => {
+		const user = await userRepository.getById(userId);
+
+		if (!user) {
+			throw new NotFoundError("User not found");
+		}
+
+		return user;
+	};
+
 	const getOrCreateUser = async (providerId: string) => {
 		let user = await userRepository.getByProviderId(providerId);
 
@@ -36,6 +47,7 @@ export const createUserService = (
 
 	return {
 		getOrCreateUser,
+		getUserById,
 	};
 };
 

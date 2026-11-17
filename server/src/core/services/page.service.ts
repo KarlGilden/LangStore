@@ -5,10 +5,10 @@ import type { PageRepository } from "../repositories/page.repository.js";
 import { requirePageLanguageCode, requirePageText } from "./page.validation.js";
 
 export interface CreatePageInput {
-	id: string;
 	collectionId: string;
 	name: string;
 	description?: string | null;
+	summary: string | null;
 }
 
 export const createPageService = (
@@ -44,12 +44,11 @@ export const createPageService = (
 
 		await requireCollection(userId, iso, input.collectionId);
 		return pageRepository.create({
-			id: input.id,
 			userId: userId,
 			collectionId: input.collectionId,
 			name: input.name,
 			description: input.description ?? null,
-			summary: null,
+			summary: input.summary,
 		});
 	};
 

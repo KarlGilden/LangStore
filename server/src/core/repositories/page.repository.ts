@@ -1,7 +1,6 @@
 import type { Page } from "../entities/page.entity.js";
 
 export interface CreatePageInput {
-	id: string;
 	userId: string;
 	collectionId: string;
 	name: string;

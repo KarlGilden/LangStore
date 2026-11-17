@@ -17,21 +17,6 @@ export function createDrizzlePageRepository(db: Database): PageRepository {
 			return toDomainPage(inserted);
 		}
 
-		const [existing] = await db
-			.select()
-			.from(pages)
-			.where(eq(pages.id, input.id))
-			.limit(1);
-		if (
-			existing &&
-			existing.userId === input.userId &&
-			existing.collectionId === input.collectionId &&
-			existing.name === input.name &&
-			existing.description === input.description
-		) {
-			return toDomainPage(existing);
-		}
-
 		throw new PageCreateConflictError();
 	};
 

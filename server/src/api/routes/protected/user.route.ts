@@ -36,7 +36,7 @@ export function createUserRoutes(
 					});
 				}
 
-				const user = await userService.getOrCreateUser(userId);
+				const user = await userService.getUserById(userId);
 
 				return reply.code(200).send(toUserViewModel(user));
 			},

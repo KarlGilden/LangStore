@@ -22,6 +22,20 @@ export function createDrizzleUserRepository(db: Database): UserRepository {
 		return toDomainUser(row);
 	};
 
+	const getById: UserRepository["getById"] = async (userId: string) => {
+		const [row] = await db
+			.select()
+			.from(users)
+			.where(eq(users.id, userId))
+			.limit(1);
+
+		if (!row) {
+			return null;
+		}
+
+		return toDomainUser(row);
+	};
+
 	const create: UserRepository["create"] = async (input) => {
 		try {
 			const [row] = await db
@@ -53,6 +67,7 @@ export function createDrizzleUserRepository(db: Database): UserRepository {
 
 	return {
 		getByProviderId,
+		getById,
 		create,
 	};
 }

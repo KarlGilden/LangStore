@@ -31,6 +31,7 @@ import {
 } from "../../core/errors/page-ingestion.error.js";
 import { ServiceUnavailableError } from "../../core/errors/service.error.js";
 import { ValidationError } from "../../core/errors/validation.error.js";
+import { NotFoundError } from "../../core/errors/common.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -46,7 +47,11 @@ export const errorHandler = (
 	let code = "INTERNAL_SERVER_ERROR";
 	let message = "An unexpected error occurred";
 
-	if (error instanceof MissingIdentityEmailError) {
+	if (error instanceof NotFoundError) {
+		statusCode = 404;
+		code = "NOT_FOUND";
+		message = error.message;
+	} else if (error instanceof MissingIdentityEmailError) {
 		statusCode = 409;
 		code = "IDENTITY_EMAIL_MISSING";
 		message = error.message;

@@ -93,6 +93,7 @@ export function createCollectionPageRoutes(
 					{
 						...request.body,
 						collectionId: request.params.collectionId,
+						summary: null,
 					},
 				);
 				return reply.code(201).send(toPageViewModel(page));

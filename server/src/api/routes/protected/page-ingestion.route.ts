@@ -36,6 +36,7 @@ export function createPageIngestionRoutes(
 				}
 
 				const input = await readPageIngestionMultipart(request);
+
 				try {
 					const result = await pageIngestionService.ingestPage({
 						userId,

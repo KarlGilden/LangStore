@@ -1,11 +1,7 @@
 import { useFetch } from "../useFetch";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../queryKeys";
-
-interface UserSettingsViewModel {
-	targetLanguage: string;
-	userLanguage: string;
-}
+import type { UserSettingsViewModel } from "@langstore/contracts";
 
 export function useUserSettings() {
 	const fetch = useFetch();

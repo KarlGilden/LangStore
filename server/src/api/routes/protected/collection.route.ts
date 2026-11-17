@@ -1,12 +1,12 @@
 import type { FastifyPluginAsync } from "fastify";
-import type { CollectionService } from "../../../core/services/collection.service.js";
-import { toCollectionViewModel } from "../../mappers/collection.mapper.js";
 import {
 	createCollectionSchema,
 	getCollectionSchema,
 	listCollectionsSchema,
 	updateCollectionSchema,
-} from "../../schema/collection.schema.js";
+} from "@langstore/contracts";
+import type { CollectionService } from "../../../core/services/collection.service.js";
+import { toCollectionViewModel } from "../../mappers/collection.mapper.js";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
 export function createCollectionRoutes(

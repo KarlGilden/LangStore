@@ -16,6 +16,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@langstore/contracts": "0.1.0",
     "@clerk/react": "^6.18.9",
     "@tanstack/react-query": "^5.108.0",
     "react": "^19.3.1",

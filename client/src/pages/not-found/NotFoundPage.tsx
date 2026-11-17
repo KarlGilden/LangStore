@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { DEFAULT_LANGUAGE_ISO } from "@langstore/contracts";
 import { paths } from "../../router/paths";
 import { useSession } from "../../auth/useSession";
 import { useUserSettings } from "../../api/queries/useUserSettings";
@@ -11,7 +12,7 @@ export function NotFoundPage() {
 
 	const homePath =
 		isLoaded && isSignedIn
-			? paths.collections(settings?.targetLanguage || "de")
+			? paths.collections(settings?.targetLanguage || DEFAULT_LANGUAGE_ISO)
 			: paths.home;
 
 	return (

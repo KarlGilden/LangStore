@@ -3,7 +3,7 @@ import {
 	InvalidEntryLanguageCodeError,
 	InvalidEntryTextError,
 } from "../errors/entry.error.js";
-import { isAssignedIso6391Code } from "../language/iso-639-1.js";
+import { isSupportedLanguageIso } from "@langstore/contracts";
 import type { EntryRepository } from "../repositories/entry.repository.js";
 import type { UserSettingsService } from "./user-settings.service.js";
 
@@ -23,7 +23,7 @@ function requireNonBlank(
 }
 
 function requireLanguageCode(iso: string): void {
-	if (!isAssignedIso6391Code(iso)) {
+	if (!isSupportedLanguageIso(iso)) {
 		throw new InvalidEntryLanguageCodeError();
 	}
 }
@@ -38,6 +38,7 @@ export const createEntryService = (
 		input: CreateEntryInput,
 	) => {
 		requireNonBlank("text", input.text);
+		requireLanguageCode(iso);
 		const translations = input.translations ?? [];
 		translations.forEach((translation, index) => {
 			requireNonBlank("translation", translation.text, index);

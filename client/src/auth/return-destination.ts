@@ -1,4 +1,4 @@
-import { paths } from "../router/paths";
+import { defaultAppPath, paths } from "../router/paths";
 
 export const RETURN_DESTINATION_PARAM = "redirect_url";
 
@@ -17,7 +17,7 @@ export function validateReturnDestination(value: string | null): string {
 		value.startsWith("//") ||
 		UNSAFE_CHARACTERS.test(value)
 	) {
-		return paths.collections;
+		return defaultAppPath;
 	}
 
 	try {
@@ -27,12 +27,12 @@ export function validateReturnDestination(value: string | null): string {
 			destination.origin !== INTERNAL_ORIGIN ||
 			isSignInPath(destination.pathname)
 		) {
-			return paths.collections;
+			return defaultAppPath;
 		}
 
 		return `${destination.pathname}${destination.search}${destination.hash}`;
 	} catch {
-		return paths.collections;
+		return defaultAppPath;
 	}
 }
 

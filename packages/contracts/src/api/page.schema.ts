@@ -1,3 +1,4 @@
+import type { FromSchema } from "json-schema-to-ts";
 import {
 	commonErrorResponses,
 	createParamSchema,
@@ -6,14 +7,13 @@ import {
 	resourceParamsSchema,
 } from "./common.schema.js";
 import { entryResponseSchema } from "./entry.schema.js";
-import type { FromSchema } from "json-schema-to-ts";
 
 const isoAndIdParams = createParamSchema(
 	languageParamsSchema,
 	resourceParamsSchema,
 );
 
-const pageResponseSchema = {
+export const pageResponseSchema = {
 	type: "object",
 	additionalProperties: false,
 	required: [
@@ -34,7 +34,7 @@ const pageResponseSchema = {
 	},
 } as const;
 
-const pageVocabularyResponseSchema = {
+export const pageVocabularyResponseSchema = {
 	...entryResponseSchema,
 	required: [...entryResponseSchema.required, "count"],
 	properties: {
@@ -43,7 +43,7 @@ const pageVocabularyResponseSchema = {
 	},
 } as const;
 
-const pageSuggestionResponseSchema = {
+export const pageSuggestionResponseSchema = {
 	type: "object",
 	additionalProperties: false,
 	required: ["text", "count", "translation"],
@@ -54,7 +54,7 @@ const pageSuggestionResponseSchema = {
 	},
 } as const;
 
-const pageIngestionResponseSchema = {
+export const pageIngestionResponseSchema = {
 	type: "object",
 	additionalProperties: false,
 	required: ["page", "suggestions"],

@@ -1,4 +1,4 @@
-export const DEFAULT_ISO = "de";
+import { DEFAULT_LANGUAGE_ISO } from "@langstore/contracts";
 
 export const paths = {
 	home: "/",
@@ -6,4 +6,4 @@ export const paths = {
 	collections: (iso: string) => `/${iso}/collections`,
 } as const;
 
-export const defaultAppPath = paths.collections(DEFAULT_ISO);
+export const defaultAppPath = paths.collections(DEFAULT_LANGUAGE_ISO);

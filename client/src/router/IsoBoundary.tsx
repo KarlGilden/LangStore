@@ -1,12 +1,11 @@
 import { Outlet, useParams } from "react-router";
+import { isSupportedLanguageIso } from "@langstore/contracts";
 import { NotFoundPage } from "../pages/not-found/NotFoundPage";
-
-const supportedIsos = ["de", "en", "fr", "es"] as const;
 
 export function IsoBoundary() {
 	const { iso } = useParams();
 
-	if (!supportedIsos.includes(iso as (typeof supportedIsos)[number])) {
+	if (!iso || !isSupportedLanguageIso(iso)) {
 		return <NotFoundPage />;
 	}
 

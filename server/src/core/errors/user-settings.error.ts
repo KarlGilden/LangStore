@@ -7,7 +7,7 @@ export class SettingsNotFoundError extends Error {
 
 export class InvalidLanguageCodeError extends Error {
 	constructor(public readonly field: "targetLanguage" | "userLanguage") {
-		super(`${field} must be an assigned lowercase ISO 639-1 code`);
+		super(`${field} must be a supported language code`);
 		this.name = "InvalidLanguageCodeError";
 	}
 }

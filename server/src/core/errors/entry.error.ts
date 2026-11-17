@@ -7,7 +7,7 @@ export class EntryNotFoundError extends Error {
 
 export class InvalidEntryLanguageCodeError extends Error {
 	constructor() {
-		super("The selected target language must be an assigned lowercase ISO 639-1 code");
+		super("The selected target language must be supported");
 		this.name = "InvalidEntryLanguageCodeError";
 	}
 }

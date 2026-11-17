@@ -1,6 +1,7 @@
-# LangStore API
+# LangStore
 
-Initial backend scaffold: Fastify, strict TypeScript, and a public health endpoint.
+LangStore is an npm workspace containing the Fastify API, React client, and
+shared API contracts.
 
 ## Setup
 
@@ -8,8 +9,11 @@ Use Node.js **24.8.0** (pinned in `.nvmrc`) and npm **10.2.5**.
 
 ```sh
 npm ci
-npm run dev
+npm run dev:server
 ```
+
+Run `npm run dev:client` in another terminal to start the frontend. Both
+commands build `@langstore/contracts` before starting their application.
 
 The server listens on `0.0.0.0:3000` by default. Set `HOST` and `PORT` in your
 environment to override these values. No credentials or database are needed.
@@ -20,16 +24,9 @@ check; it does not indicate database or external-service readiness.
 ## Structure
 
 ```text
-api/
-  app.ts                    Application factory (no listening socket)
-  server.ts                 Startup, configuration, and shutdown
-  routes/health.ts          Public health route and response schema
-core/
-  services/                 Future use cases and business rules
-  repositories/             Future persistence contracts
-infrastructure/
-  repositories/             Future repository implementations
-tests/api/health.test.ts     HTTP test using Fastify inject
+client/                     React and Vite browser application
+packages/contracts/         Portable JSON schemas, view models, and languages
+server/                     Fastify API, core logic, and infrastructure
 ```
 
 Core must remain independent of Fastify, Clerk, and Drizzle. API handlers will
@@ -48,10 +45,11 @@ intentionally omitted. Open product decisions remain in the specifications.
 ## Verification and production startup
 
 ```sh
-npm test
 npm run typecheck
 npm run build
-npm start
+npm test -w langstore-api
+npm test -w langstore-web
+npm start -w langstore-api
 ```
 
 Tests run without opening a listening socket or contacting external services.

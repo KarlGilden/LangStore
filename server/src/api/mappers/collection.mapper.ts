@@ -1,5 +1,5 @@
 import type { Collection } from "../../core/entities/collection.entity.js";
-import type { CollectionViewModel } from "../schema/collection.schema.js";
+import type { CollectionViewModel } from "@langstore/contracts";
 
 export function toCollectionViewModel(
 	collection: Collection,

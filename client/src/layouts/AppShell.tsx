@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, useParams } from "react-router";
+import { DEFAULT_LANGUAGE_ISO } from "@langstore/contracts";
 import { paths } from "../router/paths";
 import { useSession } from "../auth/useSession";
 import { ThemeSelector } from "../theme/ThemeSelector";
 
 export function AppShell() {
+	const { iso = DEFAULT_LANGUAGE_ISO } = useParams();
+	const collectionsPath = paths.collections(iso);
 	const { signOut } = useSession();
 	const [isSigningOut, setIsSigningOut] = useState(false);
 	const [signOutError, setSignOutError] = useState<string | null>(null);
@@ -26,7 +29,7 @@ export function AppShell() {
 			<aside className="flex items-center justify-between bg-primary px-5 py-4 text-primary-foreground md:min-h-dvh md:flex-col md:items-stretch md:justify-start md:px-6 md:py-7">
 				<NavLink
 					className="font-display text-xl font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground"
-					to={paths.collections}
+					to={collectionsPath}
 				>
 					LangStore
 				</NavLink>
@@ -39,7 +42,7 @@ export function AppShell() {
 									: "text-primary-foreground hover:bg-primary-foreground/10"
 							}`
 						}
-						to={paths.collections}
+						to={collectionsPath}
 					>
 						Collections
 					</NavLink>

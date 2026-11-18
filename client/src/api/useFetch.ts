@@ -15,6 +15,7 @@ export interface FetchConfig {
 	baseURL?: string;
 	body?: unknown;
 	headers?: Record<string, string>;
+	signal?: AbortSignal;
 }
 
 /**
@@ -31,6 +32,7 @@ export const useFetch = () => {
 		contentType = "application/json",
 		body,
 		headers: additionalHeaders,
+		signal,
 	}: FetchConfig): Promise<T> => {
 		const includeContentType = !!body && contentType !== "multipart/form-data";
 
@@ -52,6 +54,7 @@ export const useFetch = () => {
 			method,
 			headers: fetchHeaders,
 			credentials: "include",
+			signal,
 		};
 
 		// Only include body if it exists

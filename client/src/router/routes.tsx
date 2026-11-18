@@ -4,8 +4,10 @@ import { HomeGate } from "../auth/HomeGate";
 import { AppShell } from "../layouts/AppShell";
 import { HomePage } from "../pages/home/HomePage";
 import { collectionsRoute } from "../pages/collections/routes";
+import { collectionDetailRoute } from "../pages/collection/routes";
 import { RouteErrorPage } from "../pages/not-found/RouteErrorPage";
 import { notFoundRoute } from "../pages/not-found/routes";
+import { pageDetailRoute } from "../pages/page/routes";
 import { signInRoute } from "../pages/sign-in/routes";
 import { uploadRoute } from "../pages/upload/routes";
 import { IsoBoundary } from "./IsoBoundary";
@@ -30,7 +32,12 @@ export const appRoutes: RouteObject[] = [
 						children: [
 							{
 								Component: AppShell,
-								children: [collectionsRoute, uploadRoute],
+								children: [
+									collectionsRoute,
+									collectionDetailRoute,
+									pageDetailRoute,
+									uploadRoute,
+								],
 							},
 						],
 					},

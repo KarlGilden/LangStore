@@ -7,6 +7,7 @@ import { collectionsRoute } from "../pages/collections/routes";
 import { RouteErrorPage } from "../pages/not-found/RouteErrorPage";
 import { notFoundRoute } from "../pages/not-found/routes";
 import { signInRoute } from "../pages/sign-in/routes";
+import { uploadRoute } from "../pages/upload/routes";
 import { IsoBoundary } from "./IsoBoundary";
 
 export const appRoutes: RouteObject[] = [
@@ -29,7 +30,7 @@ export const appRoutes: RouteObject[] = [
 						children: [
 							{
 								Component: AppShell,
-								children: [collectionsRoute],
+								children: [collectionsRoute, uploadRoute],
 							},
 						],
 					},

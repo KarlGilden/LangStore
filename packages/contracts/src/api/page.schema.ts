@@ -132,3 +132,6 @@ export type PageVocabularyEntryViewModel = FromSchema<
 export type PageSuggestionViewModel = FromSchema<
 	typeof pageSuggestionResponseSchema
 >;
+export type PageIngestionViewModel = FromSchema<
+	typeof pageIngestionResponseSchema
+>;

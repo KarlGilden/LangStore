@@ -25,7 +25,7 @@ export interface FetchConfig {
 export const useFetch = () => {
 	const { getToken } = useSession();
 
-	return async <T = any>({
+	return async <T = unknown>({
 		path,
 		method = "GET",
 		contentType = "application/json",
@@ -69,12 +69,8 @@ export const useFetch = () => {
 		const response = await fetch(fetchPath, fetchOptions);
 
 		if (!response.ok) {
-			const errorData = await response
-				.json()
-				.catch(() => ({ message: response.statusText }));
-			throw new Error(
-				errorData.message || `HTTP error! status: ${response.status}`,
-			);
+			const errorData: unknown = await response.json().catch(() => null);
+			throw new Error(readErrorMessage(errorData, response));
 		}
 
 		// Handle different response types
@@ -86,6 +82,39 @@ export const useFetch = () => {
 		return (await response.text()) as T;
 	};
 };
+
+function readErrorMessage(errorData: unknown, response: Response): string {
+	if (typeof errorData === "object" && errorData !== null) {
+		if (
+			"message" in errorData &&
+			typeof errorData.message === "string" &&
+			errorData.message
+		) {
+			return errorData.message;
+		}
+
+		if (
+			"error" in errorData &&
+			typeof errorData.error === "string" &&
+			errorData.error
+		) {
+			return errorData.error;
+		}
+
+		if (
+			"error" in errorData &&
+			typeof errorData.error === "object" &&
+			errorData.error !== null &&
+			"message" in errorData.error &&
+			typeof errorData.error.message === "string" &&
+			errorData.error.message
+		) {
+			return errorData.error.message;
+		}
+	}
+
+	return response.statusText || `Request failed with status ${response.status}`;
+}
 
 const buildUrl = (path: string) => {
 	return env.baseUrl + path;

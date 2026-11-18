@@ -7,7 +7,8 @@ export function useUserSettings() {
 	const fetch = useFetch();
 
 	return useQuery<UserSettingsViewModel>({
-		queryFn: () => fetch({ method: "GET", path: "/user/setting" }),
+		queryFn: () =>
+			fetch<UserSettingsViewModel>({ method: "GET", path: "/user/setting" }),
 		queryKey: queryKeys.USER_SETTINGS,
 		staleTime: 5 * 60 * 1000, // Fresh for 5 minutes
 	});

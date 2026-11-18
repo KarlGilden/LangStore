@@ -8,6 +8,7 @@ import { ThemeSelector } from "../theme/ThemeSelector";
 export function AppShell() {
 	const { iso = DEFAULT_LANGUAGE_ISO } = useParams();
 	const collectionsPath = paths.collections(iso);
+	const uploadPath = paths.upload(iso);
 	const { signOut } = useSession();
 	const [isSigningOut, setIsSigningOut] = useState(false);
 	const [signOutError, setSignOutError] = useState<string | null>(null);
@@ -34,18 +35,21 @@ export function AppShell() {
 					LangStore
 				</NavLink>
 				<nav aria-label="Primary" className="md:mt-12">
-					<NavLink
-						className={({ isActive }) =>
-							`rounded-md px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground md:block ${
-								isActive
-									? "bg-primary-foreground text-primary"
-									: "text-primary-foreground hover:bg-primary-foreground/10"
-							}`
-						}
-						to={collectionsPath}
-					>
-						Collections
-					</NavLink>
+					<ul className="flex gap-1 md:block md:space-y-2">
+						<li>
+							<NavLink
+								className={navLinkClassName}
+								to={collectionsPath}
+							>
+								Collections
+							</NavLink>
+						</li>
+						<li>
+							<NavLink className={navLinkClassName} to={uploadPath}>
+								Upload
+							</NavLink>
+						</li>
+					</ul>
 				</nav>
 			</aside>
 
@@ -77,4 +81,12 @@ export function AppShell() {
 			</div>
 		</div>
 	);
+}
+
+function navLinkClassName({ isActive }: { isActive: boolean }): string {
+	return `block rounded-md px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground ${
+		isActive
+			? "bg-primary-foreground text-primary"
+			: "text-primary-foreground hover:bg-primary-foreground/10"
+	}`;
 }

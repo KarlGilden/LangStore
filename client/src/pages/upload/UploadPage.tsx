@@ -9,6 +9,9 @@ import type { PageSuggestionViewModel } from "@langstore/contracts";
 import { useSavePageEntries } from "../../api/mutations/useSavePageEntries";
 import { useUploadPage } from "../../api/mutations/useUploadPage";
 import { CollectionDropdown } from "../../components/common/CollectionDropdown";
+import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
+import { CameraIcon } from "../../components/icons/CameraIcon";
+import { CheckIcon } from "../../components/icons/CheckIcon";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { SelectableWordItem } from "../../components/vocabulary/SelectableWordItem";
 
@@ -148,7 +151,7 @@ export function UploadPage() {
 						className="mt-3 flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-input bg-card px-6 py-8 text-center text-card-foreground outline-none hover:border-primary hover:bg-secondary/40 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30 sm:min-h-56"
 						htmlFor="page-photo"
 					>
-						<CameraIcon />
+						<CameraIcon className="size-9 text-primary" />
 						<span className="mt-4 font-semibold">
 							{photo ? photo.name : "Take or choose a photo"}
 						</span>
@@ -233,7 +236,7 @@ function WordSelectionView({
 					onClick={onCancel}
 					type="button"
 				>
-					<BackIcon />
+					<ArrowLeftIcon className="size-5" />
 				</button>
 				<div className="min-w-0 flex-1">
 					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -301,7 +304,7 @@ function SaveSuccess({
 	return (
 		<section className="mx-auto flex min-h-[60dvh] max-w-xl flex-col items-center justify-center text-center">
 			<span className="grid size-14 place-items-center rounded-full bg-secondary text-primary">
-				<CheckIcon />
+				<CheckIcon className="size-7" />
 			</span>
 			<h1 className="mt-6 font-display text-4xl font-semibold tracking-tight">
 				Words saved
@@ -340,60 +343,6 @@ function NoSuggestionsFound({ onReturn }: { onReturn: () => void }) {
 				Return to upload
 			</button>
 		</section>
-	);
-}
-
-function CameraIcon() {
-	return (
-		<svg
-			aria-hidden="true"
-			className="size-9 text-primary"
-			fill="none"
-			viewBox="0 0 24 24"
-		>
-			<path
-				d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1-1.5h6.6l1 1.5h1.2A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-8Z"
-				stroke="currentColor"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				strokeWidth="1.6"
-			/>
-			<circle
-				cx="12"
-				cy="12.5"
-				r="3.25"
-				stroke="currentColor"
-				strokeWidth="1.6"
-			/>
-		</svg>
-	);
-}
-
-function BackIcon() {
-	return (
-		<svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24">
-			<path
-				d="m15 18-6-6 6-6"
-				stroke="currentColor"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				strokeWidth="2"
-			/>
-		</svg>
-	);
-}
-
-function CheckIcon() {
-	return (
-		<svg aria-hidden="true" className="size-7" fill="none" viewBox="0 0 24 24">
-			<path
-				d="m5 12.5 4.25 4.25L19 7"
-				stroke="currentColor"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				strokeWidth="2"
-			/>
-		</svg>
 	);
 }
 

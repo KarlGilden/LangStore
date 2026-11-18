@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import { ChevronRightIcon } from "../icons/ChevronRightIcon";
+import { PageIcon } from "../icons/PageIcon";
 
 interface LinkedResourceItemProps {
 	to: string;
@@ -35,20 +37,7 @@ export function LinkedResourceItem({
 						{meta}
 					</span>
 				</span>
-				<svg
-					aria-hidden="true"
-					className="size-5 text-muted-foreground group-hover:text-primary"
-					fill="none"
-					viewBox="0 0 24 24"
-				>
-					<path
-						d="m9 18 6-6-6-6"
-						stroke="currentColor"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						strokeWidth="1.8"
-					/>
-				</svg>
+				<ChevronRightIcon className="size-5 text-muted-foreground group-hover:text-primary" />
 			</Link>
 		</li>
 	);
@@ -79,28 +68,8 @@ function ResourceVisual({
 					{title.slice(0, 1).toLocaleUpperCase()}
 				</span>
 			) : (
-				<PageIcon />
+				<PageIcon className="size-8" />
 			)}
 		</span>
-	);
-}
-
-function PageIcon() {
-	return (
-		<svg className="size-8" fill="none" viewBox="0 0 32 32">
-			<path
-				d="M9 4.5h9l5 5v18H9v-23Z"
-				stroke="currentColor"
-				strokeLinejoin="round"
-				strokeWidth="1.5"
-			/>
-			<path
-				d="M18 4.5v5h5M13 15h6M13 19h6M13 23h4"
-				stroke="currentColor"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				strokeWidth="1.5"
-			/>
-		</svg>
 	);
 }

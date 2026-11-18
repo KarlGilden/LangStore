@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 import { useCollection } from "../../api/queries/useCollection";
 import { useCollectionPages } from "../../api/queries/useCollectionPages";
 import { LinkedResourceItem } from "../../components/common/LinkedResourceItem";
+import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
 import { ItemList } from "../../components/ui/ItemList";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
@@ -31,7 +32,7 @@ export function CollectionDetail() {
 				className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
 				to={paths.collections(iso)}
 			>
-				<BackIcon />
+				<ArrowLeftIcon className="size-4" />
 				All collections
 			</Link>
 
@@ -81,20 +82,6 @@ export function CollectionDetail() {
 				</ItemList>
 			</div>
 		</section>
-	);
-}
-
-function BackIcon() {
-	return (
-		<svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24">
-			<path
-				d="m15 18-6-6 6-6"
-				stroke="currentColor"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				strokeWidth="2"
-			/>
-		</svg>
 	);
 }
 

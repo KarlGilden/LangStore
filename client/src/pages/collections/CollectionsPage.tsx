@@ -1,11 +1,5 @@
-import { useState, type FormEvent } from "react";
 import { useCollections } from "../../api/queries/useCollections";
 import { useParams } from "react-router";
-
-type PreviewFeedback =
-	| { kind: "idle"; message: string }
-	| { kind: "success"; message: string }
-	| { kind: "error"; message: string };
 
 export function CollectionsPage() {
 	const { iso = "" } = useParams();

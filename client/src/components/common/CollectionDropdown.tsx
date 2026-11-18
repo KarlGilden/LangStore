@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { useCollections } from "../../api/queries/useCollections";
 import { DEFAULT_LANGUAGE_ISO } from "@langstore/contracts";
 import { useEffect, useState } from "react";
@@ -15,14 +15,17 @@ export function CollectionDropdown({ onChange, label = "Collection" }: IProps) {
 	const isEmpty = data ? data.length === 0 : false;
 
 	const [selectedId, setSelectedId] = useState("");
+	const firstCollectionId = data?.[0]?.id ?? "";
+	const hasSelectedCollection = data?.some(
+		(collection) => collection.id === selectedId,
+	);
+	const selectedCollectionId = hasSelectedCollection
+		? selectedId
+		: firstCollectionId;
 
 	useEffect(() => {
-		if (!data || data?.length === 0) {
-			return;
-		}
-
-		onChange(data[0].id);
-	}, [data]);
+		if (selectedCollectionId) onChange(selectedCollectionId);
+	}, [onChange, selectedCollectionId]);
 	return (
 		<div>
 			<label className="block font-semibold" htmlFor="upload-collection">
@@ -33,10 +36,9 @@ export function CollectionDropdown({ onChange, label = "Collection" }: IProps) {
 				disabled={isLoading || data?.length === 0}
 				id="upload-collection"
 				onChange={(event) => {
-					onChange(event.currentTarget.value);
 					setSelectedId(event.currentTarget.value);
 				}}
-				value={selectedId}
+				value={selectedCollectionId}
 			>
 				{isLoading ? <option value="">Loading collections...</option> : null}
 				{!isLoading && isEmpty ? (

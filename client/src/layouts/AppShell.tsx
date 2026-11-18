@@ -75,7 +75,7 @@ export function AppShell() {
 					</p>
 				) : null}
 
-				<main className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 sm:py-14 lg:px-14">
+				<main className="w-full px-5 py-10 sm:px-8 sm:py-14 lg:px-14">
 					<Outlet />
 				</main>
 			</div>

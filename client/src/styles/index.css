@@ -37,3 +37,10 @@
     color: var(--accent-foreground);
   }
 }
+
+@layer utilities {
+  .word-selection-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 6rem;
+  }
+}

@@ -32,3 +32,17 @@ export class EntryMatchConflictError extends Error {
 		this.name = "EntryMatchConflictError";
 	}
 }
+
+export class EntryAlreadyExistsError extends Error {
+	constructor() {
+		super("An entry with this text already exists for the selected language");
+		this.name = "EntryAlreadyExistsError";
+	}
+}
+
+export class InvalidEntrySelectionError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "InvalidEntrySelectionError";
+	}
+}

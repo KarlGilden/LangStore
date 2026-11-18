@@ -1,0 +1,1 @@
+ALTER TABLE "entries" ADD CONSTRAINT "entries_user_id_iso_text_unique" UNIQUE("user_id","iso","text");

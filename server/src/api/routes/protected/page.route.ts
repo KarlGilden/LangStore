@@ -5,16 +5,20 @@ import {
 	getPageSchema,
 	getPageVocabularySchema,
 	listCollectionPagesSchema,
+	savePageEntriesSchema,
 } from "@langstore/contracts";
 import type { PageService } from "../../../core/services/page.service.js";
 import type { EntryEncounterService } from "../../../core/services/entry-encounter.service.js";
 import { toPageVocabularyEntryViewModel } from "../../mappers/entry-encounter.mapper.js";
 import { toPageViewModel } from "../../mappers/page.mapper.js";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+import type { EntryService } from "../../../core/services/entry.service.js";
+import { toEntryViewModel } from "../../mappers/entry.mapper.js";
 
 export function createPageRoutes(
 	pageService: PageService,
 	entryEncounterService: EntryEncounterService,
+	entryService: EntryService,
 ): FastifyPluginAsync {
 	return async (app) => {
 		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
@@ -23,13 +27,13 @@ export function createPageRoutes(
 			"/latest",
 			{ schema: getLatestPageSchema },
 			async (request, reply) => {
-				const providerId = request.currentUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const page = await pageService.getLatestPage(
-					providerId,
+					userId,
 					request.params.iso,
 				);
 				return reply.code(200).send(toPageViewModel(page));
@@ -37,13 +41,13 @@ export function createPageRoutes(
 		);
 
 		routes.get("/:id", { schema: getPageSchema }, async (request, reply) => {
-			const providerId = request.currentUserId;
-			if (!providerId) {
+			const userId = request.currentUserId;
+			if (!userId) {
 				return reply.code(401).send({ error: "Unauthorized" });
 			}
 
 			const page = await pageService.getPage(
-				providerId,
+				userId,
 				request.params.iso,
 				request.params.id,
 			);
@@ -54,19 +58,38 @@ export function createPageRoutes(
 			"/:id/vocabulary",
 			{ schema: getPageVocabularySchema },
 			async (request, reply) => {
-				const providerId = request.currentUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const vocabulary = await entryEncounterService.getPageVocabulary(
-					providerId,
+					userId,
 					request.params.iso,
 					request.params.id,
 				);
 				return reply
 					.code(200)
 					.send(vocabulary.map(toPageVocabularyEntryViewModel));
+			},
+		);
+
+		routes.post(
+			"/:id/entries",
+			{ schema: savePageEntriesSchema },
+			async (request, reply) => {
+				const userId = request.currentUserId;
+				if (!userId) {
+					return reply.code(401).send({ error: "Unauthorized" });
+				}
+
+				const savedEntries = await entryService.savePageEntries(
+					userId,
+					request.params.iso,
+					request.params.id,
+					request.body.entries,
+				);
+				return reply.code(200).send(savedEntries.map(toEntryViewModel));
 			},
 		);
 	};
@@ -82,20 +105,16 @@ export function createCollectionPageRoutes(
 			"/:collectionId/page",
 			{ schema: createPageSchema },
 			async (request, reply) => {
-				const providerId = request.currentUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
-				const page = await pageService.createPage(
-					providerId,
-					request.params.iso,
-					{
-						...request.body,
-						collectionId: request.params.collectionId,
-						summary: null,
-					},
-				);
+				const page = await pageService.createPage(userId, request.params.iso, {
+					...request.body,
+					collectionId: request.params.collectionId,
+					summary: null,
+				});
 				return reply.code(201).send(toPageViewModel(page));
 			},
 		);
@@ -104,13 +123,13 @@ export function createCollectionPageRoutes(
 			"/:collectionId/page",
 			{ schema: listCollectionPagesSchema },
 			async (request, reply) => {
-				const providerId = request.currentUserId;
-				if (!providerId) {
+				const userId = request.currentUserId;
+				if (!userId) {
 					return reply.code(401).send({ error: "Unauthorized" });
 				}
 
 				const pages = await pageService.getAllCollectionPages(
-					providerId,
+					userId,
 					request.params.iso,
 					request.params.collectionId,
 				);

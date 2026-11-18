@@ -45,6 +45,7 @@ Entry
   userId: uuid NOT NULL, FK → User.id ON DELETE CASCADE
   createdAt: timestamp(3) with time zone NOT NULL DEFAULT now()
   iso: char(2) NOT NULL, CHECK iso ~ '^[a-z]{2}$'
+  UNIQUE(userId, iso, text)
 
 Translation
   id: uuid PK
@@ -118,10 +119,10 @@ Latest uploaded is not independently recorded latest read; no lastReadAt field h
 - Replaying the same EntryEncounter write is therefore idempotent. A later corrected count replaces the earlier count.
 - EntryEncounter writes must verify in one transaction that Entry and Page have the same owner and that Entry.iso matches the Page Collection.iso.
 
-## Required indexes and deferred uniqueness
+## Required indexes and uniqueness
 
 - Add indexes on Page(userId, createdAt, id), Page(collectionId), Collection(userId, iso), Entry(userId, iso), Translation(entryId), and EntryEncounter(pageId, entryId).
-- Do not add a uniqueness rule for (userId, iso, text) until entry text normalisation is agreed.
+- Entry text produced by page processing is normalized before selection. Enforce one exact normalized Entry.text per user and language with UNIQUE(userId, iso, text). A duplicate insert is a conflict rather than a second entry.
 
 ## Deliberately not represented yet
 

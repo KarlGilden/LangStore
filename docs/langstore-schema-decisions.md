@@ -15,6 +15,7 @@ Records the latest schema discussion, with the current model in [langstore-schem
 | Page ownership | Store userId on Page as well as Collection. | Supports direct owner-scoped page queries; the two owner values must agree. Filtering pages by language still uses Collection. |
 | Saved vocabulary | Store only vocabulary the user is learning. | The store is not a complete inventory of every word read. |
 | Entry identity | An entry represents one form of a word or phrase, owned by one user. | Different grammatical forms are separate entries; no canonical-form grouping is required now. |
+| Entry uniqueness | Entry text is unique per user and language. | Page suggestions are normalized before selection; attempting to save the same normalized text again is a conflict. |
 | Meaning | Translations express meaning, and one entry may have translations with different meanings. | No separate meaning entity; an encounter does not resolve which meaning applies. |
 | Translation multiplicity | Keep translations in a separate table linked to Entry. | Each entry can have multiple personal translations. |
 | Translation language | Translation text may be in any language; do not store iso on Translation. | The entry's iso describes the vocabulary, not the translation. Translation language is intentionally untracked. |

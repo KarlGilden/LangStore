@@ -2,10 +2,10 @@ import {
 	InvalidPageLanguageCodeError,
 	InvalidPageTextError,
 } from "../errors/page.error.js";
-import { isAssignedIso6391Code } from "../language/iso-639-1.js";
+import { isSupportedLanguageIso } from "@langstore/contracts";
 
 export function requirePageLanguageCode(iso: string): void {
-	if (!isAssignedIso6391Code(iso)) {
+	if (!isSupportedLanguageIso(iso)) {
 		throw new InvalidPageLanguageCodeError();
 	}
 }

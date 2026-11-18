@@ -146,6 +146,11 @@ export const entries = pgTable(
 	},
 	(table) => [
 		check("entries_iso_check", sql`${table.iso} ~ '^[a-z]{2}$'`),
+		unique("entries_user_id_iso_text_unique").on(
+			table.userId,
+			table.iso,
+			table.text,
+		),
 		index("entries_user_id_iso_idx").on(table.userId, table.iso),
 	],
 );

@@ -1,5 +1,5 @@
 import type { Page } from "../../core/entities/page.entity.js";
-import type { PageViewModel } from "../schema/page.schema.js";
+import type { PageViewModel } from "@langstore/contracts";
 
 export function toPageViewModel(page: Page): PageViewModel {
 	return {

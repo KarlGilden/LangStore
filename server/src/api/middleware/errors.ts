@@ -17,9 +17,11 @@ import {
 	PageNotFoundError,
 } from "../../core/errors/page.error.js";
 import {
+	EntryAlreadyExistsError,
 	EntryMatchConflictError,
 	EntryNotFoundError,
 	InvalidEntryLanguageCodeError,
+	InvalidEntrySelectionError,
 	InvalidEntryTextError,
 } from "../../core/errors/entry.error.js";
 import { InvalidEntryEncounterCountError } from "../../core/errors/entry-encounter.error.js";
@@ -123,6 +125,10 @@ export const errorHandler = (
 		statusCode = 409;
 		code = "ENTRY_MATCH_CONFLICT";
 		message = error.message;
+	} else if (error instanceof EntryAlreadyExistsError) {
+		statusCode = 409;
+		code = "ENTRY_ALREADY_EXISTS";
+		message = error.message;
 	} else if (error instanceof EntryNotFoundError) {
 		statusCode = 404;
 		code = "ENTRY_NOT_FOUND";
@@ -134,6 +140,10 @@ export const errorHandler = (
 	} else if (error instanceof InvalidEntryTextError) {
 		statusCode = 400;
 		code = "INVALID_ENTRY_TEXT";
+		message = error.message;
+	} else if (error instanceof InvalidEntrySelectionError) {
+		statusCode = 400;
+		code = "INVALID_ENTRY_SELECTION";
 		message = error.message;
 	} else if (error instanceof InvalidEntryEncounterCountError) {
 		statusCode = 400;

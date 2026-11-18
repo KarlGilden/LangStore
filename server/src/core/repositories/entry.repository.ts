@@ -7,8 +7,21 @@ export interface CreateEntryInput {
 	translations: { text: string }[];
 }
 
+export interface SavePageEntriesInput {
+	userId: string;
+	iso: string;
+	pageId: string;
+	entries: {
+		text: string;
+		count: number;
+		translations: { text: string }[];
+	}[];
+}
+
 export interface EntryRepository {
 	create(input: CreateEntryInput): Promise<Entry>;
+
+	savePageEntries(input: SavePageEntriesInput): Promise<Entry[]>;
 
 	getById(id: string, userId: string): Promise<Entry | null>;
 

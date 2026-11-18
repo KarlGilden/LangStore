@@ -3,7 +3,7 @@ import {
 	InvalidCollectionLanguageCodeError,
 	InvalidCollectionTextError,
 } from "../errors/collection.error.js";
-import { isAssignedIso6391Code } from "../language/iso-639-1.js";
+import { isSupportedLanguageIso } from "@langstore/contracts";
 import type { CollectionRepository } from "../repositories/collection.repository.js";
 
 export interface CreateCollectionInput {
@@ -28,7 +28,7 @@ function requireNonBlank(
 }
 
 function requireLanguageCode(iso: string): void {
-	if (!isAssignedIso6391Code(iso)) {
+	if (!isSupportedLanguageIso(iso)) {
 		throw new InvalidCollectionLanguageCodeError();
 	}
 }

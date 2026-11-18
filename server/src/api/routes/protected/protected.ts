@@ -30,9 +30,12 @@ export function createProtectedRoutes(
 		app.register(createCollectionRoutes(collectionService), {
 			prefix: "/:iso/collection",
 		});
-		app.register(createPageRoutes(pageService, entryEncounterService), {
-			prefix: "/:iso/page",
-		});
+		app.register(
+			createPageRoutes(pageService, entryEncounterService, entryService),
+			{
+				prefix: "/:iso/page",
+			},
+		);
 		app.register(createCollectionPageRoutes(pageService), {
 			prefix: "/:iso/collection",
 		});

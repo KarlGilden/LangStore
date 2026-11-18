@@ -4,14 +4,14 @@ import type {
 	FastifyReply,
 	FastifyRequest,
 } from "fastify";
+import {
+	getUserSchema,
+	getUserSettingsSchema,
+	replaceUserSettingsSchema,
+} from "@langstore/contracts";
 import type { UserService } from "../../../core/services/user.service.js";
 import type { UserSettingsService } from "../../../core/services/user-settings.service.js";
 import { toUserSettingsViewModel } from "../../mappers/user-settings.mapper.js";
-import {
-	getUserSettingsSchema,
-	replaceUserSettingsSchema,
-} from "../../schema/user-settings.schema.js";
-import { getUserSchema } from "../../schema/user.schema.js";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import { toUserViewModel } from "../../mappers/user.mapper.js";
 

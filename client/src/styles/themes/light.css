@@ -1,0 +1,24 @@
+:root,
+[data-theme="light"] {
+  --background: oklch(0.975 0.009 164);
+  --foreground: oklch(0.25 0.025 165);
+  --card: oklch(0.995 0.004 160);
+  --card-foreground: oklch(0.25 0.025 165);
+  --primary: oklch(0.43 0.075 164);
+  --primary-foreground: oklch(0.985 0.006 164);
+  --secondary: oklch(0.91 0.024 160);
+  --secondary-foreground: oklch(0.31 0.045 164);
+  --muted: oklch(0.94 0.012 164);
+  --muted-foreground: oklch(0.5 0.028 165);
+  --accent: oklch(0.79 0.055 230);
+  --accent-foreground: oklch(0.24 0.045 230);
+  --destructive: oklch(0.55 0.14 28);
+  --destructive-foreground: oklch(0.985 0.006 28);
+  --border: oklch(0.85 0.025 164);
+  --input: oklch(0.79 0.03 164);
+  --ring: oklch(0.56 0.09 164);
+  --radius: 0.4rem;
+  --font-body: "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
+  --font-heading: "Charter", "Iowan Old Style", "Palatino Linotype", serif;
+  color-scheme: light;
+}

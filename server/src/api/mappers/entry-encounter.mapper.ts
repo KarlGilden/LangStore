@@ -1,5 +1,5 @@
 import type { PageVocabularyEntry } from "../../core/entities/entry-encounter.entity.js";
-import type { PageVocabularyEntryViewModel } from "../schema/page.schema.js";
+import type { PageVocabularyEntryViewModel } from "@langstore/contracts";
 import { toEntryViewModel } from "./entry.mapper.js";
 
 export function toPageVocabularyEntryViewModel(

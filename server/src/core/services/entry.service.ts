@@ -1,14 +1,29 @@
 import {
 	EntryNotFoundError,
 	InvalidEntryLanguageCodeError,
+	InvalidEntrySelectionError,
 	InvalidEntryTextError,
 } from "../errors/entry.error.js";
-import { isAssignedIso6391Code } from "../language/iso-639-1.js";
+import {
+	isSupportedLanguageIso,
+	MAX_PAGE_ENTRY_SELECTIONS,
+	MAX_PAGE_ENTRY_TEXT_LENGTH,
+	MAX_PAGE_ENTRY_TRANSLATIONS,
+	MAX_PAGE_ENTRY_TRANSLATION_LENGTH,
+} from "@langstore/contracts";
 import type { EntryRepository } from "../repositories/entry.repository.js";
 import type { UserSettingsService } from "./user-settings.service.js";
+import { InvalidEntryEncounterCountError } from "../errors/entry-encounter.error.js";
+import { normaliseSentence } from "./word-extraction.service.js";
 
 export interface CreateEntryInput {
 	text: string;
+	translations?: { text: string }[];
+}
+
+export interface SavePageEntryInput {
+	text: string;
+	count: number;
 	translations?: { text: string }[];
 }
 
@@ -23,7 +38,7 @@ function requireNonBlank(
 }
 
 function requireLanguageCode(iso: string): void {
-	if (!isAssignedIso6391Code(iso)) {
+	if (!isSupportedLanguageIso(iso)) {
 		throw new InvalidEntryLanguageCodeError();
 	}
 }
@@ -38,6 +53,7 @@ export const createEntryService = (
 		input: CreateEntryInput,
 	) => {
 		requireNonBlank("text", input.text);
+		requireLanguageCode(iso);
 		const translations = input.translations ?? [];
 		translations.forEach((translation, index) => {
 			requireNonBlank("translation", translation.text, index);
@@ -59,13 +75,89 @@ export const createEntryService = (
 		return entry;
 	};
 
+	const savePageEntries = async (
+		userId: string,
+		iso: string,
+		pageId: string,
+		inputs: SavePageEntryInput[],
+	) => {
+		requireLanguageCode(iso);
+		if (inputs.length > MAX_PAGE_ENTRY_SELECTIONS) {
+			throw new InvalidEntrySelectionError(
+				`entries must contain at most ${MAX_PAGE_ENTRY_SELECTIONS} items`,
+			);
+		}
+
+		const seenTexts = new Set<string>();
+		const validatedEntries = inputs.map((input, entryIndex) => {
+			requireNonBlank("text", input.text);
+			if (input.text.length > MAX_PAGE_ENTRY_TEXT_LENGTH) {
+				throw new InvalidEntrySelectionError(
+					`entries[${entryIndex}].text is too long`,
+				);
+			}
+
+			const normalisedText = normaliseSentence(input.text);
+			if (normalisedText !== input.text || normalisedText.includes(" ")) {
+				throw new InvalidEntrySelectionError(
+					`entries[${entryIndex}].text must be one normalized word`,
+				);
+			}
+			if (seenTexts.has(normalisedText)) {
+				throw new InvalidEntrySelectionError(
+					`entries contains duplicate text: ${normalisedText}`,
+				);
+			}
+			seenTexts.add(normalisedText);
+
+			if (!Number.isSafeInteger(input.count) || input.count <= 0) {
+				throw new InvalidEntryEncounterCountError();
+			}
+
+			const submittedTranslations = input.translations ?? [];
+			if (submittedTranslations.length > MAX_PAGE_ENTRY_TRANSLATIONS) {
+				throw new InvalidEntrySelectionError(
+					`entries[${entryIndex}].translations must contain at most ${MAX_PAGE_ENTRY_TRANSLATIONS} items`,
+				);
+			}
+
+			const translationTexts = new Set<string>();
+			const translations = submittedTranslations.flatMap(
+				(translation, translationIndex) => {
+					if (translation.text.length > MAX_PAGE_ENTRY_TRANSLATION_LENGTH) {
+						throw new InvalidEntrySelectionError(
+							`entries[${entryIndex}].translations[${translationIndex}].text is too long`,
+						);
+					}
+					if (!/\S/u.test(translation.text)) return [];
+					if (translationTexts.has(translation.text)) return [];
+					translationTexts.add(translation.text);
+					return [{ text: translation.text }];
+				},
+			);
+
+			return {
+				text: normalisedText,
+				count: input.count,
+				translations,
+			};
+		});
+
+		return entryRepository.savePageEntries({
+			userId,
+			iso,
+			pageId,
+			entries: validatedEntries,
+		});
+	};
+
 	const getAllEntries = async (userId: string) => {
 		const settings = await userSettingsService.getSettings(userId);
 		requireLanguageCode(settings.targetLanguage);
 		return entryRepository.getAll(settings.userId, settings.targetLanguage);
 	};
 
-	return { createEntry, getEntry, getAllEntries };
+	return { createEntry, savePageEntries, getEntry, getAllEntries };
 };
 
 export type EntryService = ReturnType<typeof createEntryService>;

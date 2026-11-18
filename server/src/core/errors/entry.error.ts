@@ -7,7 +7,7 @@ export class EntryNotFoundError extends Error {
 
 export class InvalidEntryLanguageCodeError extends Error {
 	constructor() {
-		super("The selected target language must be an assigned lowercase ISO 639-1 code");
+		super("The selected target language must be supported");
 		this.name = "InvalidEntryLanguageCodeError";
 	}
 }
@@ -30,5 +30,19 @@ export class EntryMatchConflictError extends Error {
 	constructor(public readonly text: string) {
 		super(`Multiple entries exactly match normalized word: ${text}`);
 		this.name = "EntryMatchConflictError";
+	}
+}
+
+export class EntryAlreadyExistsError extends Error {
+	constructor() {
+		super("An entry with this text already exists for the selected language");
+		this.name = "EntryAlreadyExistsError";
+	}
+}
+
+export class InvalidEntrySelectionError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "InvalidEntrySelectionError";
 	}
 }

@@ -50,6 +50,13 @@
       "when": 1793878640548,
       "tag": "0006_stormy_banshee",
       "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794994907248,
+      "tag": "0007_thick_retro_girl",
+      "breakpoints": false
     }
   ]
 }

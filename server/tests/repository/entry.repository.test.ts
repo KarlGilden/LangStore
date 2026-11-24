@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { PageNotFoundError } from "../../src/core/errors/page.error.js";
 import * as schema from "../../src/infrastructure/data/schema.js";
+import { createDrizzleEntryEncounterRepository } from "../../src/infrastructure/repositories/entry-encounter.repository.drizzle.js";
 import { createDrizzleEntryRepository } from "../../src/infrastructure/repositories/entry.repository.drizzle.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -14,6 +15,7 @@ describeWithDatabase("DrizzleEntryRepository page selections", () => {
 	const pool = new Pool({ connectionString: databaseUrl, max: 2 });
 	const db = drizzle({ client: pool, schema });
 	const repository = createDrizzleEntryRepository(db);
+	const entryEncounterRepository = createDrizzleEntryEncounterRepository(db);
 	const createdUserIds: string[] = [];
 
 	afterEach(async () => {
@@ -221,6 +223,70 @@ describeWithDatabase("DrizzleEntryRepository page selections", () => {
 				entries: [],
 			}),
 		).resolves.toEqual([]);
+	});
+
+	it("aggregates review counts before attaching multiple translations", async () => {
+		const userId = await createUser("review");
+		const firstPageId = await createPage(userId, "de");
+		const secondPageId = await createPage(userId, "de");
+		const encounteredEntryId = await createEntry(userId, "de", "haus");
+		const unencounteredEntryId = await createEntry(userId, "de", "ging");
+		await db.insert(schema.translations).values([
+			{ entryId: encounteredEntryId, text: "house" },
+			{ entryId: encounteredEntryId, text: "home" },
+		]);
+		await db.insert(schema.entryEncounters).values([
+			{ entryId: encounteredEntryId, pageId: firstPageId, count: 3 },
+			{ entryId: encounteredEntryId, pageId: secondPageId, count: 2 },
+		]);
+
+		const results = await repository.getAllForReview(userId, "de");
+		const byId = new Map(results.map((entry) => [entry.id, entry]));
+
+		expect(byId.get(encounteredEntryId)).toEqual(
+			expect.objectContaining({
+				encounterCount: 5,
+				encounterPageCount: 2,
+			}),
+		);
+		expect(
+			new Set(
+				byId.get(encounteredEntryId)?.translations.map(({ text }) => text),
+			),
+		).toEqual(new Set(["house", "home"]));
+		expect(byId.get(unencounteredEntryId)).toEqual(
+			expect.objectContaining({
+				encounterCount: 0,
+				encounterPageCount: 0,
+			}),
+		);
+	});
+
+	it("returns one page-vocabulary item without multiplying its absolute count", async () => {
+		const userId = await createUser("page-vocabulary");
+		const pageId = await createPage(userId, "de");
+		const entryId = await createEntry(userId, "de", "haus");
+		await db.insert(schema.translations).values([
+			{ entryId, text: "house" },
+			{ entryId, text: "home" },
+		]);
+		await db.insert(schema.entryEncounters).values({
+			entryId,
+			pageId,
+			count: 3,
+		});
+
+		const results = await entryEncounterRepository.getAllPageVocabulary(
+			pageId,
+			userId,
+			"de",
+		);
+
+		expect(results).toHaveLength(1);
+		expect(results?.[0]?.encounter.count).toBe(3);
+		expect(
+			new Set(results?.[0]?.entry.translations.map(({ text }) => text)),
+		).toEqual(new Set(["house", "home"]));
 	});
 
 	async function createUser(label: string): Promise<string> {

@@ -9,6 +9,7 @@ export function AppShell() {
 	const { iso = DEFAULT_LANGUAGE_ISO } = useParams();
 	const collectionsPath = paths.collections(iso);
 	const uploadPath = paths.upload(iso);
+	const reviewPath = paths.review(iso);
 	const { signOut } = useSession();
 	const [isSigningOut, setIsSigningOut] = useState(false);
 	const [signOutError, setSignOutError] = useState<string | null>(null);
@@ -47,6 +48,11 @@ export function AppShell() {
 						<li>
 							<NavLink className={navLinkClassName} to={uploadPath}>
 								Upload
+							</NavLink>
+						</li>
+						<li>
+							<NavLink className={navLinkClassName} to={reviewPath}>
+								Review
 							</NavLink>
 						</li>
 					</ul>

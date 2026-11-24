@@ -18,6 +18,18 @@ export interface SavePageEntriesInput {
 	}[];
 }
 
+export type EntryReviewResult = Entry & {
+	encounterCount: number;
+	encounterPageCount: number;
+};
+
+export interface ReplaceEntryTranslationsInput {
+	entryId: string;
+	userId: string;
+	iso: string;
+	translations: { text: string }[];
+}
+
 export interface EntryRepository {
 	create(input: CreateEntryInput): Promise<Entry>;
 
@@ -32,4 +44,8 @@ export interface EntryRepository {
 	): Promise<Entry[]>;
 
 	getAll(userId: string, iso: string): Promise<Entry[]>;
+
+	getAllForReview(userId: string, iso: string): Promise<EntryReviewResult[]>;
+
+	updateTranslations(input: ReplaceEntryTranslationsInput): Promise<Entry | null>;
 }

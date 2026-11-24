@@ -52,7 +52,7 @@ export const entryReviewResponseSchema = {
 export const listEntriesSchema = {
 	params: languageParamsSchema,
 	response: {
-		200: { type: "array", items: entryResponseSchema },
+		200: { type: "array", items: entryReviewResponseSchema },
 		...commonErrorResponses,
 	},
 } as const;
@@ -85,7 +85,7 @@ export const createEntrySchema = {
 } as const;
 
 export const updateEntryTranslationsSchema = {
-	params: resourceParamsSchema,
+	params: createParamSchema(languageParamsSchema, resourceParamsSchema),
 	body: {
 		type: "object",
 		additionalProperties: false,

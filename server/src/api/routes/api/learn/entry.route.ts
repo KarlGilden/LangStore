@@ -3,8 +3,12 @@ import {
 	createEntrySchema,
 	getEntrySchema,
 	listEntriesSchema,
+	updateEntryTranslationsSchema,
 } from "@langstore/contracts";
-import { toEntryViewModel } from "../../../mappers/entry.mapper.js";
+import {
+	toEntryReviewViewModel,
+	toEntryViewModel,
+} from "../../../mappers/entry.mapper.js";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import { getApplicationServices } from "../../../composition/serviceUtils.js";
 
@@ -42,8 +46,27 @@ export const entryRoutes: FastifyPluginAsync = async (app) => {
 				return reply.code(400).send({ error: "" });
 			}
 
-			const entries = await entryService.getAllEntries(userId, iso);
-			return reply.code(200).send(entries.map(toEntryViewModel));
+			const entries = await entryService.getAllEntriesForReview(userId, iso);
+			return reply.code(200).send(entries.map(toEntryReviewViewModel));
+		},
+	);
+
+	routes.patch(
+		"/:id",
+		{ schema: updateEntryTranslationsSchema },
+		async (request, reply) => {
+			const userId = request.currentUserId;
+			if (!userId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
+
+			const entry = await entryService.updateEntryTranslations(
+				userId,
+				request.params.iso,
+				request.params.id,
+				request.body,
+			);
+			return reply.code(200).send(toEntryViewModel(entry));
 		},
 	);
 

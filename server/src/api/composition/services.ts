@@ -53,9 +53,7 @@ export function createServices(
 		collectionRepository,
 	});
 
-	const wordExtractionService = createWordExtractionService({
-		entryRepository,
-	});
+	const wordExtractionService = createWordExtractionService();
 
 	const pageIngestionService = createPageIngestionService({
 		pageService,

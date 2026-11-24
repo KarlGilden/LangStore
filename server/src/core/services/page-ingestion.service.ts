@@ -81,11 +81,7 @@ export const createPageIngestionService = ({
 			summary: formatSummary(recognition.text),
 		});
 
-		const extractedWords = await wordExtractionService.extractWords(
-			recognition.text,
-			input.userId,
-			input.iso,
-		);
+		const extractedWords = wordExtractionService.extractWords(recognition.text);
 
 		return {
 			page: page,

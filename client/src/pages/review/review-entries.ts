@@ -6,12 +6,12 @@ export type ReviewSort =
 	| "created-desc"
 	| "created-asc";
 
-export function filterAndSortEntries(
-	entries: readonly EntryViewModel[],
+export function filterAndSortEntries<TEntry extends EntryViewModel>(
+	entries: readonly TEntry[],
 	search: string,
 	sort: ReviewSort,
 	locale: string,
-): EntryViewModel[] {
+): TEntry[] {
 	const query = search.trim().toLocaleLowerCase(locale || undefined);
 	const visibleEntries = query
 		? entries.filter((entry) =>

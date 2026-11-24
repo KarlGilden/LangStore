@@ -1,4 +1,7 @@
-import { SUPPORTED_LANGUAGES, type EntryViewModel } from "@langstore/contracts";
+import {
+	SUPPORTED_LANGUAGES,
+	type EntryReviewViewModel,
+} from "@langstore/contracts";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router";
 import { useUpdateEntryTranslations } from "../../api/mutations/useUpdateEntryTranslations";
@@ -11,7 +14,7 @@ import {
 	type ReviewSort,
 } from "./review-entries";
 
-const EMPTY_ENTRIES: readonly EntryViewModel[] = [];
+const EMPTY_ENTRIES: readonly EntryReviewViewModel[] = [];
 
 export function ReviewPage() {
 	const { iso = "" } = useParams();
@@ -19,9 +22,8 @@ export function ReviewPage() {
 	const updateEntryTranslations = useUpdateEntryTranslations();
 	const [search, setSearch] = useState("");
 	const [sort, setSort] = useState<ReviewSort>("alphabetical-asc");
-	const [selectedEntry, setSelectedEntry] = useState<EntryViewModel | null>(
-		null,
-	);
+	const [selectedEntry, setSelectedEntry] =
+		useState<EntryReviewViewModel | null>(null);
 	const entries = entriesQuery.data ?? EMPTY_ENTRIES;
 	const languageName =
 		SUPPORTED_LANGUAGES.find((language) => language.iso === iso)?.name ?? iso;
@@ -150,6 +152,9 @@ export function ReviewPage() {
 										<span className="mt-1 block break-words text-sm leading-6 text-muted-foreground">
 											{formatTranslations(entry)}
 										</span>
+										<span className="mt-2 block text-xs font-medium text-muted-foreground">
+											{formatEncounters(entry)}
+										</span>
 									</span>
 									<span className="text-xs font-medium text-muted-foreground sm:text-right">
 										<span className="block">{formatCreatedDate(entry.createdAt)}</span>
@@ -176,9 +181,15 @@ export function ReviewPage() {
 	);
 }
 
-function formatTranslations(entry: EntryViewModel): string {
+function formatTranslations(entry: EntryReviewViewModel): string {
 	if (entry.translations.length === 0) return "No translations saved";
 	return entry.translations.map(({ text }) => text).join(", ");
+}
+
+function formatEncounters(entry: EntryReviewViewModel): string {
+	const encounterLabel = entry.encounterCount === 1 ? "encounter" : "encounters";
+	const pageLabel = entry.encounterPageCount === 1 ? "page" : "pages";
+	return `${entry.encounterCount} ${encounterLabel} across ${entry.encounterPageCount} ${pageLabel}`;
 }
 
 function formatCreatedDate(value: string): string {

@@ -112,6 +112,11 @@ export const updateEntryTranslationsSchema = {
 	response: { 200: entryResponseSchema, ...commonErrorResponses },
 } as const;
 
+export const deleteEntrySchema = {
+	params: createParamSchema(languageParamsSchema, resourceParamsSchema),
+	response: { 204: { type: "null" }, ...commonErrorResponses },
+} as const;
+
 export const savePageEntriesSchema = {
 	params: createParamSchema(languageParamsSchema, resourceParamsSchema),
 	body: {

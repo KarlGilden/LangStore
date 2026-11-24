@@ -1,5 +1,5 @@
 import type { EntryViewModel } from "@langstore/contracts";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { EditTranslationsDialog } from "./EditTranslationsDialog";
 
@@ -34,6 +34,7 @@ describe("EditTranslationsDialog", () => {
 					entry={entry}
 					error={null}
 					onDismiss={onDismiss}
+					onRequestDelete={vi.fn()}
 					onSave={vi.fn()}
 					pending={false}
 				/>
@@ -42,6 +43,25 @@ describe("EditTranslationsDialog", () => {
 
 		expect(screen.getByRole("dialog")).toHaveAttribute("open");
 		expect(onDismiss).not.toHaveBeenCalled();
+	});
+
+	it("requests explicit entry deletion", () => {
+		const onRequestDelete = vi.fn();
+
+		render(
+			<EditTranslationsDialog
+				entry={entry}
+				error={null}
+				onDismiss={vi.fn()}
+				onRequestDelete={onRequestDelete}
+				onSave={vi.fn()}
+				pending={false}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Delete word" }));
+
+		expect(onRequestDelete).toHaveBeenCalledOnce();
 	});
 });
 

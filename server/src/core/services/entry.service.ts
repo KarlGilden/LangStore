@@ -202,6 +202,18 @@ export const createEntryService = ({
 		return entry;
 	};
 
+	const deleteEntry = async (
+		userId: string,
+		iso: string,
+		entryId: string,
+	) => {
+		requireLanguageCode(iso);
+		const deleted = await entryRepository.delete(entryId, userId, iso);
+		if (!deleted) {
+			throw new EntryNotFoundError();
+		}
+	};
+
 	return {
 		createEntry,
 		savePageEntries,
@@ -209,6 +221,7 @@ export const createEntryService = ({
 		getAllEntries,
 		getAllEntriesForReview,
 		updateEntryTranslations,
+		deleteEntry,
 	};
 };
 

@@ -48,4 +48,6 @@ export interface EntryRepository {
 	getAllForReview(userId: string, iso: string): Promise<EntryReviewResult[]>;
 
 	updateTranslations(input: ReplaceEntryTranslationsInput): Promise<Entry | null>;
+
+	delete(id: string, userId: string, iso: string): Promise<boolean>;
 }

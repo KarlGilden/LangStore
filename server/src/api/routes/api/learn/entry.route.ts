@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import {
 	createEntrySchema,
+	deleteEntrySchema,
 	getEntrySchema,
 	listEntriesSchema,
 	updateEntryTranslationsSchema,
@@ -67,6 +68,24 @@ export const entryRoutes: FastifyPluginAsync = async (app) => {
 				request.body,
 			);
 			return reply.code(200).send(toEntryViewModel(entry));
+		},
+	);
+
+	routes.delete(
+		"/:id",
+		{ schema: deleteEntrySchema },
+		async (request, reply) => {
+			const userId = request.currentUserId;
+			if (!userId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
+
+			await entryService.deleteEntry(
+				userId,
+				request.params.iso,
+				request.params.id,
+			);
+			return reply.code(204).send(null);
 		},
 	);
 

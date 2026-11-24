@@ -4,8 +4,10 @@ import {
 } from "@langstore/contracts";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router";
+import { useDeleteEntry } from "../../api/mutations/useDeleteEntry";
 import { useUpdateEntryTranslations } from "../../api/mutations/useUpdateEntryTranslations";
 import { useEntries } from "../../api/queries/useEntries";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Input } from "../../components/ui/Input";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { EditTranslationsDialog } from "./EditTranslationsDialog";
@@ -20,9 +22,12 @@ export function ReviewPage() {
 	const { iso = "" } = useParams();
 	const entriesQuery = useEntries(iso);
 	const updateEntryTranslations = useUpdateEntryTranslations();
+	const deleteEntry = useDeleteEntry();
 	const [search, setSearch] = useState("");
 	const [sort, setSort] = useState<ReviewSort>("alphabetical-asc");
 	const [selectedEntry, setSelectedEntry] =
+		useState<EntryReviewViewModel | null>(null);
+	const [entryToDelete, setEntryToDelete] =
 		useState<EntryReviewViewModel | null>(null);
 	const entries = entriesQuery.data ?? EMPTY_ENTRIES;
 	const languageName =
@@ -47,6 +52,20 @@ export function ReviewPage() {
 				translations,
 			},
 			{ onSuccess: () => setSelectedEntry(null) },
+		);
+	};
+
+	const requestEntryDelete = () => {
+		if (!selectedEntry) return;
+		setEntryToDelete(selectedEntry);
+		setSelectedEntry(null);
+	};
+
+	const confirmEntryDelete = () => {
+		if (!entryToDelete) return;
+		deleteEntry.mutate(
+			{ iso, entryId: entryToDelete.id },
+			{ onSuccess: () => setEntryToDelete(null) },
 		);
 	};
 
@@ -173,8 +192,27 @@ export function ReviewPage() {
 					error={updateEntryTranslations.error}
 					key={selectedEntry.id}
 					onDismiss={dismissDialog}
+					onRequestDelete={requestEntryDelete}
 					onSave={saveTranslations}
 					pending={updateEntryTranslations.isPending}
+				/>
+			) : null}
+
+			{entryToDelete ? (
+				<ConfirmDialog
+					cancelLabel="Cancel"
+					confirmLabel={deleteEntry.isPending ? "Deleting..." : "Delete word"}
+					description={`Delete ${entryToDelete.text}, its translations, and all of its recorded encounters? This does not delete any pages.`}
+					error={deleteEntry.error?.message}
+					onConfirm={confirmEntryDelete}
+					onDismiss={() => {
+						if (deleteEntry.isPending) return;
+						deleteEntry.reset();
+						setEntryToDelete(null);
+					}}
+					open
+					pending={deleteEntry.isPending}
+					title="Delete word?"
 				/>
 			) : null}
 		</section>

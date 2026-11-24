@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { InvalidEntryEncounterCountError } from "../../src/core/errors/entry-encounter.error.js";
-import { InvalidEntrySelectionError } from "../../src/core/errors/entry.error.js";
+import {
+	EntryNotFoundError,
+	InvalidEntrySelectionError,
+} from "../../src/core/errors/entry.error.js";
 import { PageNotFoundError } from "../../src/core/errors/page.error.js";
 import type { Entry } from "../../src/core/entities/entry.entity.js";
 import type { EntryRepository } from "../../src/core/repositories/entry.repository.js";
@@ -107,7 +110,36 @@ describe("EntryService.savePageEntries", () => {
 	});
 });
 
-function createTestContext(options: { result?: Entry[]; error?: Error } = {}) {
+describe("EntryService.deleteEntry", () => {
+	it("delegates an owner- and language-scoped deletion", async () => {
+		const deleteEntry = vi.fn(async () => true);
+		const context = createTestContext({ deleteEntry });
+		const entryId = randomUUID();
+
+		await expect(
+			context.service.deleteEntry(context.userId, "de", entryId),
+		).resolves.toBeUndefined();
+		expect(deleteEntry).toHaveBeenCalledWith(entryId, context.userId, "de");
+	});
+
+	it("reports a scoped missing entry", async () => {
+		const context = createTestContext({
+			deleteEntry: vi.fn(async () => false),
+		});
+
+		await expect(
+			context.service.deleteEntry(context.userId, "de", randomUUID()),
+		).rejects.toBeInstanceOf(EntryNotFoundError);
+	});
+});
+
+function createTestContext(
+	options: {
+		result?: Entry[];
+		error?: Error;
+		deleteEntry?: EntryRepository["delete"];
+	} = {},
+) {
 	const userId = randomUUID();
 	const pageId = randomUUID();
 	const result = options.result ?? [createEntry(userId)];
@@ -125,6 +157,7 @@ function createTestContext(options: { result?: Entry[]; error?: Error } = {}) {
 		getAll: vi.fn(),
 		getAllForReview: vi.fn(),
 		updateTranslations: vi.fn(),
+		delete: options.deleteEntry ?? vi.fn(),
 	} as unknown as EntryRepository;
 
 	return {

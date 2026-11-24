@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import * as schema from "../../src/infrastructure/data/schema.js";
 import { createDrizzleCollectionRepository } from "../../src/infrastructure/repositories/collection.repository.drizzle.js";
+import { createDrizzleEntryRepository } from "../../src/infrastructure/repositories/entry.repository.drizzle.js";
 import { createDrizzlePageRepository } from "../../src/infrastructure/repositories/page.repository.drizzle.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -14,6 +15,7 @@ describeWithDatabase("Drizzle deletion repositories", () => {
 	const pool = new Pool({ connectionString: databaseUrl, max: 2 });
 	const db = drizzle({ client: pool, schema });
 	const collectionRepository = createDrizzleCollectionRepository(db);
+	const entryRepository = createDrizzleEntryRepository(db);
 	const pageRepository = createDrizzlePageRepository(db);
 	const createdUserIds: string[] = [];
 
@@ -104,6 +106,55 @@ describeWithDatabase("Drizzle deletion repositories", () => {
 		).toEqual([]);
 		expect(
 			await db.select().from(schema.entries).where(eq(schema.entries.id, entryId)),
+		).toHaveLength(1);
+	});
+
+	it("deletes an entry with its translations and encounters but preserves pages", async () => {
+		const userId = await createUser("entry-delete");
+		const collectionId = randomUUID();
+		const pageId = randomUUID();
+		const entryId = randomUUID();
+		await db.insert(schema.collections).values({
+			id: collectionId,
+			userId,
+			iso: "de",
+			name: "Test collection",
+		});
+		await db.insert(schema.pages).values({
+			id: pageId,
+			userId,
+			collectionId,
+			name: "Page 1",
+		});
+		await db.insert(schema.entries).values({
+			id: entryId,
+			userId,
+			iso: "de",
+			text: "haus",
+		});
+		await db.insert(schema.translations).values({ entryId, text: "house" });
+		await db.insert(schema.entryEncounters).values({ entryId, pageId });
+
+		await expect(entryRepository.delete(entryId, userId, "de")).resolves.toBe(
+			true,
+		);
+		expect(
+			await db.select().from(schema.entries).where(eq(schema.entries.id, entryId)),
+		).toEqual([]);
+		expect(
+			await db
+				.select()
+				.from(schema.translations)
+				.where(eq(schema.translations.entryId, entryId)),
+		).toEqual([]);
+		expect(
+			await db
+				.select()
+				.from(schema.entryEncounters)
+				.where(eq(schema.entryEncounters.entryId, entryId)),
+		).toEqual([]);
+		expect(
+			await db.select().from(schema.pages).where(eq(schema.pages.id, pageId)),
 		).toHaveLength(1);
 	});
 

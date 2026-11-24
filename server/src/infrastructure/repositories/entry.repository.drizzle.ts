@@ -407,6 +407,21 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 			return toDomainEntry(entryRow, translationRows);
 		});
 
+	const deleteEntry: EntryRepository["delete"] = async (id, userId, iso) => {
+		const [row] = await db
+			.delete(entries)
+			.where(
+				and(
+					eq(entries.id, id),
+					eq(entries.userId, userId),
+					eq(entries.iso, iso),
+				),
+			)
+			.returning({ id: entries.id });
+
+		return Boolean(row);
+	};
+
 	return {
 		create,
 		savePageEntries,
@@ -415,6 +430,7 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 		getAll,
 		getAllForReview,
 		updateTranslations,
+		delete: deleteEntry,
 	};
 }
 

@@ -10,6 +10,7 @@ interface EditTranslationsDialogProps {
 	entry: EntryViewModel;
 	error: Error | null;
 	onDismiss: () => void;
+	onRequestDelete: () => void;
 	onSave: (translations: readonly string[]) => void;
 	pending: boolean;
 }
@@ -18,6 +19,7 @@ export function EditTranslationsDialog({
 	entry,
 	error,
 	onDismiss,
+	onRequestDelete,
 	onSave,
 	pending,
 }: EditTranslationsDialogProps) {
@@ -144,22 +146,32 @@ export function EditTranslationsDialog({
 					</p>
 				) : null}
 
-				<div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+				<div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<button
-						className="min-h-11 rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+						className="min-h-11 rounded-md px-3 py-2.5 text-left font-semibold text-destructive outline-none hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
 						disabled={pending}
-						onClick={onDismiss}
+						onClick={onRequestDelete}
 						type="button"
 					>
-						Cancel
+						Delete word
 					</button>
-					<button
-						className="min-h-11 rounded-md bg-primary px-5 py-2.5 font-semibold text-primary-foreground outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
-						disabled={pending}
-						type="submit"
-					>
-						{pending ? "Saving…" : "Save translations"}
-					</button>
+					<div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+						<button
+							className="min-h-11 rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+							disabled={pending}
+							onClick={onDismiss}
+							type="button"
+						>
+							Cancel
+						</button>
+						<button
+							className="min-h-11 rounded-md bg-primary px-5 py-2.5 font-semibold text-primary-foreground outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+							disabled={pending}
+							type="submit"
+						>
+							{pending ? "Saving…" : "Save translations"}
+						</button>
+					</div>
 				</div>
 			</form>
 		</dialog>

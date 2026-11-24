@@ -1,10 +1,11 @@
 import {
+	useId,
 	useRef,
 	useState,
 	type ChangeEvent,
 	type FormEvent,
 } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import type { PageSuggestionViewModel } from "@langstore/contracts";
 import { useSavePageEntries } from "../../api/mutations/useSavePageEntries";
 import { useUploadPage } from "../../api/mutations/useUploadPage";
@@ -13,6 +14,8 @@ import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
 import { CameraIcon } from "../../components/icons/CameraIcon";
 import { CheckIcon } from "../../components/icons/CheckIcon";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { Input } from "../../components/ui/Input";
+import { Textarea } from "../../components/ui/Textarea";
 import { SelectableWordItem } from "../../components/vocabulary/SelectableWordItem";
 
 const ACCEPTED_PHOTO_TYPES = new Set(["image/jpeg", "image/png"]);
@@ -23,14 +26,24 @@ export function UploadPage() {
 
 interface UploadProps {
 	collectionId?: string;
+	backTo?: string;
+	showDescription?: boolean;
 }
 
-export function Upload({ collectionId: fixedCollectionId }: UploadProps) {
+export function Upload({
+	collectionId: fixedCollectionId,
+	backTo,
+	showDescription = false,
+}: UploadProps) {
 	const { iso = "" } = useParams();
 	const uploadPage = useUploadPage();
 	const savePageEntries = useSavePageEntries();
+	const titleId = useId();
+	const descriptionId = useId();
 	const photoInputRef = useRef<HTMLInputElement>(null);
 	const [selectedCollectionId, setSelectedCollectionId] = useState("");
+	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
 	const [photo, setPhoto] = useState<File | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [selectedTexts, setSelectedTexts] = useState<Set<string>>(
@@ -38,11 +51,14 @@ export function Upload({ collectionId: fixedCollectionId }: UploadProps) {
 	);
 	const [showCancelDialog, setShowCancelDialog] = useState(false);
 	const collectionId = fixedCollectionId ?? selectedCollectionId;
+	const trimmedTitle = title.trim();
 
 	const resetWorkflow = () => {
 		uploadPage.reset();
 		savePageEntries.reset();
 		setSelectedTexts(new Set());
+		setTitle("");
+		setDescription("");
 		setPhoto(null);
 		setFileError(null);
 		setShowCancelDialog(false);
@@ -67,10 +83,17 @@ export function Upload({ collectionId: fixedCollectionId }: UploadProps) {
 
 	const handleUpload = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		if (!collectionId || !photo || !iso) return;
+		if (!collectionId || !trimmedTitle || !photo || !iso) return;
+		const trimmedDescription = description.trim();
 
 		uploadPage.mutate(
-			{ iso, collectionId, photo },
+			{
+				iso,
+				collectionId,
+				title: trimmedTitle,
+				description: trimmedDescription || null,
+				photo,
+			},
 			{
 				onSuccess: ({ suggestions }) => {
 					setSelectedTexts(new Set(suggestions.map(({ text }) => text)));
@@ -142,7 +165,17 @@ export function Upload({ collectionId: fixedCollectionId }: UploadProps) {
 
 	return (
 		<div className="mx-auto max-w-3xl">
-			<header className="max-w-2xl">
+			{backTo ? (
+				<Link
+					className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+					to={backTo}
+				>
+					<ArrowLeftIcon className="size-4" />
+					Back to collection
+				</Link>
+			) : null}
+
+			<header className={`${backTo ? "mt-6 " : ""}max-w-2xl`}>
 				<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
 					Find words on a page
 				</h1>
@@ -156,6 +189,39 @@ export function Upload({ collectionId: fixedCollectionId }: UploadProps) {
 				{fixedCollectionId ? null : (
 					<CollectionDropdown onChange={setSelectedCollectionId} />
 				)}
+
+				<div>
+					<label className="block font-semibold" htmlFor={titleId}>
+						Title
+					</label>
+					<Input
+						autoComplete="off"
+						className="mt-3"
+						disabled={uploadPage.isPending}
+						id={titleId}
+						onChange={(event) => setTitle(event.currentTarget.value)}
+						required
+						value={title}
+					/>
+				</div>
+
+				{showDescription ? (
+					<div>
+						<label className="block font-semibold" htmlFor={descriptionId}>
+							Description{" "}
+							<span className="font-normal text-muted-foreground">
+								(optional)
+							</span>
+						</label>
+						<Textarea
+							className="mt-3"
+							disabled={uploadPage.isPending}
+							id={descriptionId}
+							onChange={(event) => setDescription(event.currentTarget.value)}
+							value={description}
+						/>
+					</div>
+				) : null}
 
 				<div>
 					<span className="block font-semibold">Page photo</span>
@@ -191,7 +257,12 @@ export function Upload({ collectionId: fixedCollectionId }: UploadProps) {
 
 				<button
 					className="min-h-12 w-full rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:min-w-40"
-					disabled={!collectionId || !photo || uploadPage.isPending}
+					disabled={
+						!collectionId ||
+						!trimmedTitle ||
+						!photo ||
+						uploadPage.isPending
+					}
 					type="submit"
 				>
 					{uploadPage.isPending ? "Reading page..." : "Find words"}

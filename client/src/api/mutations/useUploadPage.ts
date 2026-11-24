@@ -5,6 +5,8 @@ import { useFetch } from "../useFetch";
 interface UploadPageVariables {
 	iso: string;
 	collectionId: string;
+	title: string;
+	description: string | null;
 	photo: File;
 }
 
@@ -12,9 +14,10 @@ export function useUploadPage() {
 	const fetch = useFetch();
 
 	return useMutation<PageIngestionViewModel, Error, UploadPageVariables>({
-		mutationFn: ({ iso, collectionId, photo }) => {
+		mutationFn: ({ iso, collectionId, title, description, photo }) => {
 			const formData = new FormData();
-			formData.append("name", photo.name || "Photographed page");
+			formData.append("name", title);
+			if (description) formData.append("description", description);
 			formData.append("photo", photo);
 
 			return fetch<PageIngestionViewModel>({

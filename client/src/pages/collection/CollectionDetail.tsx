@@ -48,15 +48,18 @@ export function CollectionDetail() {
 						</p>
 					) : null}
 				</div>
-				<NewResourceButton to={paths.upload(iso)}>
-					New page
-				</NewResourceButton>
+				<div className="flex flex-wrap items-center gap-3">
+					<Link
+						className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-card-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+						to={paths.editCollection(iso, collection.id)}
+					>
+						Edit collection
+					</Link>
+					<NewResourceButton to={paths.upload(iso)}>New page</NewResourceButton>
+				</div>
 			</header>
 
 			<div className="mt-8">
-				<h2 className="font-display text-2xl font-semibold tracking-tight">
-					Saved pages
-				</h2>
 				<ItemList
 					className="mt-4"
 					emptyMessage="Upload a page to start building this collection."

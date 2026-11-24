@@ -1,29 +1,24 @@
-import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useCreateCollection } from "../../api/mutations/useCreateCollection";
+import {
+	CollectionForm,
+	type CollectionFormValues,
+} from "../../components/collections/CollectionForm";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
-import { Input } from "../../components/ui/Input";
-import { Textarea } from "../../components/ui/Textarea";
 import { paths } from "../../router/paths";
 
 export function NewCollectionPage() {
 	const { iso = "" } = useParams();
 	const navigate = useNavigate();
 	const createCollection = useCreateCollection();
-	const [name, setName] = useState("");
-	const [description, setDescription] = useState("");
-	const trimmedName = name.trim();
 
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		if (!iso || !trimmedName) return;
-
-		const trimmedDescription = description.trim();
+	const handleSubmit = ({ name, description }: CollectionFormValues) => {
+		if (!iso) return;
 		createCollection.mutate(
 			{
 				iso,
-				name: trimmedName,
-				description: trimmedDescription || null,
+				name,
+				description,
 			},
 			{
 				onSuccess: (collection) => {
@@ -52,55 +47,13 @@ export function NewCollectionPage() {
 				</p>
 			</header>
 
-			<form className="mt-10 space-y-8" onSubmit={handleSubmit}>
-				<div>
-					<label className="block font-semibold" htmlFor="collection-name">
-						Name
-					</label>
-					<Input
-						autoComplete="off"
-						autoFocus
-						className="mt-3"
-						disabled={createCollection.isPending}
-						id="collection-name"
-						onChange={(event) => setName(event.currentTarget.value)}
-						required
-						value={name}
-					/>
-				</div>
-
-				<div>
-					<label
-						className="block font-semibold"
-						htmlFor="collection-description"
-					>
-						Description <span className="font-normal text-muted-foreground">(optional)</span>
-					</label>
-					<Textarea
-						className="mt-3"
-						disabled={createCollection.isPending}
-						id="collection-description"
-						onChange={(event) => setDescription(event.currentTarget.value)}
-						value={description}
-					/>
-				</div>
-
-				<div className="flex flex-wrap items-center gap-3">
-					<button
-						className="min-h-12 rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-						disabled={!trimmedName || createCollection.isPending}
-						type="submit"
-					>
-						{createCollection.isPending ? "Creating..." : "Create collection"}
-					</button>
-					<Link
-						className="inline-flex min-h-12 items-center rounded-md px-4 font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-						to={paths.collections(iso)}
-					>
-						Cancel
-					</Link>
-				</div>
-			</form>
+			<CollectionForm
+				cancelTo={paths.collections(iso)}
+				onSubmit={handleSubmit}
+				pending={createCollection.isPending}
+				pendingLabel="Creating..."
+				submitLabel="Create collection"
+			/>
 
 			{createCollection.isError ? (
 				<p

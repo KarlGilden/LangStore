@@ -7,7 +7,10 @@ import {
 	collectionsRoute,
 	newCollectionRoute,
 } from "../pages/collections/routes";
-import { collectionDetailRoute } from "../pages/collection/routes";
+import {
+	collectionDetailRoute,
+	editCollectionRoute,
+} from "../pages/collection/routes";
 import { RouteErrorPage } from "../pages/not-found/RouteErrorPage";
 import { notFoundRoute } from "../pages/not-found/routes";
 import { pageDetailRoute } from "../pages/page/routes";
@@ -39,6 +42,7 @@ export const appRoutes: RouteObject[] = [
 									collectionsRoute,
 									newCollectionRoute,
 									collectionDetailRoute,
+									editCollectionRoute,
 									pageDetailRoute,
 									uploadRoute,
 								],

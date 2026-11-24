@@ -54,6 +54,11 @@ export const updateCollectionSchema = {
 	response: { 200: collectionResponseSchema, ...commonErrorResponses },
 } as const;
 
+export const deleteCollectionSchema = {
+	params: isoAndIdParams,
+	response: { 204: { type: "null" }, ...commonErrorResponses },
+} as const;
+
 export const createCollectionSchema = {
 	params: languageParamsSchema,
 	body: {

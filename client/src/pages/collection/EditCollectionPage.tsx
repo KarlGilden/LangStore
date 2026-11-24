@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { useDeleteCollection } from "../../api/mutations/useDeleteCollection";
 import { useUpdateCollection } from "../../api/mutations/useUpdateCollection";
 import { useCollection } from "../../api/queries/useCollection";
 import {
@@ -6,6 +8,7 @@ import {
 	type CollectionFormValues,
 } from "../../components/collections/CollectionForm";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
 
@@ -14,6 +17,8 @@ export function EditCollectionPage() {
 	const navigate = useNavigate();
 	const collectionQuery = useCollection(iso, collectionId);
 	const updateCollection = useUpdateCollection();
+	const deleteCollection = useDeleteCollection();
+	const [confirmingDelete, setConfirmingDelete] = useState(false);
 	const collection = collectionQuery.data;
 
 	if (collectionQuery.isLoading) {
@@ -46,6 +51,13 @@ export function EditCollectionPage() {
 		);
 	};
 
+	const handleDelete = () => {
+		deleteCollection.mutate(
+			{ iso, collectionId: collection.id },
+			{ onSuccess: () => navigate(paths.collections(iso), { replace: true }) },
+		);
+	};
+
 	return (
 		<section className="mx-auto max-w-3xl">
 			<Link
@@ -56,13 +68,22 @@ export function EditCollectionPage() {
 				{collection.name}
 			</Link>
 
-			<header className="mt-6 max-w-2xl">
-				<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-					Edit collection
-				</h1>
-				<p className="mt-4 text-base leading-7 text-muted-foreground">
-					Update how this book or reading project appears in your library.
-				</p>
+			<header className="mt-6 grid max-w-3xl gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+				<div className="max-w-2xl">
+					<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+						Edit collection
+					</h1>
+					<p className="mt-4 text-base leading-7 text-muted-foreground">
+						Update how this book or reading project appears in your library.
+					</p>
+				</div>
+				<button
+					className="min-h-11 rounded-md border border-destructive/40 px-4 py-2.5 font-semibold text-destructive outline-none hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-ring"
+					onClick={() => setConfirmingDelete(true)}
+					type="button"
+				>
+					Delete collection
+				</button>
 			</header>
 
 			<CollectionForm
@@ -84,6 +105,28 @@ export function EditCollectionPage() {
 					{updateCollection.error.message}
 				</p>
 			) : null}
+
+			{deleteCollection.isError ? (
+				<p
+					className="mt-8 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+					role="alert"
+				>
+					{deleteCollection.error.message}
+				</p>
+			) : null}
+
+			<ConfirmDialog
+				cancelLabel="Cancel"
+				confirmLabel={deleteCollection.isPending ? "Deleting..." : "Delete collection"}
+				description={`Delete ${collection.name} and all of its pages and encounters? Saved words will remain in your vocabulary.`}
+				onConfirm={handleDelete}
+				onDismiss={() => {
+					if (!deleteCollection.isPending) setConfirmingDelete(false);
+				}}
+				open={confirmingDelete}
+				pending={deleteCollection.isPending}
+				title="Delete collection?"
+			/>
 		</section>
 	);
 }

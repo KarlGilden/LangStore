@@ -6,6 +6,7 @@ interface ConfirmDialogProps {
 	description: string;
 	confirmLabel: string;
 	cancelLabel?: string;
+	pending?: boolean;
 	onConfirm: () => void;
 	onDismiss: () => void;
 }
@@ -16,6 +17,7 @@ export function ConfirmDialog({
 	description,
 	confirmLabel,
 	cancelLabel = "Keep choosing",
+	pending = false,
 	onConfirm,
 	onDismiss,
 }: ConfirmDialogProps) {
@@ -41,7 +43,7 @@ export function ConfirmDialog({
 			className="m-auto w-[calc(100%-2rem)] max-w-md rounded-lg border border-border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-foreground/40"
 			onCancel={(event) => {
 				event.preventDefault();
-				onDismiss();
+				if (!pending) onDismiss();
 			}}
 			onClose={onDismiss}
 			ref={dialogRef}
@@ -64,6 +66,7 @@ export function ConfirmDialog({
 						autoFocus
 						className="min-h-11 rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
 						onClick={onDismiss}
+						disabled={pending}
 						type="button"
 					>
 						{cancelLabel}
@@ -71,6 +74,7 @@ export function ConfirmDialog({
 					<button
 						className="min-h-11 rounded-md bg-destructive px-4 py-2.5 font-semibold text-destructive-foreground outline-none hover:bg-destructive/90 focus-visible:ring-2 focus-visible:ring-ring"
 						onClick={onConfirm}
+						disabled={pending}
 						type="button"
 					>
 						{confirmLabel}

@@ -120,11 +120,29 @@ export const createCollectionService = ({
 		return collectionRepository.getAll(userId, iso);
 	};
 
+	const deleteCollection = async (
+		userId: string,
+		iso: string,
+		collectionId: string,
+	) => {
+		requireLanguageCode(iso);
+		const deleted = await collectionRepository.delete(
+			collectionId,
+			userId,
+			iso,
+		);
+
+		if (!deleted) {
+			throw new CollectionNotFoundError();
+		}
+	};
+
 	return {
 		createCollection,
 		getCollection,
 		updateCollection,
 		getAllCollections,
+		deleteCollection,
 	};
 };
 

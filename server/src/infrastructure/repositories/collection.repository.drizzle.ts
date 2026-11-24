@@ -63,10 +63,30 @@ export function createDrizzleCollectionRepository(
 		return row ? toDomainCollection(row) : null;
 	};
 
+	const deleteCollection: CollectionRepository["delete"] = async (
+		id,
+		userId,
+		iso,
+	) => {
+		const [row] = await db
+			.delete(collections)
+			.where(
+				and(
+					eq(collections.id, id),
+					eq(collections.userId, userId),
+					eq(collections.iso, iso),
+				),
+			)
+			.returning({ id: collections.id });
+
+		return Boolean(row);
+	};
+
 	return {
 		create,
 		getById,
 		update,
+		delete: deleteCollection,
 		getAll,
 	};
 }

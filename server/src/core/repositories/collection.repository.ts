@@ -26,5 +26,7 @@ export interface CollectionRepository {
 		input: UpdateCollectionInput,
 	): Promise<Collection | null>;
 
+	delete(id: string, userId: string, iso: string): Promise<boolean>;
+
 	getAll(userId: string, iso: string): Promise<Collection[]>;
 }

@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { PageCreateConflictError } from "../../core/errors/page.error.js";
 import type { PageRepository } from "../../core/repositories/page.repository.js";
 import type { Database } from "../data/db.js";
@@ -69,6 +69,50 @@ export function createDrizzlePageRepository(db: Database): PageRepository {
 		return rows.map((row) => toDomainPage(row.page));
 	};
 
+	const collectionIdsInScope = (userId: string, iso: string) =>
+		db
+			.select({ id: collections.id })
+			.from(collections)
+			.where(
+				and(eq(collections.userId, userId), eq(collections.iso, iso)),
+			);
+
+	const update: PageRepository["update"] = async (
+		id,
+		userId,
+		iso,
+		input,
+	) => {
+		const [row] = await db
+			.update(pages)
+			.set(input)
+			.where(
+				and(
+					eq(pages.id, id),
+					eq(pages.userId, userId),
+					inArray(pages.collectionId, collectionIdsInScope(userId, iso)),
+				),
+			)
+			.returning();
+
+		return row ? toDomainPage(row) : null;
+	};
+
+	const deletePage: PageRepository["delete"] = async (id, userId, iso) => {
+		const [row] = await db
+			.delete(pages)
+			.where(
+				and(
+					eq(pages.id, id),
+					eq(pages.userId, userId),
+					inArray(pages.collectionId, collectionIdsInScope(userId, iso)),
+				),
+			)
+			.returning({ id: pages.id });
+
+		return Boolean(row);
+	};
+
 	const getLatest: PageRepository["getLatest"] = async (userId, iso) => {
 		const [row] = await db
 			.select({ page: pages })
@@ -90,6 +134,8 @@ export function createDrizzlePageRepository(db: Database): PageRepository {
 	return {
 		create,
 		getById,
+		update,
+		delete: deletePage,
 		getByCollection,
 		getLatest,
 	};

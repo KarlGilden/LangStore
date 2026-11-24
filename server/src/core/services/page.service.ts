@@ -16,6 +16,11 @@ export interface CreatePageInput {
 	summary: string | null;
 }
 
+export interface UpdatePageInput {
+	name: string;
+	description?: string | null;
+}
+
 export const createPageService = ({
 	pageRepository,
 	collectionRepository,
@@ -76,6 +81,36 @@ export const createPageService = ({
 		return pageRepository.getByCollection(collectionId, userId, iso);
 	};
 
+	const updatePage = async (
+		userId: string,
+		iso: string,
+		pageId: string,
+		input: UpdatePageInput,
+	) => {
+		requirePageLanguageCode(iso);
+		requirePageText("name", input.name);
+		if (input.description !== undefined && input.description !== null) {
+			requirePageText("description", input.description);
+		}
+
+		const page = await pageRepository.update(pageId, userId, iso, {
+			name: input.name,
+			description: input.description ?? null,
+		});
+		if (!page) {
+			throw new PageNotFoundError();
+		}
+		return page;
+	};
+
+	const deletePage = async (userId: string, iso: string, pageId: string) => {
+		requirePageLanguageCode(iso);
+		const deleted = await pageRepository.delete(pageId, userId, iso);
+		if (!deleted) {
+			throw new PageNotFoundError();
+		}
+	};
+
 	const getLatestPage = async (userId: string, iso: string) => {
 		requirePageLanguageCode(iso);
 		const page = await pageRepository.getLatest(userId, iso);
@@ -85,7 +120,14 @@ export const createPageService = ({
 		return page;
 	};
 
-	return { createPage, getPage, getAllCollectionPages, getLatestPage };
+	return {
+		createPage,
+		getPage,
+		updatePage,
+		deletePage,
+		getAllCollectionPages,
+		getLatestPage,
+	};
 };
 
 export type PageService = ReturnType<typeof createPageService>;

@@ -72,6 +72,25 @@ export const getPageSchema = {
 	response: { 200: pageResponseSchema, ...commonErrorResponses },
 } as const;
 
+export const updatePageSchema = {
+	params: isoAndIdParams,
+	body: {
+		type: "object",
+		additionalProperties: false,
+		required: ["name"],
+		properties: {
+			name: { type: "string", minLength: 1 },
+			description: nullableTextSchema,
+		},
+	},
+	response: { 200: pageResponseSchema, ...commonErrorResponses },
+} as const;
+
+export const deletePageSchema = {
+	params: isoAndIdParams,
+	response: { 204: { type: "null" }, ...commonErrorResponses },
+} as const;
+
 export const getLatestPageSchema = {
 	params: languageParamsSchema,
 	response: { 200: pageResponseSchema, ...commonErrorResponses },

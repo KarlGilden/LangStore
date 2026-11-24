@@ -18,6 +18,7 @@ export function createServices(
 		userRepository,
 		collectionRepository,
 		pageRepository,
+		pageIngestionRepository,
 		userSettingsRepository,
 		entryEncounterRepository,
 		entryRepository,
@@ -53,12 +54,10 @@ export function createServices(
 		collectionRepository,
 	});
 
-	const wordExtractionService = createWordExtractionService({
-		entryRepository,
-	});
+	const wordExtractionService = createWordExtractionService();
 
 	const pageIngestionService = createPageIngestionService({
-		pageService,
+		pageIngestionRepository,
 		wordExtractionService,
 		textRecognitionService: textRecognitionService.service,
 		collectionService,

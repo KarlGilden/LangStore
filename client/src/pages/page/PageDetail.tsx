@@ -45,18 +45,26 @@ export function PageDetail() {
 				Back to collection
 			</Link>
 
-			<header className="mt-6 max-w-3xl">
-				<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-					{page.name}
-				</h1>
-				{page.description ? (
-					<p className="mt-4 text-base leading-7 text-muted-foreground">
-						{page.description}
+			<header className="mt-6 grid max-w-5xl gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+				<div className="max-w-3xl">
+					<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+						{page.name}
+					</h1>
+					{page.description ? (
+						<p className="mt-4 text-base leading-7 text-muted-foreground">
+							{page.description}
+						</p>
+					) : null}
+					<p className="mt-3 text-sm font-medium text-primary">
+						{formatSavedDate(page.createdAt)}
 					</p>
-				) : null}
-				<p className="mt-3 text-sm font-medium text-primary">
-					{formatSavedDate(page.createdAt)}
-				</p>
+				</div>
+				<Link
+					className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+					to={paths.editPage(iso, page.collectionId, page.id)}
+				>
+					Edit page
+				</Link>
 			</header>
 
 			<div

@@ -43,4 +43,9 @@
     content-visibility: auto;
     contain-intrinsic-size: 0 6rem;
   }
+
+  .review-entry-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 6.5rem;
+  }
 }

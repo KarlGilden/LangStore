@@ -1,5 +1,9 @@
 import type { Entry } from "../../core/entities/entry.entity.js";
-import type { EntryViewModel } from "@langstore/contracts";
+import type { EntryReviewResult } from "../../core/repositories/entry.repository.js";
+import type {
+	EntryReviewViewModel,
+	EntryViewModel,
+} from "@langstore/contracts";
 
 export function toEntryViewModel(entry: Entry): EntryViewModel {
 	return {
@@ -11,5 +15,15 @@ export function toEntryViewModel(entry: Entry): EntryViewModel {
 			text: translation.text,
 			createdAt: translation.createdAt.toISOString(),
 		})),
+	};
+}
+
+export function toEntryReviewViewModel(
+	entry: EntryReviewResult,
+): EntryReviewViewModel {
+	return {
+		...toEntryViewModel(entry),
+		encounterCount: entry.encounterCount,
+		encounterPageCount: entry.encounterPageCount,
 	};
 }

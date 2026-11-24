@@ -1,11 +1,13 @@
 import type { FastifyPluginAsync } from "fastify";
 import {
 	createPageSchema,
+	deletePageSchema,
 	getLatestPageSchema,
 	getPageSchema,
 	getPageVocabularySchema,
 	listCollectionPagesSchema,
 	savePageEntriesSchema,
+	updatePageSchema,
 } from "@langstore/contracts";
 import { toPageVocabularyEntryViewModel } from "../../../mappers/entry-encounter.mapper.js";
 import { toPageViewModel } from "../../../mappers/page.mapper.js";
@@ -45,6 +47,39 @@ export const pageRoutes: FastifyPluginAsync = async (app) => {
 		);
 		return reply.code(200).send(toPageViewModel(page));
 	});
+
+	routes.put("/:id", { schema: updatePageSchema }, async (request, reply) => {
+		const userId = request.currentUserId;
+		if (!userId) {
+			return reply.code(401).send({ error: "Unauthorized" });
+		}
+
+		const page = await pageService.updatePage(
+			userId,
+			request.params.iso,
+			request.params.id,
+			request.body,
+		);
+		return reply.code(200).send(toPageViewModel(page));
+	});
+
+	routes.delete(
+		"/:id",
+		{ schema: deletePageSchema },
+		async (request, reply) => {
+			const userId = request.currentUserId;
+			if (!userId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
+
+			await pageService.deletePage(
+				userId,
+				request.params.iso,
+				request.params.id,
+			);
+			return reply.code(204).send(null);
+		},
+	);
 
 	routes.get(
 		"/:id/vocabulary",

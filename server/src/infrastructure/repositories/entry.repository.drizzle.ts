@@ -56,98 +56,146 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 	};
 
 	const savePageEntries: EntryRepository["savePageEntries"] = async (input) => {
-		try {
-			return await db.transaction(async (transaction) => {
-				const [ownedPage] = await transaction
-					.select({ id: pages.id })
-					.from(pages)
-					.innerJoin(
-						collections,
-						and(
-							eq(pages.collectionId, collections.id),
-							eq(pages.userId, collections.userId),
-						),
-					)
+		return db.transaction(async (transaction) => {
+			const [ownedPage] = await transaction
+				.select({ id: pages.id })
+				.from(pages)
+				.innerJoin(
+					collections,
+					and(
+						eq(pages.collectionId, collections.id),
+						eq(pages.userId, collections.userId),
+					),
+				)
+				.where(
+					and(
+						eq(pages.id, input.pageId),
+						eq(pages.userId, input.userId),
+						eq(collections.iso, input.iso),
+					),
+				)
+				.limit(1);
+
+			if (!ownedPage) {
+				throw new PageNotFoundError();
+			}
+			if (input.entries.length === 0) {
+				return [];
+			}
+
+			const requestedTexts = input.entries.map(({ text }) => text);
+			const existingEntryRows = await transaction
+				.select()
+				.from(entries)
+				.where(
+					and(
+						eq(entries.userId, input.userId),
+						eq(entries.iso, input.iso),
+						inArray(entries.text, requestedTexts),
+					),
+				);
+			const entryByText = new Map(
+				existingEntryRows.map((row) => [row.text, row]),
+			);
+			const missingSelections = input.entries
+				.filter(({ text }) => !entryByText.has(text))
+				.toSorted((left, right) => left.text.localeCompare(right.text));
+
+			const insertedEntryRows = missingSelections.length
+				? await transaction
+						.insert(entries)
+						.values(
+							missingSelections.map(({ text }) => ({
+								text,
+								userId: input.userId,
+								iso: input.iso,
+							})),
+						)
+						.onConflictDoNothing({
+							target: [entries.userId, entries.iso, entries.text],
+						})
+						.returning()
+				: [];
+			for (const row of insertedEntryRows) {
+				entryByText.set(row.text, row);
+			}
+
+			const unresolvedTexts = requestedTexts.filter(
+				(text) => !entryByText.has(text),
+			);
+			if (unresolvedTexts.length > 0) {
+				const concurrentlyInsertedRows = await transaction
+					.select()
+					.from(entries)
 					.where(
 						and(
-							eq(pages.id, input.pageId),
-							eq(pages.userId, input.userId),
-							eq(collections.iso, input.iso),
+							eq(entries.userId, input.userId),
+							eq(entries.iso, input.iso),
+							inArray(entries.text, unresolvedTexts),
 						),
-					)
-					.limit(1);
-
-				if (!ownedPage) {
-					throw new PageNotFoundError();
-				}
-				if (input.entries.length === 0) {
-					return [];
-				}
-
-				const entryRows = await transaction
-					.insert(entries)
-					.values(
-						input.entries.map(({ text }) => ({
-							text,
-							userId: input.userId,
-							iso: input.iso,
-						})),
-					)
-					.returning();
-				if (entryRows.length !== input.entries.length) {
-					throw new Error("Failed to persist entries");
-				}
-
-				const entryByText = new Map(entryRows.map((row) => [row.text, row]));
-				const translationInputs = input.entries.flatMap((selection) => {
-					const entry = entryByText.get(selection.text);
-					if (!entry) throw new Error("Failed to resolve persisted entry");
-					return selection.translations.map(({ text }) => ({
-						entryId: entry.id,
-						text,
-					}));
-				});
-				const translationRows = translationInputs.length
-					? await transaction
-							.insert(translations)
-							.values(translationInputs)
-							.returning()
-					: [];
-
-				await transaction.insert(entryEncounters).values(
-					input.entries.map((selection) => {
-						const entry = entryByText.get(selection.text);
-						if (!entry) throw new Error("Failed to resolve persisted entry");
-						return {
-							entryId: entry.id,
-							pageId: input.pageId,
-							count: selection.count,
-						};
-					}),
-				);
-
-				const translationsByEntryId = new Map<string, TranslationRow[]>();
-				for (const row of translationRows) {
-					const grouped = translationsByEntryId.get(row.entryId) ?? [];
-					grouped.push(row);
-					translationsByEntryId.set(row.entryId, grouped);
-				}
-
-				return input.entries.map((selection) => {
-					const entry = entryByText.get(selection.text);
-					if (!entry) throw new Error("Failed to resolve persisted entry");
-					return toDomainEntry(
-						entry,
-						translationsByEntryId.get(entry.id) ?? [],
 					);
-				});
-			});
-		} catch (error) {
-			if (isPostgresUniqueViolation(error)) {
-				throw new EntryAlreadyExistsError();
+				for (const row of concurrentlyInsertedRows) {
+					entryByText.set(row.text, row);
+				}
 			}
-			throw error;
-		}
+
+			if (requestedTexts.some((text) => !entryByText.has(text))) {
+				throw new Error("Failed to resolve persisted entries");
+			}
+
+			const insertedEntryIds = new Set(
+				insertedEntryRows.map((entry) => entry.id),
+			);
+			const translationInputs = input.entries.flatMap((selection) => {
+				const entry = requireEntryByText(entryByText, selection.text);
+				if (!insertedEntryIds.has(entry.id)) return [];
+				return selection.translations.map(({ text }) => ({
+					entryId: entry.id,
+					text,
+				}));
+			});
+			if (translationInputs.length > 0) {
+				await transaction.insert(translations).values(translationInputs);
+			}
+
+			await transaction
+				.insert(entryEncounters)
+				.values(
+					input.entries.map((selection) => ({
+						entryId: requireEntryByText(entryByText, selection.text).id,
+						pageId: input.pageId,
+						count: selection.count,
+					})),
+				)
+				.onConflictDoUpdate({
+					target: [entryEncounters.entryId, entryEncounters.pageId],
+					set: { count: sql`excluded.count` },
+				});
+
+			const entryRows = input.entries.map((selection) =>
+				requireEntryByText(entryByText, selection.text),
+			);
+			const translationRows = await transaction
+				.select()
+				.from(translations)
+				.where(
+					inArray(
+						translations.entryId,
+						entryRows.map((entry) => entry.id),
+					),
+				)
+				.orderBy(asc(translations.createdAt), asc(translations.id));
+			const translationsByEntryId = new Map<string, TranslationRow[]>();
+			for (const row of translationRows) {
+				const grouped = translationsByEntryId.get(row.entryId) ?? [];
+				grouped.push(row);
+				translationsByEntryId.set(row.entryId, grouped);
+			}
+
+			return entryRows.map((entry) =>
+				toDomainEntry(entry, translationsByEntryId.get(entry.id) ?? []),
+			);
+		});
 	};
 
 	const getById: EntryRepository["getById"] = async (id, userId) => {
@@ -376,4 +424,15 @@ function isPostgresUniqueViolation(error: unknown): boolean {
 		current = "cause" in current ? current.cause : undefined;
 	}
 	return false;
+}
+
+function requireEntryByText<T>(
+	entriesByText: ReadonlyMap<string, T>,
+	text: string,
+): T {
+	const entry = entriesByText.get(text);
+	if (!entry) {
+		throw new Error("Failed to resolve persisted entry");
+	}
+	return entry;
 }

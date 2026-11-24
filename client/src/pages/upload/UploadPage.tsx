@@ -18,17 +18,26 @@ import { SelectableWordItem } from "../../components/vocabulary/SelectableWordIt
 const ACCEPTED_PHOTO_TYPES = new Set(["image/jpeg", "image/png"]);
 
 export function UploadPage() {
+	return <Upload />;
+}
+
+interface UploadProps {
+	collectionId?: string;
+}
+
+export function Upload({ collectionId: fixedCollectionId }: UploadProps) {
 	const { iso = "" } = useParams();
 	const uploadPage = useUploadPage();
 	const savePageEntries = useSavePageEntries();
 	const photoInputRef = useRef<HTMLInputElement>(null);
-	const [collectionId, setCollectionId] = useState("");
+	const [selectedCollectionId, setSelectedCollectionId] = useState("");
 	const [photo, setPhoto] = useState<File | null>(null);
 	const [fileError, setFileError] = useState<string | null>(null);
 	const [selectedTexts, setSelectedTexts] = useState<Set<string>>(
 		() => new Set(),
 	);
 	const [showCancelDialog, setShowCancelDialog] = useState(false);
+	const collectionId = fixedCollectionId ?? selectedCollectionId;
 
 	const resetWorkflow = () => {
 		uploadPage.reset();
@@ -138,12 +147,15 @@ export function UploadPage() {
 					Find words on a page
 				</h1>
 				<p className="mt-4 text-base leading-7 text-muted-foreground">
-					Choose a collection and photograph a page. You will decide which new
-					words to keep after it is read.
+					{fixedCollectionId
+						? "Photograph a page. You will decide which new words to keep after it is read."
+						: "Choose a collection and photograph a page. You will decide which new words to keep after it is read."}
 				</p>
 			</header>
 			<form className="mt-10 space-y-8" onSubmit={handleUpload}>
-				<CollectionDropdown onChange={setCollectionId} />
+				{fixedCollectionId ? null : (
+					<CollectionDropdown onChange={setSelectedCollectionId} />
+				)}
 
 				<div>
 					<span className="block font-semibold">Page photo</span>

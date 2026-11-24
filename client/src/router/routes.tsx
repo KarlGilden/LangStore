@@ -13,7 +13,7 @@ import {
 } from "../pages/collection/routes";
 import { RouteErrorPage } from "../pages/not-found/RouteErrorPage";
 import { notFoundRoute } from "../pages/not-found/routes";
-import { pageDetailRoute } from "../pages/page/routes";
+import { newPageRoute, pageDetailRoute } from "../pages/page/routes";
 import { signInRoute } from "../pages/sign-in/routes";
 import { uploadRoute } from "../pages/upload/routes";
 import { IsoBoundary } from "./IsoBoundary";
@@ -43,6 +43,7 @@ export const appRoutes: RouteObject[] = [
 									newCollectionRoute,
 									collectionDetailRoute,
 									editCollectionRoute,
+									newPageRoute,
 									pageDetailRoute,
 									uploadRoute,
 								],

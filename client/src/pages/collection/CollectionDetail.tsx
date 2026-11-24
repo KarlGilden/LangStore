@@ -55,7 +55,9 @@ export function CollectionDetail() {
 					>
 						Edit collection
 					</Link>
-					<NewResourceButton to={paths.upload(iso)}>New page</NewResourceButton>
+					<NewResourceButton to={paths.newPage(iso, collection.id)}>
+						New page
+					</NewResourceButton>
 				</div>
 			</header>
 

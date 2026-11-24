@@ -3,7 +3,10 @@ import { AuthShell } from "../auth/AuthShell";
 import { HomeGate } from "../auth/HomeGate";
 import { AppShell } from "../layouts/AppShell";
 import { HomePage } from "../pages/home/HomePage";
-import { collectionsRoute } from "../pages/collections/routes";
+import {
+	collectionsRoute,
+	newCollectionRoute,
+} from "../pages/collections/routes";
 import { collectionDetailRoute } from "../pages/collection/routes";
 import { RouteErrorPage } from "../pages/not-found/RouteErrorPage";
 import { notFoundRoute } from "../pages/not-found/routes";
@@ -34,6 +37,7 @@ export const appRoutes: RouteObject[] = [
 								Component: AppShell,
 								children: [
 									collectionsRoute,
+									newCollectionRoute,
 									collectionDetailRoute,
 									pageDetailRoute,
 									uploadRoute,

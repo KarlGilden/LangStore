@@ -4,6 +4,7 @@ import { useCollectionPages } from "../../api/queries/useCollectionPages";
 import { LinkedResourceItem } from "../../components/common/LinkedResourceItem";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
 import { ItemList } from "../../components/ui/ItemList";
+import { NewResourceButton } from "../../components/ui/NewResourceButton";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
 
@@ -47,12 +48,9 @@ export function CollectionDetail() {
 						</p>
 					) : null}
 				</div>
-				<Link
-					className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-					to={paths.upload(iso)}
-				>
-					Add a page
-				</Link>
+				<NewResourceButton to={paths.upload(iso)}>
+					New page
+				</NewResourceButton>
 			</header>
 
 			<div className="mt-8">

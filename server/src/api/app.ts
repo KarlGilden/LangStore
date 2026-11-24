@@ -39,7 +39,10 @@ export async function buildApp(
 	await app.register(multipart);
 
 	if (dependencies.authConfig) {
-		app.register(clerkPlugin, dependencies.authConfig);
+		await app.register(clerkPlugin, {
+			...dependencies.authConfig,
+			hookName: "onRequest",
+		});
 	}
 
 	app.setErrorHandler(errorHandler);

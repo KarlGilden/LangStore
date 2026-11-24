@@ -1,6 +1,5 @@
-import { createClerkClient, getAuth, type ClerkClient } from "@clerk/fastify";
+import { createClerkClient } from "@clerk/fastify";
 import type { IdentityProfileService } from "../../core/port/identityProfile.provider.js";
-import type { FastifyRequest } from "fastify";
 import type { ExternalService } from "../types.js";
 
 interface ClerkClientConfig {

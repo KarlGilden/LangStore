@@ -32,11 +32,17 @@ export const entryRoutes: FastifyPluginAsync = async (app) => {
 		{ schema: listEntriesSchema },
 		async (request: FastifyRequest, reply: FastifyReply) => {
 			const userId = request.currentUserId;
+			const iso = request.iso;
+
 			if (!userId) {
 				return reply.code(401).send({ error: "Unauthorized" });
 			}
 
-			const entries = await entryService.getAllEntries(userId);
+			if (!iso) {
+				return reply.code(400).send({ error: "" });
+			}
+
+			const entries = await entryService.getAllEntries(userId, iso);
 			return reply.code(200).send(entries.map(toEntryViewModel));
 		},
 	);

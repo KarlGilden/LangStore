@@ -1,6 +1,5 @@
 import { createDatabase } from "../../infrastructure/data/db.js";
 import type { BuildAppDependencies } from "../app.js";
-import { getClerkAuthenticatedProviderId } from "../hooks/auth.hook.js";
 import type { AppConfig } from "../config.js";
 import { createRepositories } from "./repository.js";
 import { createExternalServices } from "./externalServices.js";
@@ -29,13 +28,16 @@ export async function createProductionDependencies(
 				secretKey: config.CLERK_SECRET_KEY,
 			},
 			close: async () => {
-				await Promise.all([closeDatabase(), ...externalServiceCloseFunctions]);
+				await Promise.all([
+					closeDatabase(),
+					...externalServiceCloseFunctions.map((close) => close()),
+				]);
 			},
 		};
 	} catch (error) {
 		await Promise.allSettled([
 			closeDatabase(),
-			...externalServiceCloseFunctions,
+			...externalServiceCloseFunctions.map((close) => close()),
 		]);
 		throw error;
 	}

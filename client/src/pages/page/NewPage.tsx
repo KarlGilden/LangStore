@@ -1,10 +1,11 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
 import { Upload } from "../upload/UploadPage";
 
 export function NewPage() {
 	const { collectionId, iso = "" } = useParams();
+	const navigate = useNavigate();
 
 	if (!collectionId) {
 		return (
@@ -16,10 +17,13 @@ export function NewPage() {
 		);
 	}
 
+	const collectionPath = paths.collection(iso, collectionId);
+
 	return (
 		<Upload
-			backTo={paths.collection(iso, collectionId)}
+			backTo={collectionPath}
 			collectionId={collectionId}
+			onComplete={() => navigate(collectionPath)}
 			showDescription
 		/>
 	);

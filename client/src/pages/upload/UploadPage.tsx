@@ -27,12 +27,14 @@ export function UploadPage() {
 interface UploadProps {
 	collectionId?: string;
 	backTo?: string;
+	onComplete?: () => void;
 	showDescription?: boolean;
 }
 
 export function Upload({
 	collectionId: fixedCollectionId,
 	backTo,
+	onComplete,
 	showDescription = false,
 }: UploadProps) {
 	const { iso = "" } = useParams();
@@ -96,6 +98,10 @@ export function Upload({
 			},
 			{
 				onSuccess: ({ suggestions }) => {
+					if (suggestions.length === 0 && onComplete) {
+						onComplete();
+						return;
+					}
 					setSelectedTexts(new Set(suggestions.map(({ text }) => text)));
 				},
 			},
@@ -129,11 +135,14 @@ export function Upload({
 					onCancel={() => setShowCancelDialog(true)}
 					onSave={() => {
 						if (!iso || selectedSuggestions.length === 0) return;
-						savePageEntries.mutate({
-							iso,
-							pageId: uploadPage.data.page.id,
-							suggestions: selectedSuggestions,
-						});
+						savePageEntries.mutate(
+							{
+								iso,
+								pageId: uploadPage.data.page.id,
+								suggestions: selectedSuggestions,
+							},
+							{ onSuccess: onComplete },
+						);
 					}}
 					onSelectAll={() =>
 						setSelectedTexts(new Set(suggestions.map(({ text }) => text)))

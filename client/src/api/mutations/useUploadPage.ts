@@ -1,5 +1,6 @@
 import type { PageIngestionViewModel } from "@langstore/contracts";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../queryKeys";
 import { useFetch } from "../useFetch";
 
 interface UploadPageVariables {
@@ -12,6 +13,7 @@ interface UploadPageVariables {
 
 export function useUploadPage() {
 	const fetch = useFetch();
+	const queryClient = useQueryClient();
 
 	return useMutation<PageIngestionViewModel, Error, UploadPageVariables>({
 		mutationFn: ({ iso, collectionId, title, description, photo }) => {
@@ -25,6 +27,11 @@ export function useUploadPage() {
 				method: "POST",
 				contentType: "multipart/form-data",
 				body: formData,
+			});
+		},
+		onSuccess: async (_result, { iso, collectionId }) => {
+			await queryClient.invalidateQueries({
+				queryKey: [...queryKeys.COLLECTION_PAGES, iso, collectionId],
 			});
 		},
 	});

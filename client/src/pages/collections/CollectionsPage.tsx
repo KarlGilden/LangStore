@@ -2,6 +2,7 @@ import { useParams } from "react-router";
 import { useCollections } from "../../api/queries/useCollections";
 import { LinkedResourceItem } from "../../components/common/LinkedResourceItem";
 import { ItemList } from "../../components/ui/ItemList";
+import { NewResourceButton } from "../../components/ui/NewResourceButton";
 import { paths } from "../../router/paths";
 
 export function CollectionsPage() {
@@ -10,14 +11,15 @@ export function CollectionsPage() {
 
 	return (
 		<section className="mx-auto max-w-5xl">
-			<header className="max-w-2xl">
-				<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-					Collections
-				</h1>
-				<p className="mt-4 text-base leading-7 text-muted-foreground">
-					Return to a book or reading project and continue from the pages you
-					have saved.
-				</p>
+			<header className="grid items-end gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
+				<div className="max-w-2xl">
+					<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+						Collections
+					</h1>
+				</div>
+				<NewResourceButton to={paths.newCollection(iso)}>
+					New collection
+				</NewResourceButton>
 			</header>
 
 			<ItemList

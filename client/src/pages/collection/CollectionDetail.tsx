@@ -4,6 +4,7 @@ import { useCollectionPages } from "../../api/queries/useCollectionPages";
 import { LinkedResourceItem } from "../../components/common/LinkedResourceItem";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
 import { ItemList } from "../../components/ui/ItemList";
+import { NewResourceButton } from "../../components/ui/NewResourceButton";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
 
@@ -47,18 +48,20 @@ export function CollectionDetail() {
 						</p>
 					) : null}
 				</div>
-				<Link
-					className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-					to={paths.upload(iso)}
-				>
-					Add a page
-				</Link>
+				<div className="flex flex-wrap items-center gap-3">
+					<Link
+						className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-card-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+						to={paths.editCollection(iso, collection.id)}
+					>
+						Edit collection
+					</Link>
+					<NewResourceButton to={paths.newPage(iso, collection.id)}>
+						New page
+					</NewResourceButton>
+				</div>
 			</header>
 
 			<div className="mt-8">
-				<h2 className="font-display text-2xl font-semibold tracking-tight">
-					Saved pages
-				</h2>
 				<ItemList
 					className="mt-4"
 					emptyMessage="Upload a page to start building this collection."

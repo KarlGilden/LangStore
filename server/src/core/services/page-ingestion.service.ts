@@ -78,7 +78,7 @@ export const createPageIngestionService = ({
 			collectionId: collection.id,
 			name: input.name,
 			description: input.description,
-			summary: recognition.text,
+			summary: formatSummary(recognition.text),
 		});
 
 		const extractedWords = await wordExtractionService.extractWords(
@@ -96,4 +96,11 @@ export const createPageIngestionService = ({
 	};
 
 	return { ingestPage };
+};
+
+const formatSummary = (summary: string) => {
+	return summary
+		.replace(/\s+/gu, " ")
+		.replace(/ +([.,;:!?…])/gu, "$1")
+		.trim();
 };

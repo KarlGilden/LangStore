@@ -3,11 +3,17 @@ import { AuthShell } from "../auth/AuthShell";
 import { HomeGate } from "../auth/HomeGate";
 import { AppShell } from "../layouts/AppShell";
 import { HomePage } from "../pages/home/HomePage";
-import { collectionsRoute } from "../pages/collections/routes";
-import { collectionDetailRoute } from "../pages/collection/routes";
+import {
+	collectionsRoute,
+	newCollectionRoute,
+} from "../pages/collections/routes";
+import {
+	collectionDetailRoute,
+	editCollectionRoute,
+} from "../pages/collection/routes";
 import { RouteErrorPage } from "../pages/not-found/RouteErrorPage";
 import { notFoundRoute } from "../pages/not-found/routes";
-import { pageDetailRoute } from "../pages/page/routes";
+import { newPageRoute, pageDetailRoute } from "../pages/page/routes";
 import { signInRoute } from "../pages/sign-in/routes";
 import { uploadRoute } from "../pages/upload/routes";
 import { IsoBoundary } from "./IsoBoundary";
@@ -34,7 +40,10 @@ export const appRoutes: RouteObject[] = [
 								Component: AppShell,
 								children: [
 									collectionsRoute,
+									newCollectionRoute,
 									collectionDetailRoute,
+									editCollectionRoute,
+									newPageRoute,
 									pageDetailRoute,
 									uploadRoute,
 								],

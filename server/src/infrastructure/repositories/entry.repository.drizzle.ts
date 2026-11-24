@@ -1,4 +1,11 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import {
+	and,
+	asc,
+	eq,
+	getTableColumns,
+	inArray,
+	sql,
+} from "drizzle-orm";
 import { EntryAlreadyExistsError } from "../../core/errors/entry.error.js";
 import { PageNotFoundError } from "../../core/errors/page.error.js";
 import type { EntryRepository } from "../../core/repositories/entry.repository.js";
@@ -242,12 +249,123 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 		);
 	};
 
+	const getAllForReview: EntryRepository["getAllForReview"] = async (
+		userId,
+		iso,
+	) => {
+		const encounterCounts = db
+			.select({
+				entryId: entryEncounters.entryId,
+				encounterCount: sql<number>`sum(${entryEncounters.count})`
+					.mapWith(Number)
+					.as("encounter_count"),
+				encounterPageCount: sql<number>`count(*)`
+					.mapWith(Number)
+					.as("encounter_page_count"),
+			})
+			.from(entryEncounters)
+			.groupBy(entryEncounters.entryId)
+			.as("encounter_counts");
+
+		const reviewRows = await db
+			.select({
+				...getTableColumns(entries),
+				encounterCount:
+					sql<number>`coalesce(${encounterCounts.encounterCount}, 0)`.mapWith(
+						Number,
+					),
+				encounterPageCount:
+					sql<number>`coalesce(${encounterCounts.encounterPageCount}, 0)`.mapWith(
+						Number,
+					),
+			})
+			.from(entries)
+			.leftJoin(
+				encounterCounts,
+				eq(encounterCounts.entryId, entries.id),
+			)
+			.where(and(eq(entries.userId, userId), eq(entries.iso, iso)))
+			.orderBy(asc(entries.createdAt), asc(entries.id));
+
+		if (reviewRows.length === 0) {
+			return [];
+		}
+
+		const translationRows = await db
+			.select()
+			.from(translations)
+			.where(
+				inArray(
+					translations.entryId,
+					reviewRows.map((entry) => entry.id),
+				),
+			)
+			.orderBy(asc(translations.createdAt), asc(translations.id));
+		const byEntryId = new Map<string, TranslationRow[]>();
+		for (const translation of translationRows) {
+			const grouped = byEntryId.get(translation.entryId) ?? [];
+			grouped.push(translation);
+			byEntryId.set(translation.entryId, grouped);
+		}
+
+		return reviewRows.map((entry) => ({
+			...toDomainEntry(entry, byEntryId.get(entry.id) ?? []),
+			encounterCount: entry.encounterCount,
+			encounterPageCount: entry.encounterPageCount,
+		}));
+	};
+
+	const updateTranslations: EntryRepository["updateTranslations"] = async (
+		input,
+	) =>
+		db.transaction(async (transaction) => {
+			const [entryRow] = await transaction
+				.select()
+				.from(entries)
+				.where(
+					and(
+						eq(entries.id, input.entryId),
+						eq(entries.userId, input.userId),
+						eq(entries.iso, input.iso),
+					),
+				)
+				.limit(1)
+				.for("update");
+
+			if (!entryRow) {
+				return null;
+			}
+
+			await transaction
+				.delete(translations)
+				.where(eq(translations.entryId, entryRow.id));
+
+			if (input.translations.length > 0) {
+				await transaction.insert(translations).values(
+					input.translations.map((translation) => ({
+						entryId: entryRow.id,
+						text: translation.text,
+					})),
+				);
+			}
+
+			const translationRows = await transaction
+				.select()
+				.from(translations)
+				.where(eq(translations.entryId, entryRow.id))
+				.orderBy(asc(translations.createdAt), asc(translations.id));
+
+			return toDomainEntry(entryRow, translationRows);
+		});
+
 	return {
 		create,
 		savePageEntries,
 		getById,
 		getByPages,
 		getAll,
+		getAllForReview,
+		updateTranslations,
 	};
 }
 

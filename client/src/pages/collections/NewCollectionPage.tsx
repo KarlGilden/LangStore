@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useCreateCollection } from "../../api/mutations/useCreateCollection";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
+import { Input } from "../../components/ui/Input";
+import { Textarea } from "../../components/ui/Textarea";
 import { paths } from "../../router/paths";
 
 export function NewCollectionPage() {
@@ -55,10 +57,10 @@ export function NewCollectionPage() {
 					<label className="block font-semibold" htmlFor="collection-name">
 						Name
 					</label>
-					<input
+					<Input
 						autoComplete="off"
 						autoFocus
-						className="mt-3 min-h-12 w-full rounded-md border border-input bg-card px-4 py-3 text-card-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+						className="mt-3"
 						disabled={createCollection.isPending}
 						id="collection-name"
 						onChange={(event) => setName(event.currentTarget.value)}
@@ -74,8 +76,8 @@ export function NewCollectionPage() {
 					>
 						Description <span className="font-normal text-muted-foreground">(optional)</span>
 					</label>
-					<textarea
-						className="mt-3 min-h-32 w-full resize-y rounded-md border border-input bg-card px-4 py-3 font-sans text-card-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+					<Textarea
+						className="mt-3"
 						disabled={createCollection.isPending}
 						id="collection-description"
 						onChange={(event) => setDescription(event.currentTarget.value)}

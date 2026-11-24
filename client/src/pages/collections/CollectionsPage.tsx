@@ -16,10 +16,6 @@ export function CollectionsPage() {
 					<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
 						Collections
 					</h1>
-					<p className="mt-4 text-base leading-7 text-muted-foreground">
-						Return to a book or reading project and continue from the pages you
-						have saved.
-					</p>
 				</div>
 				<NewResourceButton to={paths.newCollection(iso)}>
 					New collection

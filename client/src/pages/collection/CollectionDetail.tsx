@@ -1,10 +1,11 @@
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { useCollection } from "../../api/queries/useCollection";
 import { useCollectionPages } from "../../api/queries/useCollectionPages";
 import { LinkedResourceItem } from "../../components/common/LinkedResourceItem";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
+import { Button } from "../../components/ui/Button";
+import { ButtonSize, ButtonType } from "../../components/ui/Button.types";
 import { ItemList } from "../../components/ui/ItemList";
-import { NewResourceButton } from "../../components/ui/NewResourceButton";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
 
@@ -29,13 +30,13 @@ export function CollectionDetail() {
 
 	return (
 		<section className="mx-auto max-w-5xl">
-			<Link
-				className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+			<Button
+				buttonType={ButtonType.Back}
 				to={paths.collections(iso)}
 			>
 				<ArrowLeftIcon className="size-4" />
 				All collections
-			</Link>
+			</Button>
 
 			<header className="mt-6 grid items-end gap-6 border-b border-border pb-8 sm:grid-cols-[minmax(0,1fr)_auto]">
 				<div className="max-w-3xl">
@@ -49,15 +50,19 @@ export function CollectionDetail() {
 					) : null}
 				</div>
 				<div className="flex flex-wrap items-center gap-3">
-					<Link
-						className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-card-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					<Button
+						buttonType={ButtonType.Outline}
+						size={ButtonSize.Compact}
 						to={paths.editCollection(iso, collection.id)}
 					>
 						Edit collection
-					</Link>
-					<NewResourceButton to={paths.newPage(iso, collection.id)}>
+					</Button>
+					<Button
+						buttonType={ButtonType.AddNew}
+						to={paths.newPage(iso, collection.id)}
+					>
 						New page
-					</NewResourceButton>
+					</Button>
 				</div>
 			</header>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useDeleteCollection } from "../../api/mutations/useDeleteCollection";
 import { useUpdateCollection } from "../../api/mutations/useUpdateCollection";
 import { useCollection } from "../../api/queries/useCollection";
@@ -8,6 +8,8 @@ import {
 	type CollectionFormValues,
 } from "../../components/collections/CollectionForm";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
+import { Button } from "../../components/ui/Button";
+import { ButtonType } from "../../components/ui/Button.types";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
@@ -60,13 +62,13 @@ export function EditCollectionPage() {
 
 	return (
 		<section className="mx-auto max-w-3xl">
-			<Link
-				className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+			<Button
+				buttonType={ButtonType.Back}
 				to={collectionPath}
 			>
 				<ArrowLeftIcon className="size-4" />
 				{collection.name}
-			</Link>
+			</Button>
 
 			<header className="mt-6 grid max-w-3xl gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
 				<div className="max-w-2xl">
@@ -77,13 +79,13 @@ export function EditCollectionPage() {
 						Update how this book or reading project appears in your library.
 					</p>
 				</div>
-				<button
-					className="min-h-11 rounded-md border border-destructive/40 px-4 py-2.5 font-semibold text-destructive outline-none hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-ring"
+				<Button
+					buttonType={ButtonType.Delete}
 					onClick={() => setConfirmingDelete(true)}
 					type="button"
 				>
 					Delete collection
-				</button>
+				</Button>
 			</header>
 
 			<CollectionForm

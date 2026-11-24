@@ -1,4 +1,6 @@
-import { Link, isRouteErrorResponse, useRouteError } from "react-router";
+import { isRouteErrorResponse, useRouteError } from "react-router";
+import { Button } from "../../components/ui/Button";
+import { ButtonType } from "../../components/ui/Button.types";
 import { defaultAppPath } from "../../router/paths";
 
 export function RouteErrorPage() {
@@ -24,12 +26,13 @@ export function RouteErrorPage() {
 					LangStore could not display this page. No private content has been
 					included in this message.
 				</p>
-				<Link
-					className="mt-8 inline-flex rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+				<Button
+					buttonType={ButtonType.Solid}
+					className="mt-8"
 					to={defaultAppPath}
 				>
 					Return to collections
-				</Link>
+				</Button>
 			</section>
 		</main>
 	);

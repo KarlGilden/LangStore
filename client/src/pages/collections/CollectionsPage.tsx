@@ -1,8 +1,9 @@
 import { useParams } from "react-router";
 import { useCollections } from "../../api/queries/useCollections";
 import { LinkedResourceItem } from "../../components/common/LinkedResourceItem";
+import { Button } from "../../components/ui/Button";
+import { ButtonType } from "../../components/ui/Button.types";
 import { ItemList } from "../../components/ui/ItemList";
-import { NewResourceButton } from "../../components/ui/NewResourceButton";
 import { paths } from "../../router/paths";
 
 export function CollectionsPage() {
@@ -17,9 +18,12 @@ export function CollectionsPage() {
 						Collections
 					</h1>
 				</div>
-				<NewResourceButton to={paths.newCollection(iso)}>
+				<Button
+					buttonType={ButtonType.AddNew}
+					to={paths.newCollection(iso)}
+				>
 					New collection
-				</NewResourceButton>
+				</Button>
 			</header>
 
 			<ItemList

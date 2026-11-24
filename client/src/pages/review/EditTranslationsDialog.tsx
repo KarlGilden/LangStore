@@ -4,6 +4,8 @@ import {
 	type EntryViewModel,
 } from "@langstore/contracts";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { Button } from "../../components/ui/Button";
+import { ButtonSize, ButtonType } from "../../components/ui/Button.types";
 import { Input } from "../../components/ui/Input";
 
 interface EditTranslationsDialogProps {
@@ -113,21 +115,22 @@ export function EditTranslationsDialog({
 									value={translation}
 								/>
 							</div>
-							<button
+							<Button
 								aria-label={`Remove translation ${index + 1}`}
-								className="min-h-12 rounded-md px-3 text-sm font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+								buttonType={ButtonType.Ghost}
 								disabled={pending}
 								onClick={() => removeTranslation(index)}
 								type="button"
 							>
 								Remove
-							</button>
+							</Button>
 						</div>
 					))}
 				</div>
 
-				<button
-					className="mt-5 rounded-md px-3 py-2 text-sm font-semibold text-primary outline-none hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+				<Button
+					buttonType={ButtonType.Ghost}
+					className="mt-5"
 					disabled={
 						pending || translations.length >= MAX_PAGE_ENTRY_TRANSLATIONS
 					}
@@ -135,7 +138,7 @@ export function EditTranslationsDialog({
 					type="button"
 				>
 					Add another translation
-				</button>
+				</Button>
 
 				{error ? (
 					<p
@@ -147,30 +150,31 @@ export function EditTranslationsDialog({
 				) : null}
 
 				<div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<button
-						className="min-h-11 rounded-md px-3 py-2.5 text-left font-semibold text-destructive outline-none hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+					<Button
+						buttonType={ButtonType.Delete}
 						disabled={pending}
 						onClick={onRequestDelete}
 						type="button"
 					>
 						Delete word
-					</button>
+					</Button>
 					<div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-						<button
-							className="min-h-11 rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+						<Button
+							buttonType={ButtonType.Outline}
 							disabled={pending}
 							onClick={onDismiss}
 							type="button"
 						>
 							Cancel
-						</button>
-						<button
-							className="min-h-11 rounded-md bg-primary px-5 py-2.5 font-semibold text-primary-foreground outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+						</Button>
+						<Button
+							buttonType={ButtonType.Solid}
 							disabled={pending}
+							size={ButtonSize.Medium}
 							type="submit"
 						>
 							{pending ? "Saving…" : "Save translations"}
-						</button>
+						</Button>
 					</div>
 				</div>
 			</form>

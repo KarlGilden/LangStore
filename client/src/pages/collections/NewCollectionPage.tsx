@@ -1,10 +1,12 @@
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useCreateCollection } from "../../api/mutations/useCreateCollection";
 import {
 	CollectionForm,
 	type CollectionFormValues,
 } from "../../components/collections/CollectionForm";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
+import { Button } from "../../components/ui/Button";
+import { ButtonType } from "../../components/ui/Button.types";
 import { paths } from "../../router/paths";
 
 export function NewCollectionPage() {
@@ -30,13 +32,13 @@ export function NewCollectionPage() {
 
 	return (
 		<section className="mx-auto max-w-3xl">
-			<Link
-				className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+			<Button
+				buttonType={ButtonType.Back}
 				to={paths.collections(iso)}
 			>
 				<ArrowLeftIcon className="size-4" />
 				All collections
-			</Link>
+			</Button>
 
 			<header className="mt-6 max-w-2xl">
 				<h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">

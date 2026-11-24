@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import type { PageVocabularyEntryViewModel } from "@langstore/contracts";
 import { usePage } from "../../api/queries/usePage";
 import { usePageEncounters } from "../../api/queries/usePageEncounters";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
+import { Button } from "../../components/ui/Button";
+import { ButtonType } from "../../components/ui/Button.types";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { TabButton } from "../../components/ui/TabButton";
 import { paths } from "../../router/paths";
@@ -37,13 +39,13 @@ export function PageDetail() {
 
 	return (
 		<article className="mx-auto max-w-5xl">
-			<Link
-				className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+			<Button
+				buttonType={ButtonType.Back}
 				to={paths.collection(iso, page.collectionId)}
 			>
 				<ArrowLeftIcon className="size-4" />
 				Back to collection
-			</Link>
+			</Button>
 
 			<header className="mt-6 grid max-w-5xl gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
 				<div className="max-w-3xl">
@@ -59,12 +61,12 @@ export function PageDetail() {
 						{formatSavedDate(page.createdAt)}
 					</p>
 				</div>
-				<Link
-					className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+				<Button
+					buttonType={ButtonType.Outline}
 					to={paths.editPage(iso, page.collectionId, page.id)}
 				>
 					Edit page
-				</Link>
+				</Button>
 			</header>
 
 			<div

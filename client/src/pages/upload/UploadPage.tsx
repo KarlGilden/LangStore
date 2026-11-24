@@ -5,7 +5,7 @@ import {
 	type ChangeEvent,
 	type FormEvent,
 } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import type { PageSuggestionViewModel } from "@langstore/contracts";
 import { useSavePageEntries } from "../../api/mutations/useSavePageEntries";
 import { useUploadPage } from "../../api/mutations/useUploadPage";
@@ -13,6 +13,8 @@ import { CollectionDropdown } from "../../components/common/CollectionDropdown";
 import { ArrowLeftIcon } from "../../components/icons/ArrowLeftIcon";
 import { CameraIcon } from "../../components/icons/CameraIcon";
 import { CheckIcon } from "../../components/icons/CheckIcon";
+import { Button } from "../../components/ui/Button";
+import { ButtonType } from "../../components/ui/Button.types";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Input } from "../../components/ui/Input";
 import { Textarea } from "../../components/ui/Textarea";
@@ -175,13 +177,13 @@ export function Upload({
 	return (
 		<div className="mx-auto max-w-3xl">
 			{backTo ? (
-				<Link
-					className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+				<Button
+					buttonType={ButtonType.Back}
 					to={backTo}
 				>
 					<ArrowLeftIcon className="size-4" />
 					Back to collection
-				</Link>
+				</Button>
 			) : null}
 
 			<header className={`${backTo ? "mt-6 " : ""}max-w-2xl`}>
@@ -264,8 +266,9 @@ export function Upload({
 					) : null}
 				</div>
 
-				<button
-					className="min-h-12 w-full rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto sm:min-w-40"
+				<Button
+					buttonType={ButtonType.Solid}
+					className="w-full sm:w-auto sm:min-w-40"
 					disabled={
 						!collectionId ||
 						!trimmedTitle ||
@@ -275,7 +278,7 @@ export function Upload({
 					type="submit"
 				>
 					{uploadPage.isPending ? "Reading page..." : "Find words"}
-				</button>
+				</Button>
 			</form>
 
 			{uploadPage.isError ? (
@@ -321,15 +324,15 @@ function WordSelectionView({
 	return (
 		<section className="-mx-5 -my-10 flex min-h-[calc(100dvh-8rem)] flex-col bg-background sm:-mx-8 sm:-my-14 md:min-h-[calc(100dvh-4rem)] lg:-mx-14">
 			<header className="sticky top-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur sm:px-8 lg:px-10">
-				<button
+				<Button
 					aria-label="Cancel word selection"
-					className="grid size-11 shrink-0 place-items-center rounded-md border border-border bg-card outline-none hover:bg-muted disabled:cursor-wait disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+					buttonType={ButtonType.Icon}
 					disabled={disabled}
 					onClick={onCancel}
 					type="button"
 				>
 					<ArrowLeftIcon className="size-5" />
-				</button>
+				</Button>
 				<div className="min-w-0 flex-1">
 					<h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
 						Choose words to save
@@ -338,14 +341,14 @@ function WordSelectionView({
 						{formatSelectionCount(selectedCount, suggestions.length)}
 					</p>
 				</div>
-				<button
-					className="min-h-10 rounded-md px-3 text-sm font-semibold text-primary outline-none hover:bg-secondary disabled:cursor-wait disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+				<Button
+					buttonType={ButtonType.Ghost}
 					disabled={disabled}
 					onClick={allSelected ? onUnselectAll : onSelectAll}
 					type="button"
 				>
 					{allSelected ? "Clear all" : "Select all"}
-				</button>
+				</Button>
 			</header>
 
 			<ul className="grid flex-1 content-start border-l border-border bg-card sm:grid-cols-2 xl:grid-cols-3">
@@ -371,8 +374,9 @@ function WordSelectionView({
 						{error}
 					</p>
 				) : null}
-				<button
-					className="pointer-events-auto min-h-14 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground shadow-xl outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+				<Button
+					buttonType={ButtonType.Floating}
+					className="pointer-events-auto"
 					disabled={selectedCount === 0 || pending}
 					onClick={onSave}
 					type="button"
@@ -380,7 +384,7 @@ function WordSelectionView({
 					{pending
 						? "Saving words..."
 						: `Save ${selectedCount} ${selectedCount === 1 ? "word" : "words"}`}
-				</button>
+				</Button>
 			</div>
 		</section>
 	);
@@ -406,13 +410,14 @@ function SaveSuccess({
 					? "1 word was added to your vocabulary."
 					: `${count} words were added to your vocabulary.`}
 			</p>
-			<button
-				className="mt-8 min-h-12 rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+			<Button
+				buttonType={ButtonType.Solid}
+				className="mt-8 min-h-12"
 				onClick={onUploadAnother}
 				type="button"
 			>
 				Upload another page
-			</button>
+			</Button>
 		</section>
 	);
 }
@@ -427,13 +432,14 @@ function NoSuggestionsFound({ onReturn }: { onReturn: () => void }) {
 				This page was processed, but every recognized word is already saved or
 				no suggestions were found.
 			</p>
-			<button
-				className="mt-8 min-h-12 rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+			<Button
+				buttonType={ButtonType.Solid}
+				className="mt-8 min-h-12"
 				onClick={onReturn}
 				type="button"
 			>
 				Return to upload
-			</button>
+			</Button>
 		</section>
 	);
 }

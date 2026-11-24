@@ -1,4 +1,5 @@
-import { Link } from "react-router";
+import { Button } from "../../components/ui/Button";
+import { ButtonSize, ButtonType } from "../../components/ui/Button.types";
 import { paths } from "../../router/paths";
 import { ThemeSelector } from "../../theme/ThemeSelector";
 
@@ -11,12 +12,13 @@ export function HomePage() {
 				</span>
 				<div className="flex items-center gap-4">
 					<ThemeSelector />
-					<Link
-						className="rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					<Button
+						buttonType={ButtonType.Solid}
+						size={ButtonSize.Compact}
 						to={paths.signIn}
 					>
 						Sign in
-					</Link>
+					</Button>
 				</div>
 			</header>
 
@@ -32,12 +34,13 @@ export function HomePage() {
 						Save vocabulary from your books with the sentences where you found
 						it. Each repeat encounter builds a useful record of your reading.
 					</p>
-					<Link
-						className="mt-9 inline-flex rounded-md bg-primary px-5 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+					<Button
+						buttonType={ButtonType.Solid}
+						className="mt-9"
 						to={paths.signIn}
 					>
 						Get started
-					</Link>
+					</Button>
 				</div>
 
 				<aside className="rounded-lg border border-border bg-card p-6 text-card-foreground shadow-[0_1px_0_0_var(--border)] sm:p-8">

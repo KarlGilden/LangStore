@@ -4,6 +4,8 @@ import { DEFAULT_LANGUAGE_ISO } from "@langstore/contracts";
 import { paths } from "../router/paths";
 import { useSession } from "../auth/useSession";
 import { ThemeSelector } from "../theme/ThemeSelector";
+import { Button } from "../components/ui/Button";
+import { ButtonSize, ButtonType } from "../components/ui/Button.types";
 
 export function AppShell() {
 	const { iso = DEFAULT_LANGUAGE_ISO } = useParams();
@@ -62,14 +64,15 @@ export function AppShell() {
 			<div className="min-w-0">
 				<header className="flex min-h-16 flex-wrap items-center justify-end gap-3 border-b border-border px-5 py-3 sm:px-8">
 					<ThemeSelector />
-					<button
-						className="rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-card-foreground outline-none hover:bg-muted disabled:cursor-wait disabled:opacity-60 focus-visible:ring-2 focus-visible:ring-ring"
+					<Button
+						buttonType={ButtonType.Outline}
 						disabled={isSigningOut}
 						onClick={handleSignOut}
+						size={ButtonSize.Compact}
 						type="button"
 					>
 						{isSigningOut ? "Signing out…" : "Sign out"}
-					</button>
+					</Button>
 				</header>
 
 				{signOutError ? (

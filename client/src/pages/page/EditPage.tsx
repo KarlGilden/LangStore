@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useDeletePage } from "../../api/mutations/useDeletePage";
 import { useUpdatePage } from "../../api/mutations/useUpdatePage";
 import { usePage } from "../../api/queries/usePage";
@@ -9,6 +9,8 @@ import {
 	type PageFormValues,
 } from "../../components/pages/PageForm";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
+import { Button } from "../../components/ui/Button";
+import { ButtonType } from "../../components/ui/Button.types";
 import { PageStatus } from "../../components/ui/PageStatus";
 import { paths } from "../../router/paths";
 
@@ -53,13 +55,13 @@ export function EditPage() {
 
 	return (
 		<section className="mx-auto max-w-3xl">
-			<Link
-				className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-primary outline-none hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+			<Button
+				buttonType={ButtonType.Back}
 				to={pagePath}
 			>
 				<ArrowLeftIcon className="size-4" />
 				{page.name}
-			</Link>
+			</Button>
 
 			<header className="mt-6 grid max-w-3xl gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
 				<div className="max-w-2xl">
@@ -70,13 +72,13 @@ export function EditPage() {
 						Update how this page appears in its collection.
 					</p>
 				</div>
-				<button
-					className="min-h-11 rounded-md border border-destructive/40 px-4 py-2.5 font-semibold text-destructive outline-none hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-ring"
+				<Button
+					buttonType={ButtonType.Delete}
 					onClick={() => setConfirmingDelete(true)}
 					type="button"
 				>
 					Delete page
-				</button>
+				</Button>
 			</header>
 
 			<PageForm

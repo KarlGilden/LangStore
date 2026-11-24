@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef } from "react";
+import { Button } from "./Button";
+import { ButtonType } from "./Button.types";
 
 interface ConfirmDialogProps {
 	open: boolean;
@@ -72,23 +74,23 @@ export function ConfirmDialog({
 					</p>
 				) : null}
 				<div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-					<button
+					<Button
 						autoFocus
-						className="min-h-11 rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+						buttonType={ButtonType.Outline}
 						onClick={onDismiss}
 						disabled={pending}
 						type="button"
 					>
 						{cancelLabel}
-					</button>
-					<button
-						className="min-h-11 rounded-md bg-destructive px-4 py-2.5 font-semibold text-destructive-foreground outline-none hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring"
+					</Button>
+					<Button
+						buttonType={ButtonType.Destructive}
 						onClick={onConfirm}
 						disabled={pending}
 						type="button"
 					>
 						{confirmLabel}
-					</button>
+					</Button>
 				</div>
 			</div>
 		</dialog>

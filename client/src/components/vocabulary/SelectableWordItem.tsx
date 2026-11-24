@@ -1,3 +1,5 @@
+import { CheckIcon } from "../icons/CheckIcon";
+
 interface SelectableWordItemProps {
 	text: string;
 	translation: string;
@@ -36,15 +38,7 @@ export function SelectableWordItem({
 							: "border-input bg-background text-transparent"
 					}`}
 				>
-					<svg fill="none" viewBox="0 0 24 24">
-						<path
-							d="m6 12.5 3.5 3.5L18 7.5"
-							stroke="currentColor"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth="2.2"
-						/>
-					</svg>
+					<CheckIcon className="size-full" />
 				</span>
 				<span className="min-w-0 flex-1">
 					<span className="block break-words text-lg font-semibold leading-6">

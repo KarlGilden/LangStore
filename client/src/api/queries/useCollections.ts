@@ -8,9 +8,10 @@ export function useCollections(iso: string) {
 
 	return useQuery<CollectionViewModel[]>({
 		queryKey: [...queryKeys.COLLECTIONS, iso],
-		queryFn: () =>
+		queryFn: ({ signal }) =>
 			fetch<CollectionViewModel[]>({
 				path: `/${encodeURIComponent(iso)}/collection`,
+				signal,
 			}),
 		enabled: iso.length > 0,
 	});

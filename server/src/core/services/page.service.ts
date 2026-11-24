@@ -4,6 +4,11 @@ import type { CollectionRepository } from "../repositories/collection.repository
 import type { PageRepository } from "../repositories/page.repository.js";
 import { requirePageLanguageCode, requirePageText } from "./page.validation.js";
 
+export type PageServiceDependencies = {
+	pageRepository: PageRepository;
+	collectionRepository: CollectionRepository;
+};
+
 export interface CreatePageInput {
 	collectionId: string;
 	name: string;
@@ -11,10 +16,10 @@ export interface CreatePageInput {
 	summary: string | null;
 }
 
-export const createPageService = (
-	pageRepository: PageRepository,
-	collectionRepository: CollectionRepository,
-) => {
+export const createPageService = ({
+	pageRepository,
+	collectionRepository,
+}: PageServiceDependencies) => {
 	const requireCollection = async (
 		userId: string,
 		iso: string,

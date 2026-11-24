@@ -1,5 +1,6 @@
-import { createClerkClient, type ClerkClient } from "@clerk/fastify";
-import type { IdentityProfileProvider } from "../../core/port/identityProfile.provider.js";
+import { createClerkClient } from "@clerk/fastify";
+import type { IdentityProfileService } from "../../core/port/identityProfile.provider.js";
+import type { ExternalService } from "../types.js";
 
 interface ClerkClientConfig {
 	publishableKey: string;
@@ -8,28 +9,31 @@ interface ClerkClientConfig {
 
 export const createClerkAdapter = (
 	config: ClerkClientConfig,
-): IdentityProfileProvider => {
+): ExternalService<IdentityProfileService> => {
 	const clerkClient = createClerkClient({
 		publishableKey: config.publishableKey,
 		secretKey: config.secretKey,
 	});
 
 	return {
-		getUserProfile: async (userId: string) => {
-			const clerkUser = await clerkClient.users.getUser(userId);
+		service: {
+			getUserProfile: async (userId: string) => {
+				const clerkUser = await clerkClient.users.getUser(userId);
 
-			const email = clerkUser.emailAddresses.find(
-				(address) => address.id === clerkUser.primaryEmailAddressId,
-			)?.emailAddress;
+				const email = clerkUser.emailAddresses.find(
+					(address) => address.id === clerkUser.primaryEmailAddressId,
+				)?.emailAddress;
 
-			if (!email) {
-				return null;
-			}
+				if (!email) {
+					return null;
+				}
 
-			return {
-				username: clerkUser.username,
-				email,
-			};
+				return {
+					username: clerkUser.username,
+					email,
+				};
+			},
 		},
+		close: async () => {},
 	};
 };

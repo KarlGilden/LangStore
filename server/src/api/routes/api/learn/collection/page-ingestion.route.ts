@@ -4,15 +4,15 @@ import { createPageIngestionSchema } from "@langstore/contracts";
 import {
 	InvalidPageUploadError,
 	PageUploadTooLargeError,
-} from "../../../core/errors/page-ingestion.error.js";
-import type { PageIngestionService } from "../../../core/services/page-ingestion.service.js";
-import { toPageViewModel } from "../../mappers/page.mapper.js";
+} from "../../../../../core/errors/page-ingestion.error.js";
+import { toPageViewModel } from "../../../../mappers/page.mapper.js";
 import {
 	MAX_PAGE_PHOTO_BYTES,
 	validatePagePhoto,
 	type ValidatedPagePhoto,
-} from "../../upload/page-photo.js";
+} from "../../../../upload/page-photo.js";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+import { getApplicationServices } from "../../../../composition/serviceUtils.js";
 
 interface ParsedPageIngestion {
 	name: string;
@@ -20,48 +20,45 @@ interface ParsedPageIngestion {
 	photo: ValidatedPagePhoto;
 }
 
-export function createPageIngestionRoutes(
-	pageIngestionService: PageIngestionService,
-): FastifyPluginAsync {
-	return async (app) => {
-		const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
+export const pageIngestionRoutes: FastifyPluginAsync = async (app) => {
+	const { pageIngestionService } = getApplicationServices(app);
+	const routes = app.withTypeProvider<JsonSchemaToTsProvider>();
 
-		routes.post(
-			"/:collectionId/page-ingestions",
-			{ schema: createPageIngestionSchema },
-			async (request, reply) => {
-				const userId = request.currentUserId;
-				if (!userId) {
-					return reply.code(401).send({ error: "Unauthorized" });
-				}
+	routes.post(
+		"/:collectionId/page-ingestions",
+		{ schema: createPageIngestionSchema },
+		async (request, reply) => {
+			const userId = request.currentUserId;
+			if (!userId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
 
-				const input = await readPageIngestionMultipart(request);
+			const input = await readPageIngestionMultipart(request);
 
-				try {
-					const result = await pageIngestionService.ingestPage({
-						userId,
-						iso: request.params.iso,
-						pageId: randomUUID(),
-						collectionId: request.params.collectionId,
-						name: input.name,
-						description: input.description,
-						photo: {
-							bytes: input.photo.bytes,
-							mediaType: input.photo.mediaType,
-						},
-					});
+			try {
+				const result = await pageIngestionService.ingestPage({
+					userId,
+					iso: request.params.iso,
+					pageId: randomUUID(),
+					collectionId: request.params.collectionId,
+					name: input.name,
+					description: input.description,
+					photo: {
+						bytes: input.photo.bytes,
+						mediaType: input.photo.mediaType,
+					},
+				});
 
-					return reply.code(201).send({
-						page: toPageViewModel(result.page),
-						suggestions: result.suggestions,
-					});
-				} finally {
-					input.photo.bytes.fill(0);
-				}
-			},
-		);
-	};
-}
+				return reply.code(201).send({
+					page: toPageViewModel(result.page),
+					suggestions: result.suggestions,
+				});
+			} finally {
+				input.photo.bytes.fill(0);
+			}
+		},
+	);
+};
 
 async function readPageIngestionMultipart(
 	request: FastifyRequest,

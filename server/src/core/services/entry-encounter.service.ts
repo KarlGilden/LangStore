@@ -13,17 +13,23 @@ import type { EntryEncounterRepository } from "../repositories/entry-encounter.r
 import type { EntryRepository } from "../repositories/entry.repository.js";
 import type { PageRepository } from "../repositories/page.repository.js";
 
+export type EntryEncounterServiceDependencies = {
+	entryEncounterRepository: EntryEncounterRepository;
+	entryRepository: EntryRepository;
+	pageRepository: PageRepository;
+};
+
 export interface RecordEntryEncounterInput {
 	entryId: string;
 	pageId: string;
 	count: number;
 }
 
-export const createEntryEncounterService = (
-	entryEncounterRepository: EntryEncounterRepository,
-	entryRepository: EntryRepository,
-	pageRepository: PageRepository,
-) => {
+export const createEntryEncounterService = ({
+	entryEncounterRepository,
+	entryRepository,
+	pageRepository,
+}: EntryEncounterServiceDependencies) => {
 	const recordEncounter = async (
 		userId: string,
 		input: RecordEntryEncounterInput,

@@ -33,7 +33,11 @@ import {
 } from "../../core/errors/page-ingestion.error.js";
 import { ServiceUnavailableError } from "../../core/errors/service.error.js";
 import { ValidationError } from "../../core/errors/validation.error.js";
-import { NotFoundError } from "../../core/errors/common.error.js";
+import {
+	InvalidIsoError,
+	NotFoundError,
+	UnauthorizedError,
+} from "../../core/errors/common.error.js";
 
 type HttpError = Error & {
 	code?: string;
@@ -52,6 +56,14 @@ export const errorHandler = (
 	if (error instanceof NotFoundError) {
 		statusCode = 404;
 		code = "NOT_FOUND";
+		message = error.message;
+	} else if (error instanceof UnauthorizedError) {
+		statusCode = 401;
+		code = "UNAUTHORIZED";
+		message = error.message;
+	} else if (error instanceof InvalidIsoError) {
+		statusCode = 400;
+		code = "INVALID_ISO";
 		message = error.message;
 	} else if (error instanceof MissingIdentityEmailError) {
 		statusCode = 409;

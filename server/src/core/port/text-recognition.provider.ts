@@ -8,6 +8,6 @@ export interface TextRecognitionResult {
 }
 
 /** Provider-neutral boundary for OCR implementations. */
-export interface TextRecognitionProvider {
+export interface TextRecognitionService {
 	recognizeText(input: TextRecognitionInput): Promise<TextRecognitionResult>;
 }

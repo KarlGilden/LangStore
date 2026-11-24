@@ -3,6 +3,6 @@ export interface IdentityProfile {
 	email: string;
 }
 
-export interface IdentityProfileProvider {
+export interface IdentityProfileService {
 	getUserProfile(userId: string): Promise<IdentityProfile | null>;
 }

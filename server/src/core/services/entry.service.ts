@@ -16,6 +16,10 @@ import type { UserSettingsService } from "./user-settings.service.js";
 import { InvalidEntryEncounterCountError } from "../errors/entry-encounter.error.js";
 import { normaliseSentence } from "./word-extraction.service.js";
 
+export type EntryServiceDependencies = {
+	entryRepository: EntryRepository;
+};
+
 export interface CreateEntryInput {
 	text: string;
 	translations?: { text: string }[];
@@ -43,10 +47,9 @@ function requireLanguageCode(iso: string): void {
 	}
 }
 
-export const createEntryService = (
-	entryRepository: EntryRepository,
-	userSettingsService: UserSettingsService,
-) => {
+export const createEntryService = ({
+	entryRepository,
+}: EntryServiceDependencies) => {
 	const createEntry = async (
 		userId: string,
 		iso: string,
@@ -151,10 +154,8 @@ export const createEntryService = (
 		});
 	};
 
-	const getAllEntries = async (userId: string) => {
-		const settings = await userSettingsService.getSettings(userId);
-		requireLanguageCode(settings.targetLanguage);
-		return entryRepository.getAll(settings.userId, settings.targetLanguage);
+	const getAllEntries = async (userId: string, iso: string) => {
+		return entryRepository.getAll(userId, iso);
 	};
 
 	return { createEntry, savePageEntries, getEntry, getAllEntries };

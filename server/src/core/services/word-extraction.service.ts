@@ -1,16 +1,12 @@
 import type { EntryRepository } from "../repositories/entry.repository.js";
 
+export type WordExtractionServiceDependencies = {
+	entryRepository: EntryRepository;
+};
+
 export interface ExtractedWord {
 	text: string;
 	count: number;
-}
-
-export interface WordExtractionService {
-	extractWords(
-		text: string,
-		userId: string,
-		iso: string,
-	): Promise<ExtractedWord[]>;
 }
 
 export function normaliseSentence(text: string): string {
@@ -26,10 +22,10 @@ export function normaliseSentence(text: string): string {
 	return (normalised.match(wordPattern) ?? []).join(" ");
 }
 
-export const createWordExtractionService = (
-	entryRepository: EntryRepository,
-): WordExtractionService => ({
-	async extractWords(text, userId, iso) {
+export const createWordExtractionService = ({
+	entryRepository,
+}: WordExtractionServiceDependencies) => ({
+	async extractWords(text: string, userId: string, iso: string) {
 		const counts = new Map<string, number>();
 		const extractedWords = normaliseSentence(text).split(" ");
 
@@ -53,3 +49,7 @@ export const createWordExtractionService = (
 		}));
 	},
 });
+
+export type WordExtractionService = ReturnType<
+	typeof createWordExtractionService
+>;

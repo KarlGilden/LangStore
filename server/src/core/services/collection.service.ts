@@ -6,6 +6,10 @@ import {
 import { isSupportedLanguageIso } from "@langstore/contracts";
 import type { CollectionRepository } from "../repositories/collection.repository.js";
 
+export type CollectionServiceDependencies = {
+	collectionRepository: CollectionRepository;
+};
+
 export interface CreateCollectionInput {
 	name: string;
 	description?: string | null;
@@ -33,9 +37,9 @@ function requireLanguageCode(iso: string): void {
 	}
 }
 
-export const createCollectionService = (
-	collectionRepository: CollectionRepository,
-) => {
+export const createCollectionService = ({
+	collectionRepository,
+}: CollectionServiceDependencies) => {
 	const createCollection = async (
 		userId: string,
 		iso: string,

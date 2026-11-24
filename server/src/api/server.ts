@@ -1,12 +1,18 @@
+import "dotenv/config";
+import type { FastifyInstance } from "fastify";
 import { buildApp } from "./app.js";
+import { loadConfig } from "./config.js";
+import { createProductionDependencies } from "./composition/production.js";
 
-const app = await buildApp({
-	logger: { redact: ["req.headers.authorization", "req.headers.cookie"] },
-});
+let app: FastifyInstance | undefined;
+let closePromise: Promise<void> | undefined;
 
 async function shutdown(): Promise<void> {
+	if (!app) return;
+	closePromise ??= app.close();
+
 	try {
-		await app.close();
+		await closePromise;
 	} catch (error) {
 		app.log.error(error, "Failed to close the server");
 		process.exitCode = 1;
@@ -14,23 +20,23 @@ async function shutdown(): Promise<void> {
 }
 
 try {
-	const port = Number(process.env.PORT ?? "3000");
-	const host = process.env.HOST ?? "0.0.0.0";
+	const config = loadConfig();
+	const dependencies = await createProductionDependencies(config);
 
-	if (!Number.isInteger(port) || port < 1 || port > 65535) {
-		throw new Error("PORT must be an integer between 1 and 65535");
-	}
-
-	if (host.trim().length === 0) {
-		throw new Error("HOST must not be empty");
-	}
+	app = await buildApp(dependencies, {
+		logger: { redact: ["req.headers.authorization", "req.headers.cookie"] },
+	});
 
 	process.once("SIGINT", shutdown);
 	process.once("SIGTERM", shutdown);
 
-	await app.listen({ port, host });
+	await app.listen({ port: config.PORT, host: config.HOST });
 } catch (error) {
-	app.log.error(error, "Server startup failed");
+	if (app) {
+		app.log.error(error, "Server startup failed");
+	} else {
+		console.error("Server startup failed", error);
+	}
 
 	process.exitCode = 1;
 	await shutdown();

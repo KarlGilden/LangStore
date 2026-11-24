@@ -1,10 +1,11 @@
 import type {
-	TextRecognitionProvider,
 	TextRecognitionResult,
+	TextRecognitionService,
 } from "../../core/port/text-recognition.provider.js";
 import { ServiceUnavailableError } from "../../core/errors/service.error.js";
 import { ValidationError } from "../../core/errors/validation.error.js";
 import { DocumentProcessorServiceClient } from "@google-cloud/documentai";
+import type { ExternalService } from "../types.js";
 
 export interface GoogleDocumentAIClientConfig {
 	projectId: string;
@@ -31,7 +32,7 @@ export interface GoogleDocumentAIClient {
 	close(): Promise<void>;
 }
 
-export function createGoogleDocumentAIClient(
+function createGoogleDocumentAIClient(
 	config: GoogleDocumentAIClientConfig,
 ): GoogleDocumentAIClient {
 	const credentialsJsonString = Buffer.from(
@@ -49,15 +50,12 @@ export function createGoogleDocumentAIClient(
 
 export function createGoogleTextRecognitionProvider(
 	config: GoogleDocumentAIClientConfig,
-): {
-	textRecognitionProvider: TextRecognitionProvider;
-	close: () => Promise<void>;
-} {
+): ExternalService<TextRecognitionService> {
 	const client = createGoogleDocumentAIClient(config);
 	const processorName = `projects/${config.projectId}/locations/${config.location}/processors/${config.processorId}`;
 
 	return {
-		textRecognitionProvider: {
+		service: {
 			recognizeText: async (input) => {
 				let text: string | null | undefined;
 

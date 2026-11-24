@@ -1,12 +1,17 @@
-import type { IdentityProfileProvider } from "../port/identityProfile.provider.js";
+import type { IdentityProfileService } from "../port/identityProfile.provider.js";
 import type { UserRepository } from "../repositories/user.repository.js";
 import { MissingIdentityEmailError } from "../errors/identity-profile.error.js";
 import { NotFoundError } from "../errors/common.error.js";
 
-export const createUserService = (
-	userRepository: UserRepository,
-	identityProfileProvider: IdentityProfileProvider,
-) => {
+export type UserServiceDependencies = {
+	userRepository: UserRepository;
+	identityProfileService: IdentityProfileService;
+};
+
+export const createUserService = ({
+	userRepository,
+	identityProfileService,
+}: UserServiceDependencies) => {
 	const getUserById = async (userId: string) => {
 		const user = await userRepository.getById(userId);
 
@@ -21,7 +26,7 @@ export const createUserService = (
 		let user = await userRepository.getByProviderId(providerId);
 
 		if (!user) {
-			const profile = await identityProfileProvider.getUserProfile(providerId);
+			const profile = await identityProfileService.getUserProfile(providerId);
 
 			if (!profile) {
 				throw new MissingIdentityEmailError();

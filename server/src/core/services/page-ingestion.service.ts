@@ -1,10 +1,17 @@
 import type { Page } from "../entities/page.entity.js";
 import { EmptyRecognizedTextError } from "../errors/page-ingestion.error.js";
-import type { TextRecognitionProvider } from "../port/text-recognition.provider.js";
+import type { TextRecognitionService } from "../port/text-recognition.provider.js";
 import type { CollectionService } from "./collection.service.js";
 import type { PageService } from "./page.service.js";
 import { requirePageLanguageCode, requirePageText } from "./page.validation.js";
 import type { WordExtractionService } from "./word-extraction.service.js";
+
+type PageIngestionServiceDependencies = {
+	collectionService: CollectionService;
+	textRecognitionService: TextRecognitionService;
+	wordExtractionService: WordExtractionService;
+	pageService: PageService;
+};
 
 export interface PagePhotoInput {
 	bytes: Uint8Array;
@@ -36,12 +43,12 @@ export interface PageIngestionService {
 	ingestPage(input: IngestPageInput): Promise<IngestPageResult>;
 }
 
-export const createPageIngestionService = (
-	collectionService: CollectionService,
-	textRecognitionProvider: TextRecognitionProvider,
-	wordExtractionService: WordExtractionService,
-	pageService: PageService,
-) => {
+export const createPageIngestionService = ({
+	collectionService,
+	textRecognitionService,
+	pageService,
+	wordExtractionService,
+}: PageIngestionServiceDependencies) => {
 	const ingestPage = async (
 		input: IngestPageInput,
 	): Promise<IngestPageResult> => {
@@ -58,7 +65,7 @@ export const createPageIngestionService = (
 			input.collectionId,
 		);
 
-		const recognition = await textRecognitionProvider.recognizeText({
+		const recognition = await textRecognitionService.recognizeText({
 			image: input.photo.bytes,
 			mediaType: input.photo.mediaType,
 		});

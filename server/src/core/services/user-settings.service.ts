@@ -4,11 +4,13 @@ import {
 } from "../errors/user-settings.error.js";
 import { isSupportedLanguageIso } from "@langstore/contracts";
 import type { UserSettingsRepository } from "../repositories/user-settings.repository.js";
-import type { UserService } from "./user.service.js";
 
-export const createUserSettingsService = (
-	userSettingsRepository: UserSettingsRepository,
-) => {
+type UserSettingsServiceDependencies = {
+	userSettingsRepository: UserSettingsRepository;
+};
+export const createUserSettingsService = ({
+	userSettingsRepository,
+}: UserSettingsServiceDependencies) => {
 	const getSettings = async (userId: string) => {
 		const settings = await userSettingsRepository.get(userId);
 

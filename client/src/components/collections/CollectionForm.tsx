@@ -1,5 +1,6 @@
 import { useId, useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { Button } from "../ui/Button";
+import { ButtonType } from "../ui/Button.types";
 import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
 
@@ -77,19 +78,19 @@ export function CollectionForm({
 			</div>
 
 			<div className="flex flex-wrap items-center gap-3">
-				<button
-					className="min-h-12 rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground outline-none hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+				<Button
+					buttonType={ButtonType.Solid}
 					disabled={!trimmedName || pending}
 					type="submit"
 				>
 					{pending ? pendingLabel : submitLabel}
-				</button>
-				<Link
-					className="inline-flex min-h-12 items-center rounded-md px-4 font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+				</Button>
+				<Button
+					buttonType={ButtonType.Ghost}
 					to={cancelTo}
 				>
 					Cancel
-				</Link>
+				</Button>
 			</div>
 		</form>
 	);

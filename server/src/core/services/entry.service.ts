@@ -31,6 +31,10 @@ export interface SavePageEntryInput {
 	translations?: { text: string }[];
 }
 
+export interface UpdateEntryTranslationsInput {
+	translations: { text: string }[];
+}
+
 function requireNonBlank(
 	field: "text" | "translation",
 	value: string,
@@ -158,7 +162,67 @@ export const createEntryService = ({
 		return entryRepository.getAll(userId, iso);
 	};
 
-	return { createEntry, savePageEntries, getEntry, getAllEntries };
+	const getAllEntriesForReview = async (userId: string, iso: string) => {
+		requireLanguageCode(iso);
+		return entryRepository.getAllForReview(userId, iso);
+	};
+
+	const updateEntryTranslations = async (
+		userId: string,
+		iso: string,
+		entryId: string,
+		input: UpdateEntryTranslationsInput,
+	) => {
+		requireLanguageCode(iso);
+		if (input.translations.length > MAX_PAGE_ENTRY_TRANSLATIONS) {
+			throw new InvalidEntrySelectionError(
+				`translations must contain at most ${MAX_PAGE_ENTRY_TRANSLATIONS} items`,
+			);
+		}
+
+		input.translations.forEach((translation, index) => {
+			requireNonBlank("translation", translation.text, index);
+			if (translation.text.length > MAX_PAGE_ENTRY_TRANSLATION_LENGTH) {
+				throw new InvalidEntrySelectionError(
+					`translations[${index}].text is too long`,
+				);
+			}
+		});
+
+		const entry = await entryRepository.updateTranslations({
+			entryId,
+			userId,
+			iso,
+			translations: input.translations,
+		});
+		if (!entry) {
+			throw new EntryNotFoundError();
+		}
+
+		return entry;
+	};
+
+	const deleteEntry = async (
+		userId: string,
+		iso: string,
+		entryId: string,
+	) => {
+		requireLanguageCode(iso);
+		const deleted = await entryRepository.delete(entryId, userId, iso);
+		if (!deleted) {
+			throw new EntryNotFoundError();
+		}
+	};
+
+	return {
+		createEntry,
+		savePageEntries,
+		getEntry,
+		getAllEntries,
+		getAllEntriesForReview,
+		updateEntryTranslations,
+		deleteEntry,
+	};
 };
 
 export type EntryService = ReturnType<typeof createEntryService>;

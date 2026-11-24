@@ -4,6 +4,7 @@ export const queryKeys = {
 	COLLECTION_PAGES: ["collection-pages"],
 	PAGE: ["page"],
 	PAGE_ENCOUNTERS: ["page-encounters"],
+	ENTRIES: ["entries"],
 	USER_SETTINGS: ["user-settings"],
 };
 

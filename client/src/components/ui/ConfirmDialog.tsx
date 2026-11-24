@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef } from "react";
+import { Button } from "./Button";
+import { ButtonType } from "./Button.types";
 
 interface ConfirmDialogProps {
 	open: boolean;
@@ -6,6 +8,8 @@ interface ConfirmDialogProps {
 	description: string;
 	confirmLabel: string;
 	cancelLabel?: string;
+	error?: string | null;
+	pending?: boolean;
 	onConfirm: () => void;
 	onDismiss: () => void;
 }
@@ -16,6 +20,8 @@ export function ConfirmDialog({
 	description,
 	confirmLabel,
 	cancelLabel = "Keep choosing",
+	error = null,
+	pending = false,
 	onConfirm,
 	onDismiss,
 }: ConfirmDialogProps) {
@@ -41,7 +47,7 @@ export function ConfirmDialog({
 			className="m-auto w-[calc(100%-2rem)] max-w-md rounded-lg border border-border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-foreground/40"
 			onCancel={(event) => {
 				event.preventDefault();
-				onDismiss();
+				if (!pending) onDismiss();
 			}}
 			onClose={onDismiss}
 			ref={dialogRef}
@@ -59,22 +65,32 @@ export function ConfirmDialog({
 				>
 					{description}
 				</p>
+				{error ? (
+					<p
+						className="mt-5 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+						role="alert"
+					>
+						{error}
+					</p>
+				) : null}
 				<div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-					<button
+					<Button
 						autoFocus
-						className="min-h-11 rounded-md border border-border bg-card px-4 py-2.5 font-semibold outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+						buttonType={ButtonType.Outline}
 						onClick={onDismiss}
+						disabled={pending}
 						type="button"
 					>
 						{cancelLabel}
-					</button>
-					<button
-						className="min-h-11 rounded-md bg-destructive px-4 py-2.5 font-semibold text-destructive-foreground outline-none hover:bg-destructive/90 focus-visible:ring-2 focus-visible:ring-ring"
+					</Button>
+					<Button
+						buttonType={ButtonType.Destructive}
 						onClick={onConfirm}
+						disabled={pending}
 						type="button"
 					>
 						{confirmLabel}
-					</button>
+					</Button>
 				</div>
 			</div>
 		</dialog>

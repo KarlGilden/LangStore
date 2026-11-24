@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from "fastify";
 import {
 	createCollectionSchema,
 	createPageSchema,
+	deleteCollectionSchema,
 	getCollectionSchema,
 	listCollectionPagesSchema,
 	listCollectionsSchema,
@@ -82,6 +83,24 @@ export const collectionRoutes: FastifyPluginAsync = async (app) => {
 				request.body,
 			);
 			return reply.code(200).send(toCollectionViewModel(collection));
+		},
+	);
+
+	routes.delete(
+		"/:id",
+		{ schema: deleteCollectionSchema },
+		async (request, reply) => {
+			const userId = request.currentUserId;
+			if (!userId) {
+				return reply.code(401).send({ error: "Unauthorized" });
+			}
+
+			await collectionService.deleteCollection(
+				userId,
+				request.params.iso,
+				request.params.id,
+			);
+			return reply.code(204).send(null);
 		},
 	);
 };

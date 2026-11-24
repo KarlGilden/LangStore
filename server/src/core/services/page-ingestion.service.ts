@@ -1,8 +1,8 @@
 import type { Page } from "../entities/page.entity.js";
 import { EmptyRecognizedTextError } from "../errors/page-ingestion.error.js";
 import type { TextRecognitionService } from "../port/text-recognition.provider.js";
+import type { PageIngestionRepository } from "../repositories/page-ingestion.repository.js";
 import type { CollectionService } from "./collection.service.js";
-import type { PageService } from "./page.service.js";
 import { requirePageLanguageCode, requirePageText } from "./page.validation.js";
 import type { WordExtractionService } from "./word-extraction.service.js";
 
@@ -10,7 +10,7 @@ type PageIngestionServiceDependencies = {
 	collectionService: CollectionService;
 	textRecognitionService: TextRecognitionService;
 	wordExtractionService: WordExtractionService;
-	pageService: PageService;
+	pageIngestionRepository: PageIngestionRepository;
 };
 
 export interface PagePhotoInput {
@@ -46,7 +46,7 @@ export interface PageIngestionService {
 export const createPageIngestionService = ({
 	collectionService,
 	textRecognitionService,
-	pageService,
+	pageIngestionRepository,
 	wordExtractionService,
 }: PageIngestionServiceDependencies) => {
 	const ingestPage = async (
@@ -74,24 +74,26 @@ export const createPageIngestionService = ({
 			throw new EmptyRecognizedTextError();
 		}
 
-		const page = await pageService.createPage(input.userId, input.iso, {
-			collectionId: collection.id,
-			name: input.name,
-			description: input.description,
-			summary: formatSummary(recognition.text),
+		const extractedWords = wordExtractionService.extractWords(recognition.text);
+		const persisted = await pageIngestionRepository.persistPageIngestion({
+			userId: input.userId,
+			iso: input.iso,
+			page: {
+				id: input.pageId,
+				collectionId: collection.id,
+				name: input.name,
+				description: input.description,
+				summary: formatSummary(recognition.text),
+			},
+			words: extractedWords,
 		});
-
-		const extractedWords = await wordExtractionService.extractWords(
-			recognition.text,
-			input.userId,
-			input.iso,
-		);
+		const matchedTexts = new Set(persisted.matchedTexts);
 
 		return {
-			page: page,
-			suggestions: extractedWords.flatMap(({ text, count }) => [
-				{ text, count, translation: "" },
-			]),
+			page: persisted.page,
+			suggestions: extractedWords.flatMap(({ text, count }) =>
+				matchedTexts.has(text) ? [] : [{ text, count, translation: "" }],
+			),
 		};
 	};
 

@@ -8,10 +8,24 @@ export interface CreatePageInput {
 	summary: string | null;
 }
 
+export interface UpdatePageInput {
+	name: string;
+	description: string | null;
+}
+
 export interface PageRepository {
 	create(input: CreatePageInput): Promise<Page>;
 
 	getById(id: string, userId: string, iso: string): Promise<Page | null>;
+
+	update(
+		id: string,
+		userId: string,
+		iso: string,
+		input: UpdatePageInput,
+	): Promise<Page | null>;
+
+	delete(id: string, userId: string, iso: string): Promise<boolean>;
 
 	getByCollection(
 		collectionId: string,

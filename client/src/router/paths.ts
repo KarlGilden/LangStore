@@ -14,7 +14,10 @@ export const paths = {
 		`/${encodeURIComponent(iso)}/collections/${encodeURIComponent(collectionId)}/pages/new`,
 	page: (iso: string, collectionId: string, pageId: string) =>
 		`/${encodeURIComponent(iso)}/collections/${encodeURIComponent(collectionId)}/pages/${encodeURIComponent(pageId)}`,
+	editPage: (iso: string, collectionId: string, pageId: string) =>
+		`/${encodeURIComponent(iso)}/collections/${encodeURIComponent(collectionId)}/pages/${encodeURIComponent(pageId)}/edit`,
 	upload: (iso: string) => `/${iso}/upload`,
+	review: (iso: string) => `/${encodeURIComponent(iso)}/review`,
 } as const;
 
 export const defaultAppPath = paths.collections(DEFAULT_LANGUAGE_ISO);

@@ -11,5 +11,6 @@
 !/docs/langstore-schema.md
 !/docs/langstore-schema-decisions.md
 !/docs/bulk-save-page-entries-ticket.md
+!/docs/page-encounter-persistence-ticket.md
 
 .agents

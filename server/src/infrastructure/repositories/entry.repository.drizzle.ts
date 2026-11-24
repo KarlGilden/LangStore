@@ -74,7 +74,8 @@ export function createDrizzleEntryRepository(db: Database): EntryRepository {
 						eq(collections.iso, input.iso),
 					),
 				)
-				.limit(1);
+				.limit(1)
+				.for("update");
 
 			if (!ownedPage) {
 				throw new PageNotFoundError();

@@ -23,6 +23,25 @@ const tutorFeatures = [
 	},
 ];
 
+const availability = [
+	{
+		title: "Available now",
+		items: [
+			"Capture vocabulary from photographed pages",
+			"Choose words and save translations",
+			"Organise your vocabulary by collection",
+		],
+	},
+	{
+		title: "Coming next",
+		items: [
+			"AI tutor conversations",
+			"Personalised vocabulary lessons",
+			"Guided practice using your saved words",
+		],
+	},
+];
+
 export function HomePage() {
 	return (
 		<main className="min-h-dvh bg-background text-foreground">
@@ -171,6 +190,25 @@ export function HomePage() {
 							Sample German page and vocabulary selection
 						</figcaption>
 					</figure>
+				</div>
+			</section>
+			<section
+				aria-label="Availability"
+				className="mx-auto max-w-7xl px-5 pb-14 sm:px-8 sm:pb-20 lg:px-14"
+			>
+				<div className="grid divide-y divide-border overflow-hidden rounded-xl border border-border bg-card sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+					{availability.map(({ title, items }) => (
+						<div className="px-5 py-6 sm:p-8" key={title}>
+							<h2 className="font-display text-2xl font-semibold tracking-tight text-primary">
+								{title}
+							</h2>
+							<ul className="mt-4 list-disc space-y-2 pl-5 leading-7 text-card-foreground marker:text-primary">
+								{items.map((item) => (
+									<li key={item}>{item}</li>
+								))}
+							</ul>
+						</div>
+					))}
 				</div>
 			</section>
 		</main>

@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "Tuttly Nunito";
+  src: url("./nunito-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+}
+
+.home-typography {
+  --font-body: "Tuttly Nunito", "Segoe UI", sans-serif;
+  --font-heading: var(--font-body);
+  font-family: var(--font-body);
+}

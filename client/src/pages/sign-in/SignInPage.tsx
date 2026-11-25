@@ -40,7 +40,7 @@ export function SignInPage() {
 		<main className="min-h-dvh bg-background px-5 py-6 text-foreground sm:px-8">
 			<div className="mx-auto flex max-w-6xl items-center justify-between">
 				<span className="font-display text-xl font-semibold tracking-tight">
-					LangStore
+					Tuttly
 				</span>
 				<ThemeSelector />
 			</div>
@@ -57,7 +57,7 @@ export function SignInPage() {
 						Return to your words.
 					</h1>
 					<p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-						Sign in with the existing LangStore account to view your private
+						Sign in with the existing Tuttly account to view your private
 						collections.
 					</p>
 				</section>

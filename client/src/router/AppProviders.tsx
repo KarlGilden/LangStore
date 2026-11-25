@@ -23,6 +23,7 @@ export const queryClient = new QueryClient({
 export function AppProviders({ children }: { children: ReactNode }) {
 	return (
 		<ClerkProvider
+			appearance={{ variables: { fontFamily: "var(--font-body)" } }}
 			publishableKey={env.clerkPublishableKey}
 			routerPush={pushRoute}
 			routerReplace={replaceRoute}

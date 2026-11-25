@@ -8,7 +8,6 @@ import { paths } from "../../router/paths";
 import { ThemeSelector } from "../../theme/ThemeSelector";
 import readingPage from "./reading-page.webp";
 import vocabularySelection from "./vocabulary-selection.png";
-import "./home-typography.css";
 
 const tutorSteps = [
 	{
@@ -58,7 +57,7 @@ const roadmap = [
 
 export function HomePage() {
 	return (
-		<main className="home-typography min-h-dvh bg-background text-foreground">
+		<main className="min-h-dvh bg-background text-foreground">
 			<header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-14">
 				<span className="font-display text-2xl font-extrabold tracking-tight">
 					Tuttly
@@ -87,22 +86,22 @@ export function HomePage() {
 						id="hero-heading"
 						className="mt-5 max-w-[22ch] text-balance font-display text-4xl leading-[1.1] font-extrabold tracking-tight sm:text-5xl xl:text-6xl"
 					>
-						Make the language you learn part of the conversations you have.
+						Learn a language by doing what you love
 					</h1>
 					<p className="mt-6 max-w-[52ch] text-lg leading-8 text-muted-foreground">
-						Tuttly is being built to turn your vocabulary, interests and
-						everyday experiences into personalised lessons and conversations.
-						Start building your word bank today.
+						Tuttly collects vocabulary from your interests and everyday
+						experiences and turns them into personalised lessons and
+						conversations, all while tracking your progress.
 					</p>
 					<div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-4">
 						<Button buttonType={ButtonType.Solid} to={paths.signIn}>
-							Build your word bank
+							Start learning now
 						</Button>
 						<a
 							className="rounded-sm py-2 text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
 							href="#tutor-vision"
 						>
-							Explore the tutor vision
+							See what's in store
 						</a>
 					</div>
 				</div>
@@ -121,14 +120,13 @@ export function HomePage() {
 						<div className="ml-5 self-end rounded-2xl rounded-tr-sm bg-muted px-4 py-3 text-foreground sm:ml-10">
 							<dt className="text-sm font-semibold">You</dt>
 							<dd className="mt-1 leading-relaxed">
-								I want to practise talking about my weekend.
+								Ask me about what I just read in Alice in Wonderland
 							</dd>
 						</div>
 						<div className="mr-5 self-start rounded-2xl rounded-tl-sm bg-primary px-4 py-3 text-primary-foreground sm:mr-10">
 							<dt className="text-sm font-semibold">Tuttly</dt>
 							<dd className="mt-1 leading-relaxed">
-								Let’s try a conversation in German. I’ll help you use some of
-								the vocabulary you’ve been collecting.
+								What did Alice see when she fell down the rabbit hole?
 							</dd>
 						</div>
 					</dl>
@@ -306,22 +304,35 @@ export function HomePage() {
 				aria-labelledby="founder-story-heading"
 				className="border-t border-border"
 			>
-				<div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-14">
-					<h2
-						id="founder-story-heading"
-						className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
-					>
-						Why I’m building Tuttly
-					</h2>
-					<blockquote className="mt-5 max-w-[65ch] border-l-2 border-primary pl-5 text-lg leading-8 text-muted-foreground sm:pl-7">
-						<p>
-							Moving to Germany showed me the gap between understanding a
-							language and being able to use it. I wanted a tutor that could
-							help me practise real conversations while building on the
-							vocabulary I encountered every day. That’s the idea behind Tuttly,
-							and I’m building it one step at a time.
+				<div className="mx-auto grid max-w-7xl items-center gap-8 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-14 lg:px-14">
+					<div>
+						<h2
+							id="founder-story-heading"
+							className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+						>
+							Why I’m building Tuttly
+						</h2>
+						<blockquote className="mt-5 max-w-[65ch] border-l-2 border-primary pl-5 text-lg leading-8 text-muted-foreground sm:pl-7">
+							<p>
+								Moving to Germany showed me the gap between understanding a
+								language and being able to use it. I wanted a tutor that could
+								help me practise real conversations while building on the
+								vocabulary I encountered every day. That’s the idea behind
+								Tuttly, and I’m building it one step at a time.
+							</p>
+						</blockquote>
+					</div>
+					<div className="max-w-60">
+						<p className="font-semibold">
+							Interested in collaborating on Tuttly?
 						</p>
-					</blockquote>
+						<Button buttonType={ButtonType.Outline} className="mt-3" disabled>
+							Get in touch
+						</Button>
+						<p className="mt-2 text-sm text-muted-foreground">
+							Contact page coming soon
+						</p>
+					</div>
 				</div>
 			</section>
 			<section

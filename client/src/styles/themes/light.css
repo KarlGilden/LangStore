@@ -18,7 +18,5 @@
   --input: oklch(0.79 0.03 164);
   --ring: oklch(0.56 0.09 164);
   --radius: 0.4rem;
-  --font-body: "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
-  --font-heading: "Charter", "Iowan Old Style", "Palatino Linotype", serif;
   color-scheme: light;
 }

@@ -35,7 +35,7 @@ export function AppShell() {
 					className="font-display text-xl font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground"
 					to={collectionsPath}
 				>
-					LangStore
+					Tuttly
 				</NavLink>
 				<nav aria-label="Primary" className="md:mt-12">
 					<ul className="flex gap-1 md:block md:space-y-2">

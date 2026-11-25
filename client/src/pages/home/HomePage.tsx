@@ -211,6 +211,28 @@ export function HomePage() {
 					))}
 				</div>
 			</section>
+			<section
+				aria-labelledby="founder-story-heading"
+				className="border-t border-border"
+			>
+				<div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-14">
+					<h2
+						id="founder-story-heading"
+						className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+					>
+						Why I’m building Tuttly
+					</h2>
+					<blockquote className="mt-5 max-w-[65ch] border-l-2 border-primary pl-5 text-lg leading-8 text-muted-foreground sm:pl-7">
+						<p>
+							Moving to Germany showed me the gap between understanding a
+							language and being able to use it. I wanted a tutor that could
+							help me practise real conversations while building on the
+							vocabulary I encountered every day. That’s the idea behind
+							Tuttly, and I’m building it one step at a time.
+						</p>
+					</blockquote>
+				</div>
+			</section>
 		</main>
 	);
 }

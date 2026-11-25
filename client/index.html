@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,35 +7,7 @@
       name="description"
       content="A private vocabulary store for words and phrases found while reading."
     />
-    <script>
-      (() => {
-        const storageKey = "langstore-theme";
-        let preference = "system";
-
-        try {
-          const storedPreference = window.localStorage.getItem(storageKey);
-          if (
-            storedPreference === "light" ||
-            storedPreference === "dark" ||
-            storedPreference === "system"
-          ) {
-            preference = storedPreference;
-          }
-        } catch {
-          preference = "system";
-        }
-
-        const resolvedTheme =
-          preference === "system"
-            ? window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light"
-            : preference;
-
-        document.documentElement.dataset.theme = resolvedTheme;
-      })();
-    </script>
-    <title>LangStore</title>
+    <title>Tuttly</title>
   </head>
   <body>
     <div id="root"></div>

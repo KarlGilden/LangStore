@@ -7,13 +7,14 @@ import {
 	validateReturnDestination,
 } from "../../auth/return-destination";
 import { useSession } from "../../auth/useSession";
-import { ThemeSelector } from "../../theme/ThemeSelector";
 
 export function SignInPage() {
 	const session = useSession();
 	const [searchParams] = useSearchParams();
 	const requestedDestination = searchParams.get(RETURN_DESTINATION_PARAM);
-	const returnDestination = validateReturnDestination(requestedDestination);
+	const returnDestination = requestedDestination === null
+		? paths.home
+		: validateReturnDestination(requestedDestination);
 
 	if (!session.isLoaded) {
 		return (
@@ -38,11 +39,10 @@ export function SignInPage() {
 
 	return (
 		<main className="min-h-dvh bg-background px-5 py-6 text-foreground sm:px-8">
-			<div className="mx-auto flex max-w-6xl items-center justify-between">
+			<div className="mx-auto max-w-6xl">
 				<span className="font-display text-xl font-semibold tracking-tight">
-					LangStore
+					Tuttly
 				</span>
-				<ThemeSelector />
 			</div>
 
 			<div className="mx-auto grid max-w-6xl items-center gap-12 py-14 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.7fr)] lg:py-24">
@@ -57,7 +57,7 @@ export function SignInPage() {
 						Return to your words.
 					</h1>
 					<p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-						Sign in with the existing LangStore account to view your private
+						Sign in with the existing Tuttly account to view your private
 						collections.
 					</p>
 				</section>

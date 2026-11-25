@@ -23,7 +23,7 @@ export function RouteErrorPage() {
 					{title}
 				</h1>
 				<p className="mt-5 leading-7 text-muted-foreground">
-					LangStore could not display this page. No private content has been
+					Tuttly could not display this page. No private content has been
 					included in this message.
 				</p>
 				<Button

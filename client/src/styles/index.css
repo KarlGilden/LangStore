@@ -3,6 +3,14 @@
 @import "./themes/light.css";
 @import "./themes/dark.css";
 
+@font-face {
+  font-family: "Tuttly Nunito";
+  src: url("./nunito-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+}
+
 @layer base {
   *,
   ::before,
@@ -11,6 +19,8 @@
   }
 
   html {
+    --font-body: "Tuttly Nunito", "Segoe UI", sans-serif;
+    --font-heading: var(--font-body);
     background: var(--background);
   }
 

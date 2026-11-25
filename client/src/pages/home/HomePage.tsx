@@ -2,6 +2,8 @@ import { Button } from "../../components/ui/Button";
 import { ButtonSize, ButtonType } from "../../components/ui/Button.types";
 import { paths } from "../../router/paths";
 import { ThemeSelector } from "../../theme/ThemeSelector";
+import readingPage from "./reading-page.webp";
+import vocabularySelection from "./vocabulary-selection.png";
 
 const tutorFeatures = [
 	{
@@ -119,6 +121,56 @@ export function HomePage() {
 							</li>
 						))}
 					</ul>
+				</div>
+			</section>
+
+			<section
+				aria-labelledby="word-bank-heading"
+				className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-14"
+			>
+				<h2 id="word-bank-heading" className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+					Your tutor starts with your words.
+				</h2>
+				<p className="mt-4 max-w-[62ch] text-lg leading-8 text-muted-foreground">
+					Build a personal collection of vocabulary you want to use. Your word
+					bank will give Tuttly a starting point for relevant lessons, review and
+					conversations.
+				</p>
+
+				<div className="mt-10 grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:items-center lg:gap-10">
+					<div>
+						<h3 className="font-display text-2xl font-semibold tracking-tight">
+							Find vocabulary in your reading
+						</h3>
+						<p className="mt-3 max-w-[48ch] leading-7 text-muted-foreground">
+							Take a photo of a page, discover the vocabulary it contains and
+							choose the words you want to save. Keep their translations
+							together in your word bank.
+						</p>
+					</div>
+					<figure>
+						<div className="grid items-center gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,5fr)]">
+							<img
+								alt="Sample photo of a German reading page"
+								className="mx-auto w-full max-w-64 rounded-lg border border-border"
+								height={900}
+								loading="lazy"
+								src={readingPage}
+								width={720}
+							/>
+							<img
+								alt="Tuttly’s vocabulary selection screen with three German words selected and their English translations visible"
+								className="w-full rounded-lg border border-border"
+								height={460}
+								loading="lazy"
+								src={vocabularySelection}
+								width={720}
+							/>
+						</div>
+						<figcaption className="mt-3 text-sm text-muted-foreground">
+							Sample German page and vocabulary selection
+						</figcaption>
+					</figure>
 				</div>
 			</section>
 		</main>

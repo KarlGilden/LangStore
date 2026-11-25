@@ -233,6 +233,27 @@ export function HomePage() {
 					</blockquote>
 				</div>
 			</section>
+			<section
+				aria-labelledby="word-bank-cta-heading"
+				className="border-t border-border bg-secondary text-secondary-foreground"
+			>
+				<div className="mx-auto flex max-w-7xl flex-col items-start gap-7 px-5 py-14 sm:px-8 sm:py-20 lg:flex-row lg:items-center lg:justify-between lg:px-14">
+					<div>
+						<h2
+							id="word-bank-cta-heading"
+							className="max-w-[28ch] text-balance font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+						>
+							Start with your words. Build towards confident conversations.
+						</h2>
+						<p className="mt-4 text-lg leading-8">
+							Create your personal word bank today. AI tutoring is coming next.
+						</p>
+					</div>
+					<Button buttonType={ButtonType.Solid} className="shrink-0" to={paths.signIn}>
+						Build your word bank
+					</Button>
+				</div>
+			</section>
 		</main>
 	);
 }

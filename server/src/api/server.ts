@@ -23,7 +23,7 @@ try {
 	const config = loadConfig();
 	const dependencies = await createProductionDependencies(config);
 
-	app = await buildApp(dependencies, {
+	app = await buildApp(dependencies, config, {
 		logger: { redact: ["req.headers.authorization", "req.headers.cookie"] },
 	});
 

@@ -8,6 +8,7 @@ export interface AppConfig {
 	GOOGLE_CLOUD_LOCATION: string;
 	GOOGLE_CLOUD_PROCESSOR_ID: string;
 	GOOGLE_APPLICATION_CREDENTIALS: string;
+	CLIENT_URL: string;
 }
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -37,26 +38,18 @@ function readHost(value: string | undefined): string {
 	return host;
 }
 
-export function loadConfig(
-	environment: Environment = process.env,
-): AppConfig {
+export function loadConfig(environment: Environment = process.env): AppConfig {
 	return Object.freeze({
 		PORT: readPort(environment.PORT),
 		HOST: readHost(environment.HOST),
 		DATABASE_URL: requireValue(environment, "DATABASE_URL"),
 		CLERK_SECRET_KEY: requireValue(environment, "CLERK_SECRET_KEY"),
-		CLERK_PUBLISHABLE_KEY: requireValue(
-			environment,
-			"CLERK_PUBLISHABLE_KEY",
-		),
+		CLERK_PUBLISHABLE_KEY: requireValue(environment, "CLERK_PUBLISHABLE_KEY"),
 		GOOGLE_CLOUD_PROJECT_ID: requireValue(
 			environment,
 			"GOOGLE_CLOUD_PROJECT_ID",
 		),
-		GOOGLE_CLOUD_LOCATION: requireValue(
-			environment,
-			"GOOGLE_CLOUD_LOCATION",
-		),
+		GOOGLE_CLOUD_LOCATION: requireValue(environment, "GOOGLE_CLOUD_LOCATION"),
 		GOOGLE_CLOUD_PROCESSOR_ID: requireValue(
 			environment,
 			"GOOGLE_CLOUD_PROCESSOR_ID",
@@ -65,5 +58,6 @@ export function loadConfig(
 			environment,
 			"GOOGLE_APPLICATION_CREDENTIALS",
 		),
+		CLIENT_URL: requireValue(environment, "CLIENT_URL"),
 	});
 }

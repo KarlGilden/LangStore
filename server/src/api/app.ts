@@ -7,6 +7,7 @@ import { applicationPlugin } from "./plugins/application.js";
 import type { ApplicationServices } from "./composition/serviceUtils.js";
 import { errorHandler } from "./middleware/errors.js";
 import { healthRoutes } from "./routes/health.route.js";
+import type { AppConfig } from "./config.js";
 
 interface ClerkPluginConfig {
 	publishableKey: string;
@@ -21,6 +22,7 @@ export interface BuildAppDependencies {
 
 export async function buildApp(
 	dependencies: BuildAppDependencies,
+	config: AppConfig,
 	options: FastifyServerOptions = {},
 ): Promise<FastifyInstance> {
 	const app = Fastify(options);
@@ -30,7 +32,7 @@ export async function buildApp(
 	}
 
 	await app.register(cors, {
-		origin: ["http://localhost:5173"],
+		origin: [config.CLIENT_URL],
 		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization"],
 		credentials: true,

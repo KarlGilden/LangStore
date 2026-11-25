@@ -1,7 +1,6 @@
 import { ClerkProvider } from "@clerk/react";
 import type { ReactNode } from "react";
 import { env } from "../config/env";
-import { ThemeProvider } from "../theme/ThemeProvider";
 import { router } from "./router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -32,7 +31,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
 			signUpFallbackRedirectUrl="/collections"
 		>
 			<QueryClientProvider client={queryClient}>
-				<ThemeProvider>{children}</ThemeProvider>
+				{children}
 			</QueryClientProvider>
 		</ClerkProvider>
 	);

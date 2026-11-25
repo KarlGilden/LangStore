@@ -13,7 +13,6 @@ import { PageIcon } from "../../components/icons/PageIcon";
 import { Button } from "../../components/ui/Button";
 import { ButtonSize, ButtonType } from "../../components/ui/Button.types";
 import { paths } from "../../router/paths";
-import { ThemeSelector } from "../../theme/ThemeSelector";
 
 const tutorSteps = [
 	{
@@ -60,6 +59,7 @@ const roadmap = [
 	{ title: "Personalised vocabulary lessons", available: false },
 	{ title: "Practice what you know with our AI tutor", available: false },
 ];
+
 const tutorPreview = {
 	de: {
 		caption: "Vorschau – demnächst verfügbar",
@@ -90,12 +90,11 @@ const tutorPreview = {
 	{ caption: string; learner: string; prompt: string; reply: string }
 >;
 
-
 export function HomePage() {
+	const { iso } = useParams();
 	const previewLanguage =
 		iso && isSupportedLanguageIso(iso) ? iso : DEFAULT_LANGUAGE_ISO;
 	const preview = tutorPreview[previewLanguage];
-	const { iso } = useParams();
 	const signInPath = iso ? createSignInDestination(paths.collections(iso)) : paths.signIn;
 
 	return (
@@ -106,7 +105,6 @@ export function HomePage() {
 				</span>
 				<div className="flex flex-wrap items-center gap-4">
 					<LanguageSelector />
-					<ThemeSelector />
 					<Button
 						buttonType={ButtonType.Solid}
 						size={ButtonSize.Compact}
@@ -150,9 +148,9 @@ export function HomePage() {
 				</div>
 
 				<figure
-					lang={previewLanguage}
 					aria-labelledby="tutor-preview-caption"
 					className="rounded-2xl border border-border bg-card p-5 text-card-foreground sm:p-7"
+					lang={previewLanguage}
 				>
 					<figcaption
 						id="tutor-preview-caption"

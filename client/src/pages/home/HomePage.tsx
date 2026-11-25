@@ -1,7 +1,12 @@
-import { CheckIcon } from "../../components/icons/CheckIcon";
+import {
+	DEFAULT_LANGUAGE_ISO,
+	isSupportedLanguageIso,
+	type SupportedLanguageIso,
+} from "@langstore/contracts";
 import { useParams } from "react-router";
 import { createSignInDestination } from "../../auth/return-destination";
 import { LanguageSelector } from "../../components/common/LanguageSelector";
+import { CheckIcon } from "../../components/icons/CheckIcon";
 import { ChevronRightIcon } from "../../components/icons/ChevronRightIcon";
 import { Icon, ICON_STROKE_WIDTH } from "../../components/icons/Icon";
 import { PageIcon } from "../../components/icons/PageIcon";
@@ -55,8 +60,41 @@ const roadmap = [
 	{ title: "Personalised vocabulary lessons", available: false },
 	{ title: "Practice what you know with our AI tutor", available: false },
 ];
+const tutorPreview = {
+	de: {
+		caption: "Vorschau – demnächst verfügbar",
+		learner: "Du",
+		prompt: "Frag mich, was ich gerade in „Alice im Wunderland“ gelesen habe.",
+		reply: "Was sah Alice, als sie in den Kaninchenbau fiel?",
+	},
+	es: {
+		caption: "Vista previa – próximamente",
+		learner: "Tú",
+		prompt: "Pregúntame por lo que acabo de leer en «Alicia en el país de las maravillas».",
+		reply: "¿Qué vio Alicia al caer por la madriguera del conejo?",
+	},
+	fr: {
+		caption: "Aperçu – bientôt disponible",
+		learner: "Toi",
+		prompt: "Pose-moi une question sur ce que je viens de lire dans « Alice au pays des merveilles ».",
+		reply: "Qu’est-ce qu’Alice a vu en tombant dans le terrier du lapin ?",
+	},
+	en: {
+		caption: "Preview — coming soon",
+		learner: "You",
+		prompt: "Ask me about what I just read in Alice in Wonderland.",
+		reply: "What did Alice see when she fell down the rabbit hole?",
+	},
+} satisfies Record<
+	SupportedLanguageIso,
+	{ caption: string; learner: string; prompt: string; reply: string }
+>;
+
 
 export function HomePage() {
+	const previewLanguage =
+		iso && isSupportedLanguageIso(iso) ? iso : DEFAULT_LANGUAGE_ISO;
+	const preview = tutorPreview[previewLanguage];
 	const { iso } = useParams();
 	const signInPath = iso ? createSignInDestination(paths.collections(iso)) : paths.signIn;
 
@@ -112,6 +150,7 @@ export function HomePage() {
 				</div>
 
 				<figure
+					lang={previewLanguage}
 					aria-labelledby="tutor-preview-caption"
 					className="rounded-2xl border border-border bg-card p-5 text-card-foreground sm:p-7"
 				>
@@ -119,19 +158,19 @@ export function HomePage() {
 						id="tutor-preview-caption"
 						className="border-b border-border pb-4 text-sm font-semibold text-primary"
 					>
-						Preview — coming soon
+						{preview.caption}
 					</figcaption>
 					<dl className="mt-6 flex flex-col gap-4">
 						<div className="ml-5 self-end rounded-2xl rounded-tr-sm bg-muted px-4 py-3 text-foreground sm:ml-10">
-							<dt className="text-sm font-semibold">You</dt>
+							<dt className="text-sm font-semibold">{preview.learner}</dt>
 							<dd className="mt-1 leading-relaxed">
-								Ask me about what I just read in Alice in Wonderland
+								{preview.prompt}
 							</dd>
 						</div>
 						<div className="mr-5 self-start rounded-2xl rounded-tl-sm bg-primary px-4 py-3 text-primary-foreground sm:mr-10">
 							<dt className="text-sm font-semibold">Tuttly</dt>
 							<dd className="mt-1 leading-relaxed">
-								What did Alice see when she fell down the rabbit hole?
+								{preview.reply}
 							</dd>
 						</div>
 					</dl>

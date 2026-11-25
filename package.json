@@ -1,21 +1,21 @@
 {
-  "name": "langstore",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "engines": {
-    "node": "24.x"
-  },
-  "packageManager": "npm@10.2.5",
-  "workspaces": [
-    "packages/*",
-    "server",
-    "client"
-  ],
-  "scripts": {
-    "build": "npm run build -w @langstore/contracts && npm run build -w langstore-api && npm run build -w langstore-web",
-    "dev:client": "npm run build -w @langstore/contracts && npm run dev -w langstore-web",
-    "dev:server": "npm run build -w @langstore/contracts && npm run dev -w langstore-api",
-    "typecheck": "npm run build -w @langstore/contracts && npm run typecheck -w langstore-api && npm run typecheck -w langstore-web"
-  }
+	"name": "langstore",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": "24.x"
+	},
+	"packageManager": "npm@10.2.5",
+	"workspaces": [
+		"packages/*",
+		"server",
+		"client"
+	],
+	"scripts": {
+		"build": "npm run build -w @langstore/contracts && npm run build -w langstore-api && npm run build -w langstore-web",
+		"dev:client": "npm run build -w @langstore/contracts && npm run dev -w langstore-web",
+		"dev:server": "npm run build -w @langstore/contracts && npm run dev -w langstore-api",
+		"typecheck": "npm run build -w @langstore/contracts && npm run typecheck -w langstore-api && npm run typecheck -w langstore-web"
+	}
 }

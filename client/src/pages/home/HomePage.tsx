@@ -3,6 +3,24 @@ import { ButtonSize, ButtonType } from "../../components/ui/Button.types";
 import { paths } from "../../router/paths";
 import { ThemeSelector } from "../../theme/ThemeSelector";
 
+const tutorFeatures = [
+	{
+		title: "Practise conversations",
+		description:
+			"Rehearse everyday situations or talk about things that interest you, with support when you need it.",
+	},
+	{
+		title: "Learn through focused lessons",
+		description:
+			"Work on vocabulary and expressions from your own collection through lessons built around what you want to practise.",
+	},
+	{
+		title: "Put saved words to use",
+		description:
+			"Move from recognising vocabulary to recalling it and expressing your own ideas with it.",
+	},
+];
+
 export function HomePage() {
 	return (
 		<main className="min-h-dvh bg-background text-foreground">
@@ -41,7 +59,7 @@ export function HomePage() {
 						</Button>
 						<a
 							className="rounded-sm py-2 text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-							href="#tutor-preview"
+							href="#tutor-vision"
 						>
 							Explore the tutor vision
 						</a>
@@ -49,10 +67,8 @@ export function HomePage() {
 				</div>
 
 				<figure
-					id="tutor-preview"
-					tabIndex={-1}
 					aria-labelledby="tutor-preview-caption"
-					className="scroll-mt-6 rounded-2xl border border-border bg-card p-5 text-card-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:p-7"
+					className="rounded-2xl border border-border bg-card p-5 text-card-foreground sm:p-7"
 				>
 					<figcaption id="tutor-preview-caption" className="border-b border-border pb-4 text-sm font-semibold text-primary">
 						Preview — coming soon
@@ -73,6 +89,37 @@ export function HomePage() {
 						</div>
 					</dl>
 				</figure>
+			</section>
+
+			<section
+				aria-labelledby="tutor-vision"
+				className="border-y border-border bg-muted"
+			>
+				<div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20 lg:px-14">
+					<p className="text-sm font-semibold text-primary">Coming soon</p>
+					<h2
+						id="tutor-vision"
+						tabIndex={-1}
+						className="mt-3 w-fit scroll-mt-14 rounded-sm font-display text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:text-4xl"
+					>
+						The tutor vision
+					</h2>
+					<ul className="mt-8 grid gap-4 md:grid-cols-3">
+						{tutorFeatures.map(({ title, description }) => (
+							<li
+								key={title}
+								className="rounded-xl border border-border bg-card p-5 text-card-foreground lg:p-7"
+							>
+								<h3 className="font-display text-xl font-semibold tracking-tight">
+									{title}
+								</h3>
+								<p className="mt-3 leading-relaxed text-muted-foreground">
+									{description}
+								</p>
+							</li>
+						))}
+					</ul>
+				</div>
 			</section>
 		</main>
 	);

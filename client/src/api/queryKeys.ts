@@ -5,7 +5,7 @@ export const queryKeys = {
 	PAGE: ["page"],
 	PAGE_ENCOUNTERS: ["page-encounters"],
 	ENTRIES: ["entries"],
-	USER_SETTINGS: ["user-settings"],
+	USER_SETTINGS: (userId: string | null) => ["user-settings", userId],
 };
 
 export const QUERY_KEYS = queryKeys;

@@ -1,4 +1,7 @@
 import { CheckIcon } from "../../components/icons/CheckIcon";
+import { useParams } from "react-router";
+import { createSignInDestination } from "../../auth/return-destination";
+import { LanguageSelector } from "../../components/common/LanguageSelector";
 import { ChevronRightIcon } from "../../components/icons/ChevronRightIcon";
 import { Icon, ICON_STROKE_WIDTH } from "../../components/icons/Icon";
 import { PageIcon } from "../../components/icons/PageIcon";
@@ -54,18 +57,22 @@ const roadmap = [
 ];
 
 export function HomePage() {
+	const { iso } = useParams();
+	const signInPath = iso ? createSignInDestination(paths.collections(iso)) : paths.signIn;
+
 	return (
 		<main className="min-h-dvh bg-background text-foreground">
-			<header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-14">
+			<header className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8 lg:px-14">
 				<span className="font-display text-2xl font-extrabold tracking-tight">
 					Tuttly
 				</span>
-				<div className="flex items-center gap-4">
+				<div className="flex flex-wrap items-center gap-4">
+					<LanguageSelector />
 					<ThemeSelector />
 					<Button
 						buttonType={ButtonType.Solid}
 						size={ButtonSize.Compact}
-						to={paths.signIn}
+						to={signInPath}
 					>
 						Sign in
 					</Button>
@@ -92,7 +99,7 @@ export function HomePage() {
 						conversations, all while tracking your progress.
 					</p>
 					<div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-4">
-						<Button buttonType={ButtonType.Solid} to={paths.signIn}>
+						<Button buttonType={ButtonType.Solid} to={signInPath}>
 							Start learning now
 						</Button>
 						<a
@@ -352,7 +359,7 @@ export function HomePage() {
 					<Button
 						buttonType={ButtonType.Solid}
 						className="shrink-0"
-						to={paths.signIn}
+						to={signInPath}
 					>
 						Build your word bank
 					</Button>

@@ -2,6 +2,7 @@ import { DEFAULT_LANGUAGE_ISO } from "@langstore/contracts";
 
 export const paths = {
 	home: "/",
+	languageHome: (iso: string) => `/${encodeURIComponent(iso)}`,
 	signIn: "/sign-in",
 	collections: (iso: string) => `/${iso}/collections`,
 	newCollection: (iso: string) =>

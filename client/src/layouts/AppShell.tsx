@@ -4,6 +4,7 @@ import { DEFAULT_LANGUAGE_ISO } from "@langstore/contracts";
 import { paths } from "../router/paths";
 import { useSession } from "../auth/useSession";
 import { ThemeSelector } from "../theme/ThemeSelector";
+import { LanguageSelector } from "../components/common/LanguageSelector";
 import { Button } from "../components/ui/Button";
 import { ButtonSize, ButtonType } from "../components/ui/Button.types";
 
@@ -63,6 +64,7 @@ export function AppShell() {
 
 			<div className="min-w-0">
 				<header className="flex min-h-16 flex-wrap items-center justify-end gap-3 border-b border-border px-5 py-3 sm:px-8">
+					<LanguageSelector />
 					<ThemeSelector />
 					<Button
 						buttonType={ButtonType.Outline}

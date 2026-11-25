@@ -39,6 +39,10 @@ export const appRoutes: RouteObject[] = [
 				Component: IsoBoundary,
 				children: [
 					{
+						Component: HomeGate,
+						children: [{ index: true, Component: HomePage }],
+					},
+					{
 						Component: AuthShell,
 						children: [
 							{

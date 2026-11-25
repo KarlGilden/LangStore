@@ -13,7 +13,9 @@ export function SignInPage() {
 	const session = useSession();
 	const [searchParams] = useSearchParams();
 	const requestedDestination = searchParams.get(RETURN_DESTINATION_PARAM);
-	const returnDestination = validateReturnDestination(requestedDestination);
+	const returnDestination = requestedDestination === null
+		? paths.home
+		: validateReturnDestination(requestedDestination);
 
 	if (!session.isLoaded) {
 		return (

@@ -73,7 +73,9 @@ export const useFetch = () => {
 
 		if (!response.ok) {
 			const errorData: unknown = await response.json().catch(() => null);
-			throw new Error(readErrorMessage(errorData, response));
+			throw Object.assign(new Error(readErrorMessage(errorData, response)), {
+				status: response.status,
+			});
 		}
 
 		// Handle different response types

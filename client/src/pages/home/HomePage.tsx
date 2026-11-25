@@ -6,8 +6,6 @@ import { Button } from "../../components/ui/Button";
 import { ButtonSize, ButtonType } from "../../components/ui/Button.types";
 import { paths } from "../../router/paths";
 import { ThemeSelector } from "../../theme/ThemeSelector";
-import readingPage from "./reading-page.webp";
-import vocabularySelection from "./vocabulary-selection.png";
 
 const tutorSteps = [
 	{
@@ -226,7 +224,7 @@ export function HomePage() {
 									className="h-[var(--preview-height)] w-auto rounded-lg border border-border"
 									height={900}
 									loading="lazy"
-									src={readingPage}
+									src={"./reading-page.webp"}
 									width={720}
 								/>
 							</figure>
@@ -237,7 +235,7 @@ export function HomePage() {
 									className="h-[var(--preview-height)] w-auto max-w-full rounded-lg border border-border bg-muted object-contain"
 									height={460}
 									loading="lazy"
-									src={vocabularySelection}
+									src={"vocabulary-selection.png"}
 									width={720}
 								/>
 							</figure>

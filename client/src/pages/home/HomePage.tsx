@@ -64,26 +64,26 @@ const tutorPreview = {
 	de: {
 		caption: "Vorschau – demnächst verfügbar",
 		learner: "Du",
-		prompt: "Frag mich, was ich gerade in „Alice im Wunderland“ gelesen habe.",
-		reply: "Was sah Alice, als sie in den Kaninchenbau fiel?",
+		prompt: "Was sah Alice, als sie in den Kaninchenbau fiel?",
+		reply: "Sie sah ein Glas Orangenmarmelade, aber es war leer.",
 	},
 	es: {
 		caption: "Vista previa – próximamente",
 		learner: "Tú",
-		prompt: "Pregúntame por lo que acabo de leer en «Alicia en el país de las maravillas».",
-		reply: "¿Qué vio Alicia al caer por la madriguera del conejo?",
+		prompt: "¿Qué vio Alicia al caer por la madriguera del conejo?",
+		reply: "Vio un tarro de mermelada de naranja, pero estaba vacío.",
 	},
 	fr: {
 		caption: "Aperçu – bientôt disponible",
 		learner: "Toi",
-		prompt: "Pose-moi une question sur ce que je viens de lire dans « Alice au pays des merveilles ».",
-		reply: "Qu’est-ce qu’Alice a vu en tombant dans le terrier du lapin ?",
+		prompt: "Qu’est-ce qu’Alice a vu en tombant dans le terrier du lapin ?",
+		reply: "Elle a vu un pot de marmelade d’orange, mais il était vide.",
 	},
 	en: {
 		caption: "Preview — coming soon",
 		learner: "You",
-		prompt: "Ask me about what I just read in Alice in Wonderland.",
-		reply: "What did Alice see when she fell down the rabbit hole?",
+		prompt: "What did Alice see when she fell down the rabbit hole?",
+		reply: "She saw a jar of orange marmalade, but it was empty.",
 	},
 } satisfies Record<
 	SupportedLanguageIso,
@@ -95,7 +95,9 @@ export function HomePage() {
 	const previewLanguage =
 		iso && isSupportedLanguageIso(iso) ? iso : DEFAULT_LANGUAGE_ISO;
 	const preview = tutorPreview[previewLanguage];
-	const signInPath = iso ? createSignInDestination(paths.collections(iso)) : paths.signIn;
+	const signInPath = iso
+		? createSignInDestination(paths.collections(iso))
+		: paths.signIn;
 
 	return (
 		<main className="min-h-dvh bg-background text-foreground">
@@ -117,7 +119,7 @@ export function HomePage() {
 
 			<section
 				aria-labelledby="hero-heading"
-				className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-16 lg:px-14 lg:py-28"
+				className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-7 px-4 pt-8 pb-10 sm:gap-10 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-16 lg:px-14 lg:py-28"
 			>
 				<div>
 					<p className="text-sm font-semibold text-primary">
@@ -125,21 +127,21 @@ export function HomePage() {
 					</p>
 					<h1
 						id="hero-heading"
-						className="mt-5 max-w-[22ch] text-balance font-display text-4xl leading-[1.1] font-extrabold tracking-tight sm:text-5xl xl:text-6xl"
+						className="mt-3 max-w-[22ch] text-balance font-display text-4xl leading-[1.1] font-extrabold tracking-tight sm:mt-5 sm:text-5xl xl:text-6xl"
 					>
 						Learn a language by doing what you love
 					</h1>
-					<p className="mt-6 max-w-[52ch] text-lg leading-8 text-muted-foreground">
+					<p className="mt-4 max-w-[52ch] text-base leading-7 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
 						Tuttly collects vocabulary from your interests and everyday
 						experiences and turns them into personalised lessons and
 						conversations, all while tracking your progress.
 					</p>
-					<div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-4">
+					<div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-4">
 						<Button buttonType={ButtonType.Solid} to={signInPath}>
 							Start learning now
 						</Button>
 						<a
-							className="rounded-sm py-2 text-sm font-semibold text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+							className="inline-flex min-h-11 items-center justify-center rounded-sm px-2 text-sm font-semibold sm:px-0 text-primary underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
 							href="#tutor-vision"
 						>
 							See what's in store
@@ -149,27 +151,23 @@ export function HomePage() {
 
 				<figure
 					aria-labelledby="tutor-preview-caption"
-					className="rounded-2xl border border-border bg-card p-5 text-card-foreground sm:p-7"
+					className="min-w-0 rounded-2xl border border-border bg-card p-4 text-card-foreground sm:p-7"
 					lang={previewLanguage}
 				>
 					<figcaption
 						id="tutor-preview-caption"
-						className="border-b border-border pb-4 text-sm font-semibold text-primary"
+						className="border-b border-border pb-3 text-base font-semibold sm:pb-4 sm:text-lg"
 					>
-						{preview.caption}
+						Chat with Tuttly
 					</figcaption>
-					<dl className="mt-6 flex flex-col gap-4">
-						<div className="ml-5 self-end rounded-2xl rounded-tr-sm bg-muted px-4 py-3 text-foreground sm:ml-10">
-							<dt className="text-sm font-semibold">{preview.learner}</dt>
-							<dd className="mt-1 leading-relaxed">
-								{preview.prompt}
-							</dd>
-						</div>
-						<div className="mr-5 self-start rounded-2xl rounded-tl-sm bg-primary px-4 py-3 text-primary-foreground sm:mr-10">
+					<dl className="mt-4 flex flex-col gap-3 sm:mt-6 sm:gap-4">
+						<div className="mr-4 self-start rounded-2xl rounded-tl-sm bg-primary px-3 py-2.5 sm:px-4 sm:py-3 text-primary-foreground sm:mr-10">
 							<dt className="text-sm font-semibold">Tuttly</dt>
-							<dd className="mt-1 leading-relaxed">
-								{preview.reply}
-							</dd>
+							<dd className="mt-1 text-sm leading-relaxed wrap-break-word sm:text-base">{preview.prompt}</dd>
+						</div>
+						<div className="ml-4 self-end rounded-2xl rounded-tr-sm bg-muted px-3 py-2.5 sm:px-4 sm:py-3 text-foreground sm:ml-10">
+							<dt className="text-sm font-semibold">{preview.learner}</dt>
+							<dd className="mt-1 text-sm leading-relaxed wrap-break-word sm:text-base">{preview.reply}</dd>
 						</div>
 					</dl>
 				</figure>
@@ -261,7 +259,7 @@ export function HomePage() {
 								together in your word bank.
 							</p>
 						</div>
-						<div className="flex w-full max-w-xl flex-col items-start gap-3 sm:flex-row sm:justify-between sm:gap-4 sm:justify-self-end">
+						<div className="flex w-full max-w-xl flex-col items-center gap-3 justify-self-center sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:justify-self-end">
 							<figure className="shrink-0">
 								<img
 									alt="Sample photo of a German reading page"
